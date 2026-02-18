@@ -1,0 +1,21 @@
+{
+  "name": "The Travel Place",
+  "short_name": "Travel Place",
+  "description": "Travel Made Effortless - Flight booking, hotel reservations, car rentals, and visa applications",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/images/logo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

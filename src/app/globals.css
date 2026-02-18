@@ -1,0 +1,2181 @@
+/* 
+ * Tailwind CSS directives 
+ * These are processed by PostCSS and Tailwind CSS during build
+ */
+/* Tailwind CSS directives - suppress linting warnings */
+/* stylelint-disable at-rule-no-unknown */
+/* postcss-disable-next-line */
+/* eslint-disable */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* stylelint-enable at-rule-no-unknown */
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+
+/* Travel Services Visual Polish */
+@import '../styles/travel-services-polish.css';
+
+/* Custom base styles */
+@layer base {
+	/* Cross-browser normalization */
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	html {
+		scroll-behavior: smooth;
+		/* Prevent horizontal scrolling on mobile */
+		overflow-x: hidden;
+		/* Better text rendering */
+		-webkit-text-size-adjust: 100%;
+		-ms-text-size-adjust: 100%;
+		text-size-adjust: 100%;
+	}
+
+	body {
+		font-family: "Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+			Roboto, "Helvetica Neue", Arial, sans-serif;
+		/* Better font rendering */
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		/* Prevent horizontal scrolling */
+		overflow-x: hidden;
+		/* Consistent line height */
+		line-height: 1.6;
+		/* Off-white background */
+		background-color: #fafafa;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+			Roboto, "Helvetica Neue", Arial, sans-serif;
+		/* Better heading rendering */
+		font-weight: 600;
+		line-height: 1.2;
+		/* Prevent text overflow */
+		word-wrap: break-word;
+		hyphens: auto;
+	}
+
+	/* Better image handling */
+	img {
+		max-width: 100%;
+		height: auto;
+		/* Prevent layout shift */
+		vertical-align: middle;
+	}
+
+	/* Better button styling across browsers */
+	button {
+		font-family: inherit;
+		font-size: inherit;
+		line-height: inherit;
+		margin: 0;
+		/* Remove default button styles */
+		background: none;
+		border: none;
+		padding: 0;
+		cursor: pointer;
+	}
+
+	/* Better input styling */
+	input,
+	textarea,
+	select {
+		font-family: inherit;
+		font-size: inherit;
+		line-height: inherit;
+		margin: 0;
+	}
+
+	/* Better focus styles for accessibility */
+	:focus {
+		outline: 2px solid #e21e24;
+		outline-offset: 2px;
+	}
+
+	/* Remove focus outline for mouse users */
+	:focus:not(:focus-visible) {
+		outline: none;
+	}
+
+	/* Enhanced focus for keyboard users */
+	:focus-visible {
+		outline: 2px solid #e21e24;
+		outline-offset: 2px;
+	}
+}
+
+/* Custom component styles */
+@layer components {
+	/* Button Components */
+	.btn-primary {
+		@apply bg-brand-red hover:bg-brand-red-dark text-white font-semibold px-8 py-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2;
+	}
+
+	.btn-secondary {
+		@apply bg-brand-orange hover:bg-brand-orange-dark text-white font-semibold px-8 py-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2;
+	}
+
+	.btn-outline {
+		@apply border-2 border-white text-white hover:bg-white hover:text-brand-blue font-semibold px-8 py-4 rounded-full transition-all duration-300 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2;
+	}
+
+	.btn-ghost {
+		@apply text-brand-blue hover:text-brand-red font-medium px-6 py-3 rounded-lg transition-all duration-300 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-brand-red-300 focus:ring-offset-2;
+	}
+
+	.btn-small {
+		@apply px-4 py-2 text-sm font-medium rounded-lg;
+	}
+
+	/* Container Components */
+	.container-custom {
+		@apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+	}
+
+	.container-narrow {
+		@apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+	}
+
+	.container-wide {
+		@apply max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8;
+	}
+
+	/* Form Components */
+	.input-field {
+		@apply w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 placeholder:text-neutral-400;
+	}
+
+	.input-error {
+		@apply border-error-500 focus:ring-error-500 focus:border-error-500;
+	}
+
+	.input-success {
+		@apply border-success-500 focus:ring-success-500 focus:border-success-500;
+	}
+
+	.select-field {
+		@apply w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 bg-white cursor-pointer;
+	}
+
+	/* Card Components */
+	.card {
+		@apply bg-white rounded-2xl shadow-lg overflow-hidden;
+	}
+
+	.card-hover {
+		@apply transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer;
+	}
+
+	.card-destination {
+		@apply relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group;
+	}
+
+	.card-hotel {
+		@apply bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden;
+	}
+
+	.card-feature {
+		@apply bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 text-center group;
+	}
+
+	.card-testimonial {
+		@apply bg-white rounded-2xl p-8 shadow-lg relative overflow-hidden;
+	}
+
+	/* Navigation Components */
+	.nav-link {
+		@apply text-neutral-700 hover:text-brand-red font-medium transition-colors duration-200 relative;
+	}
+
+	.nav-link-active {
+		@apply text-brand-red font-semibold;
+	}
+
+	.nav-link::after {
+		@apply content-[''] absolute bottom-0 left-0 w-0 h-0.5 bg-brand-red transition-all duration-300;
+	}
+
+	.nav-link:hover::after {
+		@apply w-full;
+	}
+
+	/* Section Components */
+	.section-padding {
+		@apply py-16 lg:py-24;
+	}
+
+	.section-padding-small {
+		@apply py-12 lg:py-16;
+	}
+
+	.section-title {
+		@apply text-3xl lg:text-4xl xl:text-5xl font-bold text-brand-blue mb-4;
+	}
+
+	.section-subtitle {
+		@apply text-lg lg:text-xl text-neutral-600 max-w-2xl mx-auto;
+	}
+
+	/* Grid Components */
+	.grid-destinations {
+		@apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8;
+	}
+
+	.grid-hotels {
+		@apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8;
+	}
+
+	.grid-services {
+		@apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12;
+	}
+
+	/* Overlay Components */
+	.overlay-dark {
+		@apply absolute inset-0 bg-black bg-opacity-40;
+	}
+
+	.overlay-gradient {
+		@apply absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent;
+	}
+
+	/* Badge Components */
+	.badge {
+		@apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+	}
+
+	.badge-primary {
+		@apply bg-brand-red-100 text-brand-red-800;
+	}
+
+	.badge-secondary {
+		@apply bg-brand-orange-100 text-brand-orange-800;
+	}
+
+	.badge-success {
+		@apply bg-success-100 text-success-800;
+	}
+
+	/* Rating Components */
+	.rating-stars {
+		@apply flex items-center space-x-1;
+	}
+
+	.star-filled {
+		@apply text-yellow-400;
+	}
+
+	.star-empty {
+		@apply text-neutral-300;
+	}
+}
+
+/* Accessibility improvements */
+@layer utilities {
+	.sr-only {
+		@apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+	}
+
+	.focus-visible {
+		@apply focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2;
+	}
+
+	/* Scrollbar utilities */
+	.scrollbar-hide {
+		/* IE and Edge */
+		-ms-overflow-style: none;
+		/* Firefox */
+		scrollbar-width: none;
+	}
+
+	.scrollbar-hide::-webkit-scrollbar {
+		/* Safari and Chrome */
+		display: none;
+	}
+}
+
+/* Cross-browser compatibility fixes */
+@layer utilities {
+	/* Grid fallbacks for older browsers */
+	.grid-fallback {
+		display: -webkit-box;
+		display: -ms-flexbox;
+		display: flex;
+		-ms-flex-wrap: wrap;
+		flex-wrap: wrap;
+	}
+
+	/* Backdrop filter fallbacks */
+	.backdrop-blur-fallback {
+		background-color: rgba(255, 255, 255, 0.9);
+		/* Fallback for browsers without backdrop-filter support */
+	}
+
+	/* Aspect ratio fallbacks */
+	.aspect-ratio-fallback {
+		position: relative;
+		height: 0;
+		padding-bottom: 56.25%; /* 16:9 aspect ratio */
+	}
+
+	.aspect-ratio-fallback > * {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	/* Transform fallbacks for older browsers */
+	.transform-fallback {
+		-webkit-transform: translateZ(0);
+		transform: translateZ(0);
+		/* Force hardware acceleration */
+		-webkit-backface-visibility: hidden;
+		backface-visibility: hidden;
+	}
+
+	/* Flexbox fallbacks */
+	.flex-fallback {
+		display: -webkit-box;
+		display: -ms-flexbox;
+		display: flex;
+	}
+
+	.flex-center-fallback {
+		-webkit-box-align: center;
+		-ms-flex-align: center;
+		align-items: center;
+		-webkit-box-pack: center;
+		-ms-flex-pack: center;
+		justify-content: center;
+	}
+}
+
+/* Hide date picker icons when custom icons are present */
+input[type="date"]::-webkit-calendar-picker-indicator {
+	display: none;
+	-webkit-appearance: none;
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type="date"] {
+	-moz-appearance: textfield;
+}
+
+/* Browser-specific fixes */
+/* Safari-specific fixes */
+@supports (-webkit-appearance: none) {
+	.safari-fix {
+		/* Fix for Safari's aggressive caching */
+		-webkit-transform: translateZ(0);
+		transform: translateZ(0);
+	}
+
+	/* Better button rendering in Safari */
+	button {
+		-webkit-appearance: none;
+		appearance: none;
+	}
+
+	/* Fix for Safari's input styling */
+	input[type="text"],
+	input[type="email"],
+	input[type="password"],
+	textarea {
+		-webkit-appearance: none;
+		appearance: none;
+		border-radius: 0;
+	}
+}
+
+/* Firefox-specific fixes */
+@-moz-document url-prefix() {
+	/* Fix for Firefox's button padding */
+	button::-moz-focus-inner {
+		border: 0;
+		padding: 0;
+	}
+
+	/* Better scrollbar styling in Firefox */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: #e21e24 #f1f1f1;
+	}
+}
+
+/* Edge/IE-specific fixes */
+@supports (-ms-ime-align: auto) {
+	/* Fix for older Edge versions */
+	.edge-fix {
+		-ms-grid-row-align: stretch;
+		-ms-grid-column-align: stretch;
+	}
+}
+
+/* Chrome-specific optimizations */
+@supports (-webkit-background-clip: text) {
+	.chrome-optimized {
+		/* Enable hardware acceleration */
+		-webkit-transform: translateZ(0);
+		transform: translateZ(0);
+		will-change: transform;
+	}
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+	* {
+		border-color: ButtonText !important;
+	}
+
+	.btn-primary {
+		background-color: ButtonFace !important;
+		color: ButtonText !important;
+		border: 2px solid ButtonText !important;
+	}
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+		/* Disable transform animations */
+		transform: none !important;
+	}
+}
+
+/* Print styles */
+@media print {
+	* {
+		background: transparent !important;
+		color: black !important;
+		box-shadow: none !important;
+		text-shadow: none !important;
+	}
+
+	a,
+	a:visited {
+		text-decoration: underline;
+	}
+
+	img {
+		max-width: 100% !important;
+		page-break-inside: avoid;
+	}
+
+	h1,
+	h2,
+	h3 {
+		page-break-after: avoid;
+	}
+}
+/* Newsletter Section - Regenerated from Figma Specifications */
+
+/* Main layout container - matches Figma total dimensions: 1306×608px */
+.newsletter-layout {
+	position: relative;
+	width: 100%;
+	max-width: 1306px;
+	height: 608px;
+	margin: 0 auto;
+	display: flex;
+	align-items: flex-start;
+}
+
+/* Background section - Figma: 666×608px at (0,0) with 200px border-radius */
+.newsletter-background-section {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 666px;
+	height: 608px;
+}
+
+.newsletter-background-container {
+	width: 100%;
+	height: 100%;
+	border-radius: 200px;
+	overflow: hidden;
+	position: relative;
+	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Individual images positioned per Figma coordinates */
+.newsletter-img-1 {
+	/* Figma: x:345.92, y:273, size:320.08×335 */
+	position: absolute;
+	left: 345.92px;
+	top: 273px;
+	width: 320.08px;
+	height: 335px;
+	border-radius: 16px;
+	overflow: hidden;
+}
+
+.newsletter-img-2 {
+	/* Figma: x:0, y:159, size:320.08×432 */
+	position: absolute;
+	left: 0px;
+	top: 159px;
+	width: 320.08px;
+	height: 432px;
+	border-radius: 16px;
+	overflow: hidden;
+}
+
+.newsletter-img-3 {
+	/* Figma: x:231.36, y:0, size:320.08×432 */
+	position: absolute;
+	left: 231.36px;
+	top: 0px;
+	width: 320.08px;
+	height: 432px;
+	border-radius: 16px;
+	overflow: hidden;
+}
+
+.newsletter-image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* Content section - Figma: 589×420px at (717,159) */
+.newsletter-content-section {
+	position: absolute;
+	left: 717px;
+	top: 159px;
+	width: 589px;
+	height: 420px;
+	display: flex;
+	flex-direction: column;
+	gap: 30px;
+}
+
+.newsletter-text-content {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	padding: 0 13px;
+}
+
+.newsletter-heading {
+	/* Figma: Poppins 700, 36px, 1.5em line-height, 571px width */
+	font-family: "Poppins", sans-serif;
+	font-weight: 700;
+	font-size: 36px;
+	line-height: 1.5em;
+	color: #000000;
+	margin: 0;
+	width: 571px;
+}
+
+.newsletter-description {
+	/* Figma: Nunito Sans 400, 18px, 1.777em line-height, 163px height */
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 18px;
+	line-height: 1.7777777777777777em;
+	color: #000000;
+	margin: 0;
+	height: 163px;
+}
+
+.newsletter-form-container {
+	width: 589px;
+	height: 74px;
+}
+
+.newsletter-form {
+	width: 100%;
+	height: 100%;
+}
+
+.newsletter-input-wrapper {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.newsletter-email-input {
+	/* Figma: 589×74px, dashed #3E5CB8 border, 50px border-radius */
+	width: 589px;
+	height: 74px;
+	background: #ffffff;
+	border: 1px dashed #3e5cb8;
+	border-radius: 50px;
+	padding: 24px 35px;
+	padding-right: 120px;
+	font-family: "Poppins", sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.625em;
+	color: #6a6a6a;
+	box-shadow: 8px 8px 32px 0px rgba(0, 0, 0, 0.12);
+	outline: none;
+}
+
+.newsletter-email-input:focus {
+	border-color: #3e5cb8;
+	box-shadow: 8px 8px 32px 0px rgba(0, 0, 0, 0.12),
+		0 0 0 2px rgba(62, 92, 184, 0.2);
+}
+
+.newsletter-submit-btn {
+	/* Figma: 80×74px, #E21E24 background, positioned at right edge */
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 80px;
+	height: 74px;
+	background: #e21e24;
+	border-radius: 50px;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+}
+
+.newsletter-submit-btn:hover {
+	background: #c71a1f;
+	transform: translateY(-1px);
+}
+
+.newsletter-submit-btn:focus {
+	outline: 2px solid #e21e24;
+	outline-offset: 2px;
+}
+
+.newsletter-submit-btn:disabled {
+	background: #cccccc;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.newsletter-status-message {
+	margin-top: 12px;
+	padding: 8px 16px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	text-align: center;
+}
+
+.newsletter-status-message.success {
+	background: #d4edda;
+	color: #155724;
+	border: 1px solid #c3e6cb;
+}
+
+.newsletter-status-message.error {
+	background: #f8d7da;
+	color: #721c24;
+	border: 1px solid #f5c6cb;
+}
+
+/* Responsive Design */
+@media (max-width: 1366px) {
+	.newsletter-layout {
+		max-width: 1200px;
+		height: 560px;
+		transform: scale(0.92);
+		transform-origin: center;
+	}
+}
+
+@media (max-width: 1200px) {
+	.newsletter-layout {
+		max-width: 1000px;
+		height: 480px;
+		transform: scale(0.77);
+	}
+}
+
+@media (max-width: 1024px) {
+	.newsletter-layout {
+		position: static;
+		height: auto;
+		transform: none;
+		flex-direction: column;
+		gap: 40px;
+		align-items: center;
+		text-align: center;
+	}
+
+	.newsletter-background-section {
+		position: static;
+		width: 400px;
+		height: 365px;
+		margin: 0 auto;
+	}
+
+	.newsletter-background-container {
+		transform: scale(0.6);
+		transform-origin: center;
+	}
+
+	.newsletter-content-section {
+		position: static;
+		width: 100%;
+		max-width: 589px;
+		margin: 0 auto;
+	}
+
+	.newsletter-heading {
+		width: auto;
+		font-size: 28px;
+	}
+
+	.newsletter-description {
+		height: auto;
+	}
+
+	.newsletter-form-container {
+		width: 100%;
+		max-width: 500px;
+		margin: 0 auto;
+	}
+
+	.newsletter-email-input {
+		width: 100%;
+	}
+}
+
+@media (max-width: 640px) {
+	.newsletter-background-section {
+		width: 300px;
+		height: 274px;
+	}
+
+	.newsletter-background-container {
+		transform: scale(0.45);
+	}
+
+	.newsletter-heading {
+		font-size: 24px;
+	}
+
+	.newsletter-description {
+		font-size: 16px;
+	}
+
+	.newsletter-email-input {
+		height: 60px;
+		padding: 18px 25px;
+		padding-right: 100px;
+		font-size: 14px;
+	}
+
+	.newsletter-submit-btn {
+		width: 70px;
+		height: 60px;
+	}
+}
+
+.submit-button:disabled {
+	background: #cccccc;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.submit-button:disabled:hover {
+	background: #cccccc;
+	transform: none;
+}
+
+.newsletter-message {
+	margin-top: 12px;
+	padding: 8px 16px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	text-align: center;
+}
+
+.newsletter-message.success {
+	background: #d4edda;
+	color: #155724;
+	border: 1px solid #c3e6cb;
+}
+
+.newsletter-message.error {
+	background: #f8d7da;
+	color: #721c24;
+	border: 1px solid #f5c6cb;
+}
+
+/* Newsletter Section - Circular Overlapping Design */
+
+/* Main container */
+.newsletter-container {
+	display: flex;
+	align-items: center;
+	gap: 64px;
+	min-height: 650px;
+}
+
+/* Left side - Circular overlapping images */
+.newsletter-visual-side {
+	flex: 0 0 auto;
+	width: 562px;
+}
+
+.newsletter-circles-composition {
+	position: relative;
+	width: 562px;
+	height: 400px;
+}
+
+/* Individual circles */
+.newsletter-circle {
+	position: absolute;
+	border-radius: 200px;
+	border: solid 8px white;
+	overflow: hidden;
+	box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.newsletter-circle:hover {
+	transform: scale(1.05);
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Large circle - Top (Family at airport) */
+.newsletter-circle-large-top {
+	bottom: 40%;
+	right: 50px;
+	width: 300px;
+	height: 400px;
+	z-index: 3;
+}
+
+/* Medium circle - Bottom left (Adventure travel) */
+.newsletter-circle-medium-left {
+	bottom: 5%;
+	left: 0;
+	width: 300px;
+	height: 400px;
+	z-index: 1;
+}
+
+/* Small circle - Bottom right (Travel memories) */
+.newsletter-circle-small-right {
+	bottom: 0;
+	left: 54%;
+	width: 300px;
+	height: 300px;
+	z-index: 2;
+}
+
+.newsletter-circle-image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* Right side - Content */
+.newsletter-content-area {
+	flex: 1;
+	max-width: 589px;
+}
+
+.newsletter-content-inner {
+	display: flex;
+	flex-direction: column;
+	gap: 30px;
+	padding: 20px 0;
+}
+
+.newsletter-heading {
+	font-family: "Poppins", sans-serif;
+	font-weight: 700;
+	font-size: 36px;
+	line-height: 1.5em;
+	color: #000000;
+	margin: 0;
+}
+
+.newsletter-description {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 18px;
+	line-height: 1.7777777777777777em;
+	color: #000000;
+	margin: 0;
+}
+
+.newsletter-form-wrapper {
+	width: 100%;
+}
+
+.newsletter-form {
+	width: 100%;
+}
+
+.newsletter-input-group {
+	position: relative;
+	width: 100%;
+	max-width: 589px;
+}
+
+.newsletter-email-field {
+	width: 100%;
+	height: 74px;
+	background: #ffffff;
+	border: 1px dashed #3e5cb8;
+	border-right: none;
+	border-radius: 50px !important;
+	padding: 24px 35px;
+	padding-right: 120px;
+	font-family: "Poppins", sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.625em;
+	color: #6a6a6a;
+	box-shadow: 8px 8px 32px 0px rgba(0, 0, 0, 0.12);
+	outline: none;
+}
+
+.newsletter-email-field:focus {
+	border-color: #3e5cb8;
+	box-shadow: 8px 8px 32px 0px rgba(0, 0, 0, 0.12),
+		0 0 0 2px rgba(62, 92, 184, 0.2);
+}
+
+.newsletter-submit-button {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 80px;
+	height: 74px;
+	background: #e21e24;
+	border-radius: 50px;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+}
+
+.newsletter-submit-button:hover {
+	background: #c71a1f;
+	transform: translateY(-1px);
+}
+
+.newsletter-submit-button:focus {
+	outline: 2px solid #e21e24;
+	outline-offset: 2px;
+}
+
+.newsletter-submit-button:disabled {
+	background: #cccccc;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.newsletter-status {
+	margin-top: 12px;
+	padding: 8px 16px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	text-align: center;
+}
+
+.newsletter-status.success {
+	background: #d4edda;
+	color: #155724;
+	border: 1px solid #c3e6cb;
+}
+
+.newsletter-status.error {
+	background: #f8d7da;
+	color: #721c24;
+	border: 1px solid #f5c6cb;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+	.newsletter-container {
+		gap: 60px;
+	}
+
+	.newsletter-visual-side {
+		width: 400px;
+	}
+
+	.newsletter-circles-composition {
+		width: 400px;
+		height: 320px;
+	}
+
+	.newsletter-circle-large-top {
+		width: 240px;
+		height: 240px;
+		right: 40px;
+	}
+
+	.newsletter-circle-medium-left {
+		width: 200px;
+		height: 200px;
+	}
+
+	.newsletter-circle-small-right {
+		width: 160px;
+		height: 160px;
+		bottom: 15px;
+	}
+
+	.newsletter-heading {
+		font-size: 32px;
+	}
+}
+
+@media (max-width: 1024px) {
+	.newsletter-container {
+		flex-direction: column;
+		gap: 40px;
+		text-align: center;
+	}
+
+	.newsletter-visual-side {
+		width: 350px;
+		margin: 0 auto;
+	}
+
+	.newsletter-circles-composition {
+		width: 350px;
+		height: 280px;
+	}
+
+	.newsletter-circle-large-top {
+		width: 200px;
+		height: 200px;
+		right: 30px;
+	}
+
+	.newsletter-circle-medium-left {
+		width: 170px;
+		height: 170px;
+	}
+
+	.newsletter-circle-small-right {
+		width: 130px;
+		height: 130px;
+		bottom: 10px;
+	}
+
+	.newsletter-content-area {
+		max-width: 100%;
+	}
+
+	.newsletter-heading {
+		font-size: 28px;
+	}
+
+	.newsletter-input-group {
+		max-width: 500px;
+		margin: 0 auto;
+	}
+}
+
+@media (max-width: 640px) {
+	.newsletter-visual-side {
+		width: 280px;
+	}
+
+	.newsletter-circles-composition {
+		width: 280px;
+		height: 220px;
+	}
+
+	.newsletter-circle-large-top {
+		width: 150px;
+		height: 150px;
+		right: 20px;
+	}
+
+	.newsletter-circle-medium-left {
+		width: 130px;
+		height: 130px;
+	}
+
+	.newsletter-circle-small-right {
+		width: 100px;
+		height: 100px;
+		bottom: 5px;
+	}
+
+	.newsletter-heading {
+		font-size: 24px;
+	}
+
+	.newsletter-description {
+		font-size: 16px;
+	}
+
+	.newsletter-email-field {
+		height: 60px;
+		padding: 18px 25px;
+		padding-right: 100px;
+		font-size: 14px;
+	}
+
+	.newsletter-submit-button {
+		width: 70px;
+		height: 60px;
+	}
+}
+/* Process Section Step Numbers */
+.process-step-number {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 700;
+	font-size: 64px;
+	line-height: 1.2em;
+	color: transparent;
+	-webkit-text-stroke: 1px #ffffff;
+	text-stroke: 1px #ffffff;
+	display: inline-block;
+} /* Ser
+vice Layout Overrides */
+
+/* Force white header for service pages */
+.service-header-override > div {
+	background-color: white !important;
+	color: #111827 !important;
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.service-header-override .text-white {
+	color: #111827 !important;
+}
+
+.service-header-override .text-gray-900 {
+	color: #111827 !important;
+}
+
+/* Use normal logo on service pages (remove invert filter) */
+.service-header-override img[src*="white-logo"] {
+	filter: none;
+}
+
+/* Fix signup button text color on service pages */
+.service-header-override a[href="#signup"] {
+	color: white !important;
+}
+
+.service-header-override .bg-brand-red {
+	color: white !important;
+}
+
+/* Force white footer for service pages */
+.service-footer-override {
+	background-color: white !important;
+}
+
+.service-footer-override .bg-gray-900 {
+	background-color: white !important;
+}
+
+.service-footer-override .text-white {
+	color: #111827 !important;
+}
+
+.service-footer-override .text-gray-300 {
+	color: #6b7280 !important;
+}
+
+.service-footer-override .text-gray-400 {
+	color: #9ca3af !important;
+}
+
+/* Newsletter section in service footer */
+.service-footer-override .newsletter-section {
+	background-color: #f9fafb !important;
+	border-top: 1px solid #e5e7eb;
+}
+
+.service-footer-override .newsletter-heading {
+	color: #111827 !important;
+}
+
+.service-footer-override .newsletter-description {
+	color: #6b7280 !important;
+}
+/* 
+Figma Flight Components Styles */
+
+/* SearchBar Styles */
+.figma-search-bar {
+	background: #ffffff;
+	border-radius: 0 0 16px 16px;
+	padding: 32px 69px 32px 71px;
+	display: flex;
+	align-items: center;
+	gap: 64px;
+	width: 100%;
+}
+
+.figma-search-container {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	width: 100%;
+}
+
+.figma-route-section {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	flex: 3;
+}
+
+.figma-route-inputs {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 8px 0;
+	flex: 2;
+}
+
+.figma-input-field {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex: 2;
+	min-width: 0;
+}
+
+.figma-input-icon {
+	width: 32px;
+	height: 32px;
+}
+
+.figma-location-text {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 700;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #333333;
+	white-space: nowrap;
+}
+
+.figma-separator {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.219;
+	color: #333333;
+	margin: 0 4px;
+}
+
+.figma-passengers-info {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #333333;
+	flex: 1;
+}
+
+.figma-divider {
+	width: 0;
+	height: 40px;
+	border-left: 1px solid #333333;
+	opacity: 0.5;
+}
+
+.figma-date-section {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	flex: 1;
+	min-width: 0;
+}
+
+.figma-date-input {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 0;
+	flex: 1;
+}
+
+.figma-date-label {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 700;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #333333;
+	flex: 1;
+}
+
+.figma-date-value {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #e21e24;
+	flex: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.figma-search-button {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 20px;
+	background: #e21e24;
+	border-radius: 8px;
+	border: none;
+	cursor: pointer;
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #ffffff;
+}
+
+.figma-search-button:hover {
+	background: #c71e24;
+}
+
+/* Flight Filters Styles */
+.figma-flight-filters {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	width: 100%;
+	max-width: 600px;
+}
+
+.figma-filter-row {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 16px;
+	flex: 1;
+	flex-wrap: wrap;
+}
+
+.figma-filter-pill {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 8px 12px 8px 16px;
+	background: #ffffff;
+	border: 1px solid #cbd4e6;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.figma-filter-pill:hover {
+	border-color: #605dec;
+}
+
+.figma-filter-label {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #27273f;
+	white-space: nowrap;
+}
+
+.figma-filter-chevron {
+	width: 18px;
+	height: 18px;
+	color: #27273f;
+}
+
+.figma-section-title {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 600;
+	font-size: 18px;
+	line-height: 1.364;
+	color: #6e7491;
+	flex: 1;
+}
+
+/* Flight Results Layout */
+.figma-flight-results {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	width: 100%;
+}
+
+.figma-results-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 46px;
+	flex: 1;
+	width: 100%;
+	overflow: hidden;
+}
+
+.figma-left-section {
+	flex: 1;
+	min-width: 0;
+	max-width: 872px;
+}
+
+.figma-right-section {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 40px;
+	width: 400px;
+	min-width: 400px;
+	flex-shrink: 0;
+}
+
+/* Flight Table Styles */
+.figma-flight-table {
+	width: 100%;
+	max-width: 872px;
+	height: 456px;
+	border: 1px solid #e9e8fc;
+	border-radius: 12px;
+	overflow-y: auto;
+	/* Hide scrollbar for Chrome, Safari and Opera */
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.figma-flight-table::-webkit-scrollbar {
+	display: none;
+}
+
+.figma-table-container {
+	display: flex;
+	flex-direction: column;
+	padding: 16px;
+	background: #ffffff;
+	border: 1px solid #f6f6fe;
+	border-radius: 8px;
+	width: 100%;
+}
+
+.figma-flight-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px;
+	flex: 1;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.figma-flight-row:hover {
+	background: #f6f6fe;
+}
+
+.figma-flight-row.selected {
+	background: #f6f6fe;
+	border: 1px solid #605dec;
+	border-radius: 4px;
+}
+
+/* Column layout */
+.figma-column-1 {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
+	min-width: 180px;
+}
+
+.figma-column-2 {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	min-width: 160px;
+}
+
+.figma-column-3 {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	min-width: 140px;
+	margin-right: 24px;
+}
+
+.figma-column-4 {
+	flex-shrink: 0;
+	text-align: right;
+	min-width: 120px;
+}
+
+.figma-airline-logo {
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.figma-logo-placeholder {
+	width: 40px;
+	height: 40px;
+	background: #e9e8fc;
+	border-radius: 50%;
+}
+
+.figma-airline-info {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.figma-duration {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 600;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #27273f;
+}
+
+.figma-airline-name {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 1.364;
+	color: #7c8db0;
+	text-transform: capitalize;
+}
+
+.figma-time {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #27273f;
+}
+
+.figma-flight-class {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 1.364;
+	color: #7c8db0;
+	text-transform: capitalize;
+}
+
+.figma-stops {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #27273f;
+}
+
+.figma-layover {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 1.364;
+	color: #7c8db0;
+}
+
+.figma-price {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 700;
+	font-size: 18px;
+	line-height: 1.364;
+	color: #e74c3c;
+}
+
+.figma-trip-type {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 1.364;
+	color: #7c8db0;
+	text-transform: capitalize;
+}
+
+.figma-empty {
+	flex: 1;
+	opacity: 0;
+}
+
+.figma-row-divider {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	padding: 4px 0;
+	flex: 1;
+}
+
+.figma-row-divider::after {
+	content: "";
+	width: 100%;
+	height: 1px;
+	background: #e9e8fc;
+}
+
+/* Flight Selection Styles */
+.figma-flight-selection {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 40px;
+	width: 100%;
+	min-width: 300px;
+}
+
+.figma-flight-cart {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	flex: 1;
+	width: 100%;
+	overflow: hidden;
+}
+
+.figma-selected-flights {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 16px;
+	background: #ffffff;
+	border: 1px solid #e9e8fc;
+	border-radius: 12px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.figma-selected-flight {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	padding: 16px;
+	background: #f9fafb;
+	border-radius: 8px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.figma-selected-flight-left {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
+}
+
+.figma-selected-flight-right {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	text-align: right;
+	flex: 1;
+	min-width: 0;
+}
+
+.figma-airline-logo-small {
+	width: 48px;
+	height: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.figma-airline-logo-img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	border-radius: 4px;
+}
+
+.figma-logo-placeholder-small {
+	width: 48px;
+	height: 48px;
+	background: #e5e7eb;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: 500;
+	color: #6b7280;
+}
+
+.figma-airline-details {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.figma-airline-name {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 1.364;
+	color: #111827;
+}
+
+.figma-flight-number {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 1.364;
+	color: #9ca3af;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+}
+
+.figma-flight-number-item {
+	white-space: nowrap;
+}
+
+.figma-flight-number-separator {
+	white-space: nowrap;
+}
+
+.figma-duration-with-days {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 500;
+	font-size: 14px;
+	line-height: 1.364;
+	color: #6b7280;
+	white-space: nowrap;
+}
+
+.figma-time {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 1.364;
+	color: #111827;
+	white-space: nowrap;
+}
+
+.figma-layover {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 1.364;
+	color: #9ca3af;
+	white-space: nowrap;
+}
+
+.figma-airline-logo-small {
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.figma-logo-placeholder-small {
+	width: 40px;
+	height: 40px;
+	background: #e9e8fc;
+	border-radius: 50%;
+}
+
+.figma-airline-details {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	flex: 1;
+}
+
+.figma-airline-name {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #27273f;
+	flex: 1;
+}
+
+.figma-flight-number {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #7c8db0;
+	flex: 1;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+}
+
+.figma-flight-info {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	flex: 1;
+}
+
+.figma-flight-info .figma-duration {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #27273f;
+	flex: 1;
+}
+
+.figma-flight-info .figma-time {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #27273f;
+	flex: 1;
+}
+
+.figma-flight-info .figma-layover {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #7c8db0;
+	flex: 1;
+}
+
+.figma-flight-divider {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	padding: 4px 0;
+	width: 100%;
+	max-width: 368px;
+	box-sizing: border-box;
+}
+
+.figma-flight-divider::after {
+	content: "";
+	width: 100%;
+	height: 1px;
+	background: #e9e8fc;
+}
+
+.figma-price-summary {
+	display: flex;
+	justify-content: flex-end;
+	gap: 40px;
+	padding: 16px;
+	background: #ffffff;
+	border-top: 1px solid #e9e8fc;
+}
+
+.figma-price-labels {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.figma-price-label {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 600;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #27273f;
+	text-align: right;
+	width: 120px;
+}
+
+.figma-price-values {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 8px;
+}
+
+.figma-price-value {
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 600;
+	font-size: 16px;
+	line-height: 1.364;
+	color: #27273f;
+}
+
+.figma-action-buttons {
+	display: flex;
+	gap: 24px;
+}
+
+.figma-back-button {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 20px;
+	height: 48px;
+	background: transparent;
+	border: 1px solid #e21e24;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 18px;
+	line-height: 1.364;
+	color: #e21e24;
+}
+
+.figma-back-button:hover {
+	background: #f5f5f5;
+}
+
+.figma-continue-button {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 20px;
+	height: 48px;
+	background: #e21e24;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-family: "Nunito Sans", sans-serif;
+	font-weight: 400;
+	font-size: 18px;
+	line-height: 1.364;
+	color: #ffffff;
+}
+
+.figma-continue-button:hover {
+	background: #c71e24;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+	.figma-results-container {
+		gap: 24px;
+	}
+
+	.figma-right-section {
+		width: 350px;
+		min-width: 350px;
+	}
+
+	.figma-flight-selection {
+		width: 100%;
+	}
+
+	.figma-selected-flight {
+		width: 100%;
+	}
+
+	.figma-flight-divider {
+		width: 100%;
+	}
+}
+
+@media (max-width: 1200px) {
+	.figma-search-bar {
+		width: 100%;
+		padding: 24px 32px;
+		gap: 32px;
+	}
+
+	.figma-flight-results {
+		width: 100%;
+	}
+
+	.figma-results-container {
+		flex-direction: column;
+		gap: 24px;
+		overflow: visible;
+	}
+
+	.figma-left-section {
+		max-width: 100%;
+		min-width: auto;
+	}
+
+	.figma-right-section {
+		width: 100%;
+		min-width: auto;
+		align-items: stretch;
+	}
+
+	.figma-flight-table {
+		width: 100%;
+		max-width: 100%;
+	}
+
+	.figma-flight-selection {
+		width: 100%;
+		max-width: 100%;
+		min-width: auto;
+		align-items: stretch;
+	}
+
+	.figma-selected-flight {
+		max-width: 100%;
+	}
+
+	.figma-flight-divider {
+		max-width: 100%;
+	}
+
+	.figma-table-container {
+		width: 100%;
+	}
+}
+
+@media (max-width: 768px) {
+	.figma-search-container {
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.figma-route-section {
+		width: 100%;
+	}
+
+	.figma-filter-row {
+		flex-wrap: wrap;
+		justify-content: flex-start;
+	}
+
+	.figma-primary-row,
+	.figma-secondary-row {
+		gap: 16px;
+	}
+
+	.figma-action-buttons {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.figma-back-button,
+	.figma-continue-button {
+		width: 100%;
+		justify-content: center;
+	}
+} /* Flig
+hts Page Container */
+.flights-page-container {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+	.flights-page-container {
+		padding: 0 1.5rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.flights-page-container {
+		padding: 0 2rem;
+	}
+}
+
+@media (min-width: 1280px) {
+	.flights-page-container {
+		padding: 0 3rem;
+	}
+}
+
+@media (min-width: 1536px) {
+	.flights-page-container {
+		padding: 0 4rem;
+	}
+} /* Ai
+rline Logo Styles */
+.figma-airline-logo-img {
+	width: 40px;
+	height: 40px;
+	object-fit: contain;
+	border-radius: 4px;
+}
+
+.figma-logo-placeholder {
+	width: 40px;
+	height: 40px;
+	background: #e9e8fc;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	color: #6e7491;
+	font-weight: 600;
+}
+
+.figma-logo-placeholder-small {
+	width: 40px;
+	height: 40px;
+	background: #e9e8fc;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	color: #6e7491;
+	font-weight: 600;
+} /* Additi
+onal responsive breakpoint for side-by-side layout */
+@media (min-width: 1201px) {
+	.figma-results-container {
+		flex-wrap: nowrap;
+	}
+
+	.figma-left-section {
+		flex: 1 1 auto;
+		min-width: 500px;
+	}
+
+	.figma-right-section {
+		flex: 0 0 400px;
+	}
+}
+/* Red text for "Returning" in section title */
+.figma-section-title-red {
+	color: #e21e24;
+}
+
+/* Import Flight Components Styles */
+@import '../styles/flights.css';
+/* 
+Autocomplete dropdown positioning fixes */
+@import '../styles/autocomplete-fix.css';

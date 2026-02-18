@@ -1,0 +1,142 @@
+/* Autocomplete dropdown positioning fixes */
+
+/* Ensure the autocomplete container has proper overflow settings */
+.autocomplete-container {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Fix for autocomplete dropdown positioning */
+.autocomplete-dropdown {
+  /* Ensure dropdown is always visible and properly positioned */
+  position: fixed !important;
+  z-index: 9999 !important;
+  
+  /* Prevent dropdown from being cut off */
+  max-height: 240px;
+  overflow-y: auto;
+  
+  /* Ensure proper width constraints */
+  min-width: 200px;
+  max-width: 90vw;
+  
+  /* Add some visual improvements */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 2px solid #93c5fd;
+  border-radius: 8px;
+  background: white;
+}
+
+/* Fallback positioning for cases where Portal doesn't work */
+.autocomplete-fallback {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 50 !important;
+  margin-top: 4px !important;
+}
+
+/* Fix for search form container to allow overflow */
+.search-form-container {
+  overflow: visible !important;
+}
+
+.search-form-container form {
+  overflow: visible !important;
+}
+
+.search-form-container .form-field {
+  overflow: visible !important;
+}
+
+/* Ensure parent containers don't clip the dropdown */
+.hero-section,
+.services-section,
+.main-content {
+  overflow: visible !important;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 768px) {
+  .autocomplete-dropdown {
+    max-width: calc(100vw - 32px);
+    left: 16px !important;
+    right: 16px !important;
+    width: auto !important;
+  }
+}
+
+/* Fix for containers that might have transform or contain properties */
+.autocomplete-dropdown {
+  /* Reset any transform context issues */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Ensure dropdown appears above other elements */
+.autocomplete-dropdown,
+.autocomplete-fallback {
+  z-index: 9999 !important;
+}
+
+/* Fix for potential stacking context issues */
+body {
+  /* Ensure body doesn't create stacking context issues */
+  position: relative;
+}
+
+/* Specific fix for travel services form */
+.travel-services .search-form,
+.travel-services .search-form form,
+.travel-services .search-form .form-fields {
+  overflow: visible !important;
+}
+
+/* Debug styles (remove in production) */
+.debug-autocomplete .autocomplete-dropdown {
+  border: 3px solid red !important;
+}
+
+.debug-autocomplete .autocomplete-container {
+  border: 2px solid blue !important;
+}
+
+/* Animation for dropdown appearance */
+.autocomplete-dropdown {
+  animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ensure proper scrolling in dropdown */
+.autocomplete-dropdown ul {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Fix for potential CSS containment issues */
+.autocomplete-dropdown {
+  contain: none !important;
+}
+
+/* Ensure dropdown is not affected by parent transforms */
+.autocomplete-dropdown {
+  position: fixed !important;
+  /* Use viewport units to ensure proper positioning */
+}
+
+/* Fix for potential backdrop-filter issues */
+.autocomplete-dropdown {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

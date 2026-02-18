@@ -1,0 +1,169 @@
+/* Mobile optimizations for visa application forms */
+
+/* Improve touch targets on mobile */
+@media (max-width: 640px) {
+  /* Ensure all interactive elements meet minimum touch target size */
+  .visa-form input,
+  .visa-form select,
+  .visa-form button,
+  .visa-form textarea {
+    min-height: 44px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Improve date input appearance on mobile */
+  .visa-form input[type="date"] {
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px 20px;
+    padding-right: 40px;
+  }
+
+  /* Improve select appearance on mobile */
+  .visa-form select {
+    background-size: 20px 20px;
+    background-position: right 12px center;
+  }
+
+  /* Better spacing for form sections on mobile */
+  .visa-form .form-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* Improve checkbox and radio button touch targets */
+  .visa-form input[type="checkbox"],
+  .visa-form input[type="radio"] {
+    min-width: 20px;
+    min-height: 20px;
+    transform: scale(1.2);
+  }
+
+  /* Better button styling for mobile */
+  .visa-form button {
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  /* Improve textarea appearance */
+  .visa-form textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  /* Better focus states for mobile */
+  .visa-form input:focus,
+  .visa-form select:focus,
+  .visa-form textarea:focus {
+    outline: 2px solid #e21e24;
+    outline-offset: 2px;
+    border-color: #e21e24;
+  }
+
+  /* Improve error message visibility */
+  .visa-form .error-message {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-top: 4px;
+  }
+
+  /* Better spacing for form groups */
+  .visa-form .form-group {
+    margin-bottom: 24px;
+  }
+
+  /* Improve label readability */
+  .visa-form label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .visa-form input,
+  .visa-form select,
+  .visa-form textarea {
+    font-size: 15px;
+  }
+
+  .visa-form .form-section {
+    padding: 20px;
+  }
+}
+
+/* Improve appointment location cards for mobile */
+@media (max-width: 640px) {
+  .appointment-location-card {
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .appointment-location-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  .appointment-location-title {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .appointment-location-details {
+    font-size: 13px;
+    line-height: 1.4;
+    margin-top: 4px;
+  }
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 640px) {
+  /* Ensure sufficient color contrast */
+  .visa-form .text-gray-600 {
+    color: #4b5563 !important;
+  }
+
+  .visa-form .text-gray-500 {
+    color: #6b7280 !important;
+  }
+
+  /* Improve focus visibility */
+  .visa-form *:focus-visible {
+    outline: 3px solid #e21e24;
+    outline-offset: 2px;
+  }
+
+  /* Better spacing for touch interaction */
+  .visa-form .touch-target {
+    padding: 12px;
+    margin: 8px 0;
+  }
+}
+
+/* Prevent horizontal scrolling on mobile */
+@media (max-width: 640px) {
+  .visa-form-container {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .visa-form .grid {
+    gap: 16px;
+  }
+
+  .visa-form .grid > * {
+    min-width: 0;
+  }
+}

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Storage - The Travel Place</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #dc2626;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        button {
+            background-color: #dc2626;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #b91c1c;
+        }
+        .secondary {
+            background-color: #6b7280;
+        }
+        .secondary:hover {
+            background-color: #4b5563;
+        }
+        pre {
+            background-color: #f3f4f6;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .warning {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Clear Browser Storage</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Important:</strong> This will clear all stored data for The Travel Place, including any saved booking information.
+        </div>
+
+        <div id="status"></div>
+
+        <h3>Current Storage Contents:</h3>
+        <pre id="storageContents">Loading...</pre>
+
+        <div style="margin-top: 20px;">
+            <button onclick="clearAllStorage()">Clear All Storage</button>
+            <button onclick="checkStorage()" class="secondary">Refresh Status</button>
+            <button onclick="goToHome()" class="secondary">Go to Home</button>
+        </div>
+
+        <h3 style="margin-top: 30px;">What gets cleared:</h3>
+        <ul>
+            <li>localStorage (all saved data)</li>
+            <li>sessionStorage (temporary session data)</li>
+            <li>All insurance booking data</li>
+        </ul>
+    </div>
+
+    <script>
+        function displayStorage() {
+            const storage = {
+                localStorage: {},
+                sessionStorage: {}
+            };
+
+            // Get all localStorage items
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                storage.localStorage[key] = localStorage.getItem(key);
+            }
+
+            // Get all sessionStorage items
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                storage.sessionStorage[key] = sessionStorage.getItem(key);
+            }
+
+            document.getElementById('storageContents').textContent = 
+                JSON.stringify(storage, null, 2);
+
+            // Check for problematic data
+            const travelerInfo = localStorage.getItem('insuranceTravelerInfo');
+            if (travelerInfo && travelerInfo.includes('NaN')) {
+                document.getElementById('status').innerHTML = `
+                    <div class="status info">
+                        ⚠️ Found corrupted data! The "insuranceTravelerInfo" contains invalid dates.
+                        <br><strong>You need to clear storage to fix this.</strong>
+                    </div>
+                `;
+            } else if (localStorage.length === 0 && sessionStorage.length === 0) {
+                document.getElementById('status').innerHTML = `
+                    <div class="status success">
+                        ✅ Storage is empty! You can now start a fresh booking.
+                    </div>
+                `;
+            } else {
+                document.getElementById('status').innerHTML = `
+                    <div class="status info">
+                        📦 Storage contains ${localStorage.length} localStorage items and ${sessionStorage.length} sessionStorage items.
+                    </div>
+                `;
+            }
+        }
+
+        function clearAllStorage() {
+            if (confirm('Are you sure you want to clear all stored data? This cannot be undone.')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                document.getElementById('status').innerHTML = `
+                    <div class="status success">
+                        ✅ All storage cleared successfully!
+                        <br>You can now start a fresh booking.
+                    </div>
+                `;
+                
+                displayStorage();
+            }
+        }
+
+        function checkStorage() {
+            displayStorage();
+        }
+
+        function goToHome() {
+            window.location.href = '/';
+        }
+
+        // Display storage on page load
+        displayStorage();
+    </script>
+</body>
+</html>

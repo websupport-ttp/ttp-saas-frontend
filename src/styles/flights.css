@@ -1,0 +1,333 @@
+/* Flight Components Styles */
+
+/* 
+ * Tailwind CSS @apply directive - suppress linting warnings
+ * These directives are processed by PostCSS and Tailwind CSS during build
+ */
+/* stylelint-disable at-rule-no-unknown */
+/* postcss-disable-next-line */
+/* eslint-disable */
+
+/* Flight Filters */
+.figma-flight-filters {
+  @apply bg-white rounded-lg shadow-sm p-6 mb-6;
+}
+
+.figma-filter-row {
+  @apply flex flex-wrap gap-3 mb-4;
+}
+
+.figma-filter-pill {
+  @apply inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200;
+}
+
+.figma-filter-pill.active {
+  @apply bg-red-50 border-red-300 text-red-700;
+}
+
+.figma-filter-label {
+  @apply text-sm font-medium;
+}
+
+.figma-filter-chevron {
+  @apply w-4 h-4 transition-transform duration-200;
+}
+
+.figma-filter-pill.active .figma-filter-chevron {
+  @apply rotate-180;
+}
+
+.figma-section-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.figma-section-title-red {
+  @apply text-red-600;
+}
+
+/* Flight Results */
+.figma-flight-results {
+  @apply space-y-6;
+}
+
+.figma-results-container {
+  @apply grid grid-cols-1 lg:grid-cols-3 gap-6;
+}
+
+/* Ensure filter bar matches results container width */
+.figma-flight-results .figma-flight-filters {
+  @apply max-w-none;
+}
+
+.figma-left-section {
+  @apply lg:col-span-2;
+}
+
+.figma-right-section {
+  @apply lg:col-span-1 w-full;
+}
+
+/* Flight Table */
+.figma-flight-table {
+  @apply bg-white rounded-lg shadow-sm overflow-hidden;
+}
+
+.figma-table-container {
+  @apply divide-y divide-gray-100;
+}
+
+.figma-flight-row {
+  @apply flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-200;
+}
+
+.figma-flight-row.selected {
+  @apply bg-red-50 border-l-4 border-red-500;
+}
+
+/* Column-based layout */
+.figma-column-1 {
+  @apply flex items-center gap-3 flex-shrink-0;
+  min-width: 180px;
+}
+
+.figma-column-2 {
+  @apply flex-1 flex flex-col items-end;
+  min-width: 160px;
+}
+
+.figma-column-3 {
+  @apply flex-1 flex flex-col items-end;
+  min-width: 140px;
+  margin-right: 24px;
+}
+
+.figma-column-4 {
+  @apply flex-shrink-0 text-right;
+  min-width: 120px;
+}
+
+.figma-airline-logo {
+  @apply flex-shrink-0 w-12 h-12;
+}
+
+.figma-airline-logo-img {
+  @apply w-full h-full object-contain rounded;
+}
+
+.figma-logo-placeholder {
+  @apply w-full h-full bg-gray-200 rounded flex items-center justify-center text-xs font-medium text-gray-600;
+}
+
+.figma-airline-info {
+  @apply flex flex-col;
+}
+
+.figma-duration {
+  @apply font-semibold text-gray-900 text-base;
+}
+
+.figma-airline-name {
+  @apply text-gray-500 text-sm capitalize;
+}
+
+.figma-time {
+  @apply text-gray-700 font-medium text-base;
+}
+
+.figma-flight-class {
+  @apply text-gray-500 text-sm capitalize;
+}
+
+.figma-stops {
+  @apply text-gray-900 font-medium text-base;
+}
+
+.figma-layover {
+  @apply text-gray-500 text-sm;
+}
+
+.figma-price {
+  @apply font-bold text-lg text-red-600;
+}
+
+.figma-trip-type {
+  @apply text-gray-500 text-sm capitalize;
+}
+
+.figma-empty {
+  @apply flex-1;
+}
+
+.figma-row-divider {
+  @apply h-px bg-gray-100;
+}
+
+/* Flight Selection */
+.figma-flight-selection {
+  @apply space-y-6 w-full;
+}
+
+.figma-flight-cart {
+  @apply bg-white rounded-lg shadow-sm p-6 w-full min-h-[200px];
+}
+
+.figma-selected-flights {
+  @apply space-y-4 mb-6 w-full;
+}
+
+.figma-selected-flight {
+  @apply flex items-start justify-between p-4 bg-gray-50 rounded-lg w-full;
+}
+
+.figma-selected-flight-left {
+  @apply flex items-center gap-3 flex-shrink-0;
+}
+
+.figma-selected-flight-right {
+  @apply flex flex-col items-end text-right flex-1 min-w-0;
+}
+
+.figma-airline-logo-small {
+  @apply flex-shrink-0 w-12 h-12;
+}
+
+.figma-airline-logo-img {
+  @apply w-full h-full object-contain rounded;
+}
+
+.figma-logo-placeholder-small {
+  @apply w-full h-full bg-gray-200 rounded flex items-center justify-center text-xs font-medium text-gray-600;
+}
+
+.figma-airline-details {
+  @apply flex flex-col;
+}
+
+.figma-airline-name {
+  @apply font-medium text-gray-900 text-base;
+}
+
+.figma-flight-number {
+  @apply text-sm text-gray-500 flex flex-wrap;
+  gap: 0;
+}
+
+.figma-flight-number-item {
+  @apply whitespace-nowrap;
+}
+
+.figma-flight-number-separator {
+  @apply whitespace-nowrap;
+}
+
+.figma-duration-with-days {
+  @apply font-medium text-gray-900 text-base whitespace-nowrap;
+}
+
+.figma-time {
+  @apply text-base text-gray-900 font-medium whitespace-nowrap;
+}
+
+.figma-layover {
+  @apply text-sm text-gray-500 whitespace-nowrap;
+}
+
+.figma-time {
+  @apply text-sm text-gray-600;
+}
+
+.figma-layover {
+  @apply text-xs text-gray-500;
+}
+
+.figma-flight-divider {
+  @apply h-px bg-gray-200 my-4;
+}
+
+.figma-price-summary {
+  @apply flex justify-between items-start border-t border-gray-200 pt-4;
+}
+
+.figma-price-labels {
+  @apply space-y-2;
+}
+
+.figma-price-values {
+  @apply space-y-2 text-right;
+}
+
+.figma-price-label {
+  @apply text-sm text-gray-600;
+}
+
+.figma-price-value {
+  @apply text-sm font-medium text-gray-900;
+}
+
+.figma-price-value:last-child {
+  @apply text-lg font-bold text-red-600;
+}
+
+.figma-action-buttons {
+  @apply flex space-x-4;
+}
+
+.figma-back-button {
+  @apply flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200;
+}
+
+.figma-continue-button {
+  @apply flex-1 px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors duration-200;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .figma-results-container {
+    @apply grid-cols-1;
+  }
+  
+  .figma-flight-row {
+    @apply flex-col items-start space-y-3 p-3;
+  }
+  
+  .figma-column-1,
+  .figma-column-2,
+  .figma-column-3,
+  .figma-column-4 {
+    @apply w-full text-left items-start;
+  }
+  
+  .figma-column-1 {
+    @apply justify-start;
+  }
+  
+  .figma-column-3 {
+    @apply text-left items-start;
+    margin-right: 0;
+  }
+  
+  .figma-column-4 {
+    @apply text-left;
+  }
+  
+  .figma-selected-flight {
+    @apply flex-col items-start space-y-2 w-full;
+  }
+  
+  .figma-selected-flight-left {
+    @apply w-full;
+  }
+  
+  .figma-selected-flight-right {
+    @apply w-full items-start text-left;
+  }
+  
+  .figma-price-summary {
+    @apply flex-col space-y-4;
+  }
+  
+  .figma-action-buttons {
+    @apply flex-col space-y-3 space-x-0;
+  }
+}
+/* stylelint-enable at-rule-no-unknown */

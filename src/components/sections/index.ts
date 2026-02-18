@@ -1,0 +1,15 @@
+export { default as HeroSection } from "./HeroSection";
+export { default as PopularDestinationsSection } from "./PopularDestinationsSection";
+export { default as HotelsSection } from "./HotelsSection";
+export { TestimonialsSection } from "./TestimonialsSection";
+export { default as NewsletterSection } from "./NewsletterSection";
+export { default as ArticlesSection } from "./ArticlesSection";
+export { default as PackagesSection } from "./PackagesSection";
+export { default as OurServicesSection } from "./ServicesSection";
+export { default as AboutUsSection } from "./AboutUsSection";
+export { default as TestimonialSection } from "./TestimonialSection";
+export { default as HotDealsSection } from "./HotDealsSection";
+export { default as ProcessSection } from "./ProcessSection";
+export { default as ServiceHero } from "./ServiceHero";
+export { default as WhyChooseUsSection } from "./WhyChooseUsSection";
+export { default as HotelNearYou } from "./HotelNearYou";
