@@ -17,6 +17,7 @@ export interface CarRental {
   features?: CarFeature[];
   pricePerDay: number;
   currency?: string;
+  location?: string;
   supplier?: CarSupplier;
   image: string;
   images?: string[];
