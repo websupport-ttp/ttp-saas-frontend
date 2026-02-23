@@ -84,8 +84,8 @@ export default function StaffDashboard({ user }: StaffDashboardProps) {
                 </div>
                 {getClearanceBadge()}
               </div>
-              {user.employeeId && (
-                <p className="text-sm text-gray-500 mt-2">Employee ID: {user.employeeId}</p>
+              {user.staffEmployeeId && (
+                <p className="text-sm text-gray-500 mt-2">Employee ID: {user.staffEmployeeId}</p>
               )}
             </div>
 
