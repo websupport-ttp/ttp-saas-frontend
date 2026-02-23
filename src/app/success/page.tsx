@@ -143,11 +143,13 @@ export default function UniversalSuccessPageRoute() {
       }
     } catch (error) {
       console.error(`❌ Network error verifying payment for ${service}:`, error)
-      console.error(`🔍 Error details:`, {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      })
+      if (error instanceof Error) {
+        console.error(`🔍 Error details:`, {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        })
+      }
     }
   }
 
