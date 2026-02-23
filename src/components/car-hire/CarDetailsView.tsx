@@ -111,14 +111,16 @@ export default function CarDetailsView({
           </div>
           
           {/* Additional Features */}
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {car.features.filter(f => f.included).map((feature) => (
-              <div key={feature.id} className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                <span className="text-sm text-gray-700">{feature.name}</span>
-              </div>
-            ))}
-          </div>
+          {car.features && Array.isArray(car.features) && car.features.length > 0 && typeof car.features[0] === 'object' && (
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {(car.features as any[]).filter(f => typeof f === 'object' && f.included).map((feature: any) => (
+                <div key={feature.id} className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  <span className="text-sm text-gray-700">{feature.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Location and Hours */}
