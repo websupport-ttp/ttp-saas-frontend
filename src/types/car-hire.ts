@@ -6,18 +6,24 @@
 export interface CarRental {
   id: string;
   name: string;
+  brand?: string;
+  model?: string;
+  year?: number;
   type: 'economy' | 'compact' | 'midsize' | 'fullsize' | 'luxury' | 'suv';
   capacity: number;
   doors: number;
   transmission: 'automatic' | 'manual';
-  features: CarFeature[];
+  fuelType?: 'petrol' | 'diesel' | 'electric' | 'hybrid';
+  features?: CarFeature[];
   pricePerDay: number;
-  supplier: CarSupplier;
+  currency?: string;
+  supplier?: CarSupplier;
   image: string;
-  rating: number;
-  fuelPolicy: 'full-to-full' | 'full-to-empty' | 'same-to-same';
-  mileage: 'unlimited' | 'limited';
-  airConditioning: boolean;
+  images?: string[];
+  rating?: number;
+  fuelPolicy?: 'full-to-full' | 'full-to-empty' | 'same-to-same';
+  mileage?: 'unlimited' | 'limited';
+  airConditioning?: boolean;
 }
 
 // Car feature interface
