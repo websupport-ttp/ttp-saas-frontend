@@ -112,11 +112,13 @@ export default function CarCard({ car, onSelect, className = '' }: CarCardProps)
         </div>
 
         {/* Fuel Policy */}
-        <div className="mb-4">
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-            {car.fuelPolicy.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-          </span>
-        </div>
+        {car.fuelPolicy && (
+          <div className="mb-4">
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+              {car.fuelPolicy.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            </span>
+          </div>
+        )}
 
         {/* Price and Book Button */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
