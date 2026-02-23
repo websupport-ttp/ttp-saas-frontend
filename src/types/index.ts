@@ -172,6 +172,7 @@ export interface SearchFormData {
   applicants?: string;
   visaType?: string;
   travelPurpose?: string;
+  urgency?: string;
 }
 
 // Form field types
