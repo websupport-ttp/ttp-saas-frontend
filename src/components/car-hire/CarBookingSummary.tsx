@@ -58,7 +58,7 @@ export default function CarBookingSummary({
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="font-semibold text-gray-900 truncate">{car.name}</h4>
-          <p className="text-sm text-gray-600">{car.supplier.name}</p>
+          <p className="text-sm text-gray-600">{car.supplier?.name || 'The Travel Place'}</p>
           <p className="text-sm text-gray-600">{car.capacity} passengers • {car.transmission}</p>
         </div>
       </div>

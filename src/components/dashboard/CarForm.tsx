@@ -72,8 +72,8 @@ export default function CarForm({ car, onClose, user }: CarFormProps) {
         location: car.location,
         availability: car.availability,
         registrationNumber: car.registrationNumber || '',
-        supplierName: car.supplier.name,
-        supplierRating: car.supplier.rating,
+        supplierName: car.supplier?.name || 'The Travel Place',
+        supplierRating: car.supplier?.rating || 4.5,
       });
       if (car.image) {
         setImagePreview(car.image);

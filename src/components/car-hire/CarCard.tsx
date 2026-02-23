@@ -54,7 +54,7 @@ export default function CarCard({ car, onSelect, className = '' }: CarCardProps)
             {car.name}
           </h3>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">{car.supplier.name}</span>
+            <span className="text-sm text-gray-600">{car.supplier?.name || 'The Travel Place'}</span>
             <div className="flex items-center">
               <div className="flex items-center">
                 {[...Array(5)].map((_, i) => (

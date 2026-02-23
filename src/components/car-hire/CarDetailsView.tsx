@@ -93,7 +93,7 @@ export default function CarDetailsView({
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute bottom-4 left-4 text-white">
           <h2 className="text-2xl font-bold">{car.name}</h2>
-          <p className="text-lg opacity-90">{car.supplier.name}</p>
+          <p className="text-lg opacity-90">{car.supplier?.name || 'The Travel Place'}</p>
         </div>
       </div>
 
@@ -125,10 +125,10 @@ export default function CarDetailsView({
         <div className="mb-8 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Pickup Location</h3>
           <div className="space-y-2">
-            <p className="text-gray-700 font-medium">{car.supplier.location}</p>
+            <p className="text-gray-700 font-medium">{car.supplier?.location || car.location || 'Lagos, Nigeria'}</p>
             <div className="text-sm text-gray-600">
-              <p><span className="font-medium">Weekdays:</span> {car.supplier.hoursOfOperation.weekdays}</p>
-              <p><span className="font-medium">Weekends:</span> {car.supplier.hoursOfOperation.weekends}</p>
+              <p><span className="font-medium">Weekdays:</span> {car.supplier?.hoursOfOperation?.weekdays || '8:00 AM - 6:00 PM'}</p>
+              <p><span className="font-medium">Weekends:</span> {car.supplier?.hoursOfOperation?.weekends || '9:00 AM - 5:00 PM'}</p>
             </div>
           </div>
         </div>
