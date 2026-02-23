@@ -17,13 +17,14 @@ interface Car {
   year: number;
   type: string;
   capacity: number;
+  doors?: number;
   transmission: string;
   pricePerDay: number;
   image?: string;
   location: string;
   availability: boolean;
   registrationNumber?: string;
-  supplier: {
+  supplier?: {
     name: string;
     rating: number;
   };
