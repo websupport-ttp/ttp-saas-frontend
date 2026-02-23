@@ -29,6 +29,10 @@ export interface User {
   staffClearanceLevel?: StaffClearanceLevel;
   staffDepartment?: string;
   staffEmployeeId?: string;
+  profilePicture?: {
+    url: string;
+    publicId: string;
+  };
 }
 
 export interface DashboardPermissions {

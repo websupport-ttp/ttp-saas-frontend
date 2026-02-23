@@ -6,10 +6,12 @@ import { User, getDashboardPermissions } from '@/lib/auth/permissions';
 
 interface DashboardSidebarProps {
   user: User;
+  isCollapsed: boolean;
+  onToggle: () => void;
 }
 
-export default function DashboardSidebar({ user }: DashboardSidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function DashboardSidebar({ user, isCollapsed, onToggle }: DashboardSidebarProps) {
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const permissions = getDashboardPermissions(user);
@@ -82,6 +84,9 @@ export default function DashboardSidebar({ user }: DashboardSidebarProps) {
     if (href === '/dashboard') {
       return pathname === '/dashboard';
     }
+    if (href === '/dashboard/admin') {
+      return pathname === '/dashboard/admin';
+    }
     return pathname?.startsWith(href);
   };
 
@@ -89,7 +94,7 @@ export default function DashboardSidebar({ user }: DashboardSidebarProps) {
     <>
       {/* Mobile menu button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
         className="lg:hidden fixed bottom-4 right-4 z-50 bg-brand-red text-white p-3 rounded-full shadow-lg"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,20 +102,51 @@ export default function DashboardSidebar({ user }: DashboardSidebarProps) {
         </svg>
       </button>
 
-      {/* Overlay */}
-      {isOpen && (
+      {/* Mobile overlay */}
+      {isMobileOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsOpen(false)}
+          onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out z-40 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 overflow-y-auto`}
+        className={`fixed top-0 left-0 h-full bg-white border-r border-gray-200 transform transition-all duration-300 ease-in-out z-40 ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 overflow-y-auto ${
+          isCollapsed ? 'lg:w-20' : 'lg:w-64'
+        }`}
       >
+        {/* Collapse toggle button - Desktop only */}
+        <div className="hidden lg:flex items-center justify-between h-16 px-4 border-b border-gray-200">
+          {!isCollapsed && (
+            <span className="text-lg font-semibold text-gray-900">Menu</span>
+          )}
+          <button
+            onClick={onToggle}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <svg
+              className={`w-5 h-5 text-gray-600 transition-transform ${
+                isCollapsed ? 'rotate-180' : ''
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Navigation */}
         <nav className="p-4 space-y-2">
           {navigation
             .filter((item) => item.show)
@@ -119,16 +155,19 @@ export default function DashboardSidebar({ user }: DashboardSidebarProps) {
                 key={item.name}
                 onClick={() => {
                   router.push(item.href);
-                  setIsOpen(false);
+                  setIsMobileOpen(false);
                 }}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                className={`w-full flex items-center ${
+                  isCollapsed ? 'justify-center' : 'space-x-3'
+                } px-4 py-3 rounded-lg transition-colors ${
                   isActive(item.href)
                     ? 'bg-brand-red text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
+                title={isCollapsed ? item.name : undefined}
               >
                 {item.icon}
-                <span className="font-medium">{item.name}</span>
+                {!isCollapsed && <span className="font-medium">{item.name}</span>}
               </button>
             ))}
         </nav>

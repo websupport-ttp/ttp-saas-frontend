@@ -9,7 +9,9 @@ import {
   StyledAutocompleteInput,
   StyledPassengerSelector,
   StyledRoomSelector,
-  StyledTripTypeSelector
+  StyledTripTypeSelector,
+  StyledVisaTypeSelector,
+  StyledProcessingSpeedSelector
 } from './styled-popovers';
 import { TravelerSelector, TravelerCounts } from './TravelerSelector';
 import TimeSelector from './TimeSelector';
@@ -21,7 +23,7 @@ interface FieldConfig {
   key: string;
   placeholder: string;
   icon?: string;
-  type: 'text' | 'date' | 'autocomplete' | 'passenger-selector' | 'traveler-selector' | 'room-selector' | 'select' | 'trip-type-selector' | 'time-selector' | 'simple-passenger-selector';
+  type: 'text' | 'date' | 'autocomplete' | 'passenger-selector' | 'traveler-selector' | 'room-selector' | 'select' | 'trip-type-selector' | 'time-selector' | 'simple-passenger-selector' | 'visa-type-selector' | 'processing-speed-selector';
   autocompleteType?: 'airport' | 'location' | 'country';
   required: boolean;
   width: string;
@@ -141,43 +143,6 @@ const serviceConfig: Record<ServiceType, ServiceConfig> = {
     ],
     buttonText: 'Search',
   },
-  car: {
-    icon: '/images/car-icon.svg',
-    fields: [
-      {
-        key: 'location',
-        placeholder: 'Pickup location',
-        icon: '/images/arrival-icon.svg',
-        type: 'autocomplete' as const,
-        autocompleteType: 'location' as const,
-        required: true,
-        width: 'flex-1',
-        validation: (value: string) => value.length < 2 ? 'Please enter a valid pickup location' : null
-      },
-      {
-        key: 'pickup',
-        placeholder: 'Pickup',
-        type: 'date' as const,
-        required: true,
-        width: 'flex-1',
-        validation: (value: string) => {
-          const date = new Date(value);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          return date < today ? 'Pickup date cannot be in the past' : null;
-        }
-      },
-      {
-        key: 'drivers',
-        placeholder: '1 driver',
-        icon: '/images/person-icon.svg',
-        type: 'text' as const,
-        required: true,
-        width: 'flex-1'
-      },
-    ],
-    buttonText: 'Search',
-  },
   insurance: {
     icon: '/images/insurance-icon.svg',
     fields: [
@@ -220,57 +185,44 @@ const serviceConfig: Record<ServiceType, ServiceConfig> = {
     fields: [
       {
         key: 'destinationCountry',
-        placeholder: 'Destination Country',
-        icon: '/images/arrival-icon.svg',
+        placeholder: 'Where are you traveling to?',
+        icon: 'public',
         type: 'autocomplete' as const,
         autocompleteType: 'country' as const,
         required: true,
         width: 'flex-1',
-        validation: (value: string) => value.length < 2 ? 'Please select destination country' : null
+        validation: (value: string) => value.length < 2 ? 'Please select your destination country' : null
       },
       {
         key: 'visaType',
-        placeholder: 'Visa Type',
-        icon: '/images/service-icons/visa-application-icon.svg',
-        type: 'select' as const,
+        placeholder: 'Select visa category',
+        icon: 'description',
+        type: 'visa-type-selector' as const,
         required: true,
         width: 'flex-1',
-        options: [
-          { value: '', label: 'Select visa type' },
-          { value: 'Tourist', label: 'Tourist Visa' },
-          { value: 'Business', label: 'Business Visa' },
-          { value: 'Student', label: 'Student Visa' },
-          { value: 'Work', label: 'Work Visa' },
-          { value: 'Transit', label: 'Transit Visa' }
-        ],
         defaultValue: ''
       },
       {
         key: 'nationality',
-        placeholder: 'Your Nationality',
-        icon: '/images/arrival-icon.svg',
+        placeholder: 'Your country of citizenship',
+        icon: 'flag',
         type: 'autocomplete' as const,
         autocompleteType: 'country' as const,
         required: true,
         width: 'flex-1',
-        validation: (value: string) => value.length < 2 ? 'Please enter your nationality' : null
+        validation: (value: string) => value.length < 2 ? 'Please select your nationality' : null
       },
       {
         key: 'urgency',
-        placeholder: 'Processing Speed',
-        icon: '/images/clock-icon.svg',
-        type: 'select' as const,
+        placeholder: 'Choose processing speed',
+        icon: 'schedule',
+        type: 'processing-speed-selector' as const,
         required: true,
         width: 'flex-1',
-        options: [
-          { value: 'Standard', label: 'Standard (2-4 weeks)' },
-          { value: 'Express', label: 'Express (1-2 weeks)' },
-          { value: 'Super Express', label: 'Super Express (3-5 days)' }
-        ],
         defaultValue: 'Standard'
       },
     ],
-    buttonText: 'Get Started',
+    buttonText: 'Begin Application',
   },
   'visa-application': {
     icon: '/images/visa-icon.svg',
@@ -311,17 +263,17 @@ const serviceConfig: Record<ServiceType, ServiceConfig> = {
     fields: [
       {
         key: 'pickupAddress',
-        placeholder: 'Pick up address',
+        placeholder: 'Where should we pick you up?',
         icon: '/images/location-icon.svg',
         type: 'autocomplete' as const,
         autocompleteType: 'location' as const,
         required: true,
         width: 'flex-1',
-        validation: (value: string) => value.length < 2 ? 'Please enter a valid pickup address' : null
+        validation: (value: string) => value.length < 2 ? 'Please enter a valid pickup location' : null
       },
       {
         key: 'pickupDate',
-        placeholder: 'Pick up date',
+        placeholder: 'When do you need the car?',
         icon: '/images/calendar-icon.svg',
         type: 'date' as const,
         required: true,
@@ -330,12 +282,12 @@ const serviceConfig: Record<ServiceType, ServiceConfig> = {
           const date = new Date(value);
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          return date < today ? 'Pick up date cannot be in the past' : null;
+          return date < today ? 'Pickup date cannot be in the past' : null;
         }
       },
       {
         key: 'pickupTime',
-        placeholder: 'Pick up time',
+        placeholder: 'What time works best?',
         icon: '/images/clock-icon.svg',
         type: 'time-selector' as const,
         required: true,
@@ -344,24 +296,24 @@ const serviceConfig: Record<ServiceType, ServiceConfig> = {
       },
       {
         key: 'dropoffAddress',
-        placeholder: 'Drop off address',
+        placeholder: 'Where will you return the car?',
         icon: '/images/location-icon.svg',
         type: 'autocomplete' as const,
         autocompleteType: 'location' as const,
         required: true,
         width: 'flex-1',
-        validation: (value: string) => value.length < 2 ? 'Please enter a valid drop off address' : null
+        validation: (value: string) => value.length < 2 ? 'Please enter a valid drop-off location' : null
       },
       {
         key: 'passengers',
-        placeholder: '1 passenger',
+        placeholder: 'How many passengers?',
         icon: '/images/person-icon.svg',
         type: 'simple-passenger-selector' as const,
         required: true,
         width: 'flex-1'
       },
     ],
-    buttonText: 'Search Cars',
+    buttonText: 'Find Available Cars',
   },
   car: {
     icon: '/images/car-icon.svg',
@@ -684,8 +636,8 @@ export default function SearchForm({
     config.fields.forEach(field => {
       const value = formData[field.key as keyof SearchFormData] || '';
 
-      // Skip validation for passenger-selector, traveler-selector, trip-type-selector, time-selector and simple-passenger-selector as they're handled separately
-      if (field.type === 'passenger-selector' || field.type === 'traveler-selector' || field.type === 'trip-type-selector' || field.type === 'time-selector' || field.type === 'simple-passenger-selector') {
+      // Skip validation for passenger-selector, traveler-selector, trip-type-selector, time-selector, simple-passenger-selector, visa-type-selector, and processing-speed-selector as they're handled separately
+      if (field.type === 'passenger-selector' || field.type === 'traveler-selector' || field.type === 'trip-type-selector' || field.type === 'time-selector' || field.type === 'simple-passenger-selector' || field.type === 'visa-type-selector' || field.type === 'processing-speed-selector') {
         return;
       }
 
@@ -768,26 +720,34 @@ export default function SearchForm({
             return (
               <div
                 key={field.key}
-                className={`relative flex-1 min-w-0 border-white ${
+                className={`relative flex-1 min-w-0 border-white h-full ${
                   isLastField 
                     ? 'border-b-0 md:border-r-0' 
                     : 'border-b md:border-b-0 md:border-r'
                 } form-field`}
                 style={{ overflow: 'visible' }}
               >
-                <div className="flex items-center px-3 py-3 sm:py-4 min-w-0 w-full">
+                <div className="flex items-center px-3 py-3 sm:py-4 min-w-0 w-full h-full">
                   {/* Show icon for non-date fields only */}
                   {field.icon && !['date'].includes(field.type || '') && (
-                    <Image
-                      src={field.icon as string}
-                      alt={`${field.placeholder} icon`}
-                      width={14}
-                      height={14}
-                      className="w-3.5 h-3.5 mr-2 flex-shrink-0 opacity-70"
-                      style={{
-                        filter: 'brightness(0) invert(0)'
-                      }}
-                    />
+                    <>
+                      {field.icon.startsWith('/') ? (
+                        <Image
+                          src={field.icon as string}
+                          alt={`${field.placeholder} icon`}
+                          width={14}
+                          height={14}
+                          className="w-3.5 h-3.5 mr-2 flex-shrink-0 opacity-70"
+                          style={{
+                            filter: 'brightness(0) invert(0)'
+                          }}
+                        />
+                      ) : (
+                        <span className="material-icons text-brand-blue opacity-70 mr-2 flex-shrink-0" style={{ fontSize: '18px' }}>
+                          {field.icon}
+                        </span>
+                      )}
+                    </>
                   )}
 
                   {field.type === 'date' ? (
@@ -905,23 +865,58 @@ export default function SearchForm({
                         className="w-full"
                       />
                     </div>
+                  ) : field.type === 'visa-type-selector' ? (
+                    <div className="flex-1">
+                      <StyledVisaTypeSelector
+                        value={fieldValue || field.defaultValue || ''}
+                        onChange={(value) => {
+                          handleInputChange(field.key, value)
+                          handleInputBlur(field.key, value)
+                        }}
+                        placeholder={field.placeholder}
+                        error={!!(fieldError && isFieldTouched)}
+                        className="w-full"
+                      />
+                    </div>
+                  ) : field.type === 'processing-speed-selector' ? (
+                    <div className="flex-1">
+                      <StyledProcessingSpeedSelector
+                        value={fieldValue || field.defaultValue || ''}
+                        onChange={(value) => {
+                          handleInputChange(field.key, value)
+                          handleInputBlur(field.key, value)
+                        }}
+                        placeholder={field.placeholder}
+                        error={!!(fieldError && isFieldTouched)}
+                        className="w-full"
+                      />
+                    </div>
                   ) : field.type === 'select' ? (
-                    <select
-                      value={fieldValue || field.defaultValue || ''}
-                      onChange={(e) => handleInputChange(field.key, e.target.value)}
-                      onBlur={(e) => handleInputBlur(field.key, e.target.value)}
-                      className={`flex-1 bg-transparent text-brand-blue outline-none text-sm sm:text-base font-medium cursor-pointer ${fieldError && isFieldTouched ? 'border-b-2 border-red-400' : ''}`}
-                      aria-label={field.placeholder}
-                      aria-invalid={!!(fieldError && isFieldTouched)}
-                      aria-describedby={fieldError && isFieldTouched ? `${field.key}-error` : undefined}
-                      required={field.required}
-                    >
-                      {field.options?.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex-1 relative">
+                      <select
+                        value={fieldValue || field.defaultValue || ''}
+                        onChange={(e) => handleInputChange(field.key, e.target.value)}
+                        onBlur={(e) => handleInputBlur(field.key, e.target.value)}
+                        className={`w-full bg-transparent text-brand-blue outline-none text-sm sm:text-base font-medium cursor-pointer appearance-none pr-8 ${fieldError && isFieldTouched ? 'text-red-500' : ''}`}
+                        style={{
+                          paddingRight: '2rem',
+                          backgroundImage: 'none'
+                        }}
+                        aria-label={field.placeholder}
+                        aria-invalid={!!(fieldError && isFieldTouched)}
+                        aria-describedby={fieldError && isFieldTouched ? `${field.key}-error` : undefined}
+                        required={field.required}
+                      >
+                        {field.options?.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="material-icons absolute right-0 top-1/2 -translate-y-1/2 text-brand-blue opacity-70 pointer-events-none" style={{ fontSize: '20px' }}>
+                        expand_more
+                      </span>
+                    </div>
                   ) : (
                     <input
                       type={field.type || 'text'}
