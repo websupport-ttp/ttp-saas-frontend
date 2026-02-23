@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import { User, getDashboardPermissions } from '@/lib/auth/permissions';
 import DashboardLayout from './DashboardLayout';
 import BookingManagement from './BookingManagement';
+import ManagementFinancialDashboard from './ManagementFinancialDashboard';
 
 interface ManagerDashboardProps {
   user: User;
 }
 
 export default function ManagerDashboard({ user }: ManagerDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'bookings' | 'reports' | 'team'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'bookings' | 'reports' | 'team' | 'financial'>('overview');
   const [stats, setStats] = useState({
     teamMembers: 0,
     completedToday: 0,
@@ -52,6 +53,8 @@ export default function ManagerDashboard({ user }: ManagerDashboardProps) {
     switch (activeTab) {
       case 'bookings':
         return <BookingManagement user={user} permissions={permissions} />;
+      case 'financial':
+        return <ManagementFinancialDashboard />;
       case 'reports':
         return (
           <div className="bg-white rounded-lg shadow p-6">
@@ -70,7 +73,7 @@ export default function ManagerDashboard({ user }: ManagerDashboardProps) {
         return (
           <div>
             {/* Welcome Section */}
-            <div className="bg-gradient-to-r from-green-600 to-green-800 rounded-lg shadow-lg p-6 mb-6 text-white">
+            <div className="bg-gradient-to-r from-brand-blue to-brand-blue-800 rounded-lg shadow-lg p-6 mb-6 text-white">
               <h2 className="text-2xl font-bold">Manager Dashboard</h2>
               <p className="mt-1 opacity-90">Welcome back, {user.firstName}!</p>
               <p className="text-sm mt-2 opacity-75">Team oversight and performance tracking</p>
@@ -80,8 +83,8 @@ export default function ManagerDashboard({ user }: ManagerDashboardProps) {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
-                  <div className="p-3 bg-blue-100 rounded-lg">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 bg-brand-blue/10 rounded-lg">
+                    <svg className="w-6 h-6 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
@@ -108,8 +111,8 @@ export default function ManagerDashboard({ user }: ManagerDashboardProps) {
 
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
-                  <div className="p-3 bg-yellow-100 rounded-lg">
-                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 bg-brand-orange/10 rounded-lg">
+                    <svg className="w-6 h-6 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
@@ -122,8 +125,8 @@ export default function ManagerDashboard({ user }: ManagerDashboardProps) {
 
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
-                  <div className="p-3 bg-purple-100 rounded-lg">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 bg-brand-red/10 rounded-lg">
+                    <svg className="w-6 h-6 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
                   </div>
@@ -204,6 +207,17 @@ export default function ManagerDashboard({ user }: ManagerDashboardProps) {
             }`}
           >
             Overview
+          </button>
+
+          <button
+            onClick={() => setActiveTab('financial')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'financial'
+                ? 'border-green-600 text-green-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Financial Stats
           </button>
 
           <button

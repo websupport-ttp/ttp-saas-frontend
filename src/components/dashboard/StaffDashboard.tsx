@@ -53,9 +53,9 @@ export default function StaffDashboard({ user }: StaffDashboardProps) {
     const level = user.staffClearanceLevel || 1;
     const colors = {
       1: 'bg-gray-100 text-gray-800',
-      2: 'bg-blue-100 text-blue-800',
+      2: 'bg-brand-blue/10 text-brand-blue',
       3: 'bg-green-100 text-green-800',
-      4: 'bg-purple-100 text-purple-800',
+      4: 'bg-brand-red/10 text-brand-red',
     };
     return (
       <span className={`px-3 py-1 rounded-full text-sm font-medium ${colors[level as keyof typeof colors]}`}>
@@ -93,8 +93,8 @@ export default function StaffDashboard({ user }: StaffDashboardProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
-                  <div className="p-3 bg-blue-100 rounded-lg">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 bg-brand-blue/10 rounded-lg">
+                    <svg className="w-6 h-6 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </div>
@@ -108,8 +108,8 @@ export default function StaffDashboard({ user }: StaffDashboardProps) {
               {permissions.canManageInventory && (
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center">
-                    <div className="p-3 bg-green-100 rounded-lg">
-                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-3 bg-brand-orange/10 rounded-lg">
+                      <svg className="w-6 h-6 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                       </svg>
                     </div>
@@ -123,8 +123,8 @@ export default function StaffDashboard({ user }: StaffDashboardProps) {
 
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
-                  <div className="p-3 bg-purple-100 rounded-lg">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 bg-brand-red/10 rounded-lg">
+                    <svg className="w-6 h-6 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>

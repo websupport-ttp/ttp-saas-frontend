@@ -189,7 +189,7 @@ export default function LoginOverlay({
           email: signupData.email,
           phoneNumber: fullPhoneNumber,
           password: signupData.password,
-          role: 'User',
+          role: 'Customer', // Changed from 'User' to match backend enum
         }),
       })
 

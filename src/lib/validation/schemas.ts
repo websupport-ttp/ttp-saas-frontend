@@ -6,7 +6,11 @@
 import { z } from 'zod';
 
 // Common validation patterns
-const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+// More flexible phone regex that accepts:
+// - International format: +2348012345678
+// - Local format with leading zero: 08012345678
+// - Without country code: 8012345678
+const phoneRegex = /^\+?[0-9]{7,15}$/;
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
 const nameRegex = /^[a-zA-Z\s'-]+$/;
 const airportCodeRegex = /^[A-Z]{3}$/;
@@ -24,7 +28,7 @@ export const emailSchema = z
 
 export const phoneSchema = z
   .string()
-  .regex(phoneRegex, 'Invalid phone number format (E.164)')
+  .regex(phoneRegex, 'Invalid phone number format. Use format: +2348012345678 or 08012345678')
   .min(7, 'Phone number must be at least 7 digits')
   .max(15, 'Phone number cannot exceed 15 digits');
 

@@ -220,17 +220,34 @@ const serviceConfig: Record<ServiceType, ServiceConfig> = {
     fields: [
       {
         key: 'destinationCountry',
-        placeholder: 'Destination',
+        placeholder: 'Destination Country',
         icon: '/images/arrival-icon.svg',
         type: 'autocomplete' as const,
         autocompleteType: 'country' as const,
         required: true,
         width: 'flex-1',
-        validation: (value: string) => value.length < 2 ? 'Please enter a valid country' : null
+        validation: (value: string) => value.length < 2 ? 'Please select destination country' : null
+      },
+      {
+        key: 'visaType',
+        placeholder: 'Visa Type',
+        icon: '/images/service-icons/visa-application-icon.svg',
+        type: 'select' as const,
+        required: true,
+        width: 'flex-1',
+        options: [
+          { value: '', label: 'Select visa type' },
+          { value: 'Tourist', label: 'Tourist Visa' },
+          { value: 'Business', label: 'Business Visa' },
+          { value: 'Student', label: 'Student Visa' },
+          { value: 'Work', label: 'Work Visa' },
+          { value: 'Transit', label: 'Transit Visa' }
+        ],
+        defaultValue: ''
       },
       {
         key: 'nationality',
-        placeholder: 'Nationality',
+        placeholder: 'Your Nationality',
         icon: '/images/arrival-icon.svg',
         type: 'autocomplete' as const,
         autocompleteType: 'country' as const,
@@ -239,15 +256,21 @@ const serviceConfig: Record<ServiceType, ServiceConfig> = {
         validation: (value: string) => value.length < 2 ? 'Please enter your nationality' : null
       },
       {
-        key: 'applicants',
-        placeholder: '1 applicant',
-        icon: '/images/person-icon.svg',
-        type: 'text' as const,
+        key: 'urgency',
+        placeholder: 'Processing Speed',
+        icon: '/images/clock-icon.svg',
+        type: 'select' as const,
         required: true,
-        width: 'flex-1'
+        width: 'flex-1',
+        options: [
+          { value: 'Standard', label: 'Standard (2-4 weeks)' },
+          { value: 'Express', label: 'Express (1-2 weeks)' },
+          { value: 'Super Express', label: 'Super Express (3-5 days)' }
+        ],
+        defaultValue: 'Standard'
       },
     ],
-    buttonText: 'Apply',
+    buttonText: 'Get Started',
   },
   'visa-application': {
     icon: '/images/visa-icon.svg',

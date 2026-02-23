@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import ServiceTabs from '../ui/ServiceTabs'
-
+import { cmsService, HeroSlide } from '@/lib/services/cms-service'
 
 // Inline SVG icons
 const ChevronLeft = ({ className }: { className?: string }) => (
@@ -24,43 +24,67 @@ const ArrowRight = ({ className }: { className?: string }) => (
   </svg>
 )
 
-const heroSlides = [
+// Default slides as fallback
+const defaultSlides = [
   {
-    id: 1,
+    _id: '1',
     title: "Discover Amazing Destinations",
     subtitle: "Explore the world's most beautiful places",
-    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
-    alt: "Beautiful mountain landscape with lake reflection at sunset",
+    image: { url: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" },
+    order: 0,
+    isActive: true,
   },
   {
-    id: 2,
+    _id: '2',
     title: "Adventure Awaits You",
     subtitle: "Create memories that last a lifetime",
-    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
-    alt: "Scenic mountain valley with winding river and forest",
+    image: { url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" },
+    order: 1,
+    isActive: true,
   },
   {
-    id: 3,
+    _id: '3',
     title: "Your Journey Starts Here",
     subtitle: "Plan your perfect getaway with us",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
-    alt: "Tropical beach with crystal clear water and palm trees",
+    image: { url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" },
+    order: 2,
+    isActive: true,
   },
 ]
 
 export default function HeroSection() {
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultSlides)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!isAutoPlaying) return
+    fetchSlides()
+  }, [])
+
+  const fetchSlides = async () => {
+    try {
+      const response = await cmsService.getHeroSlides(true)
+      if (response.data && response.data.length > 0) {
+        setHeroSlides(response.data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch hero slides:', error)
+      // Keep using default slides
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!isAutoPlaying || heroSlides.length === 0) return
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [isAutoPlaying])
+  }, [isAutoPlaying, heroSlides.length])
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index)
@@ -85,13 +109,13 @@ export default function HeroSection() {
       {/* Background Images */}
       {heroSlides.map((slide, index) => (
         <div
-          key={slide.id}
+          key={slide._id}
           className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'
             }`}
         >
           <Image
-            src={slide.image}
-            alt={slide.alt}
+            src={slide.image?.url || defaultSlides[0].image.url}
+            alt={slide.title}
             fill
             className="object-cover"
             priority={index === 0}

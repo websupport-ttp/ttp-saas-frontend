@@ -37,7 +37,15 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           {/* Logo and Home Button */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-brand-red">The Travel Place</h1>
+              <img 
+                src="/images/logo.svg" 
+                alt="The Travel Place" 
+                className="h-8 w-auto"
+                onError={(e) => {
+                  // Fallback to PNG if SVG fails
+                  e.currentTarget.src = '/images/logo.png';
+                }}
+              />
               <span className="ml-3 text-sm text-gray-500">Dashboard</span>
             </div>
             <button

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import SearchForm from './SearchForm'
 import { ServiceType, SearchFormData } from '@/types'
+import VisaRequestModal from '../visa/VisaRequestModal'
 
 const services = [
   { 
@@ -47,6 +48,8 @@ const services = [
 export default function ServiceTabs() {
   const [activeService, setActiveService] = useState<ServiceType>('flights')
   const [isSearching, setIsSearching] = useState(false)
+  const [showVisaModal, setShowVisaModal] = useState(false)
+  const [visaFormData, setVisaFormData] = useState<SearchFormData | null>(null)
   const router = useRouter()
 
   const handleTabClick = (serviceId: ServiceType, href: string, event: React.MouseEvent) => {
@@ -68,9 +71,17 @@ export default function ServiceTabs() {
     router.push(href)
   }
 
-  const handleSearch = (data: SearchFormData) => {
+  const handleSearch = async (data: SearchFormData) => {
     try {
       setIsSearching(true)
+      
+      // Special handling for visa assistance - show modal first
+      if (activeService === 'visa') {
+        setVisaFormData(data)
+        setShowVisaModal(true)
+        setIsSearching(false)
+        return
+      }
       
       // Save search data to localStorage
       localStorage.setItem(`travelplace_search_${activeService}`, JSON.stringify({
@@ -101,6 +112,48 @@ export default function ServiceTabs() {
       }
     } catch (error) {
       console.error('Search error:', error)
+      alert('An error occurred. Please try again.')
+      setIsSearching(false)
+    }
+  }
+
+  const handleVisaModalSubmit = async (contactData: { fullName: string; email: string; phone: string }) => {
+    if (!visaFormData) return
+
+    try {
+      setIsSearching(true)
+
+      // Create visa request
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/api/v1/visa-assistance/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          destinationCountry: visaFormData.destinationCountry,
+          visaType: visaFormData.visaType,
+          nationality: visaFormData.nationality,
+          urgency: visaFormData.urgency || 'Standard',
+          fullName: contactData.fullName,
+          email: contactData.email,
+          phone: contactData.phone,
+          travelPurpose: 'Tourism'
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setShowVisaModal(false)
+        // Navigate to application form
+        router.push(result.data.redirectUrl)
+      } else {
+        alert(result.message || 'Failed to create visa request')
+        setIsSearching(false)
+      }
+    } catch (error) {
+      console.error('Visa request error:', error)
+      alert('An error occurred. Please try again.')
       setIsSearching(false)
     }
   }
@@ -189,6 +242,17 @@ export default function ServiceTabs() {
           }}
         />
       </div>
+
+      {/* Visa Request Modal */}
+      <VisaRequestModal
+        isOpen={showVisaModal}
+        onClose={() => {
+          setShowVisaModal(false)
+          setIsSearching(false)
+        }}
+        onSubmit={handleVisaModalSubmit}
+        loading={isSearching}
+      />
     </div>
   )
 }
