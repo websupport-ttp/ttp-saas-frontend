@@ -85,11 +85,14 @@ export function filterCars(
     }
 
     // Features filter
-    if (filters.features && filters.features.length > 0) {
-      const carFeatureIds = car.features.filter(f => f.included).map(f => f.id);
-      const hasAllFeatures = filters.features.every(featureId => carFeatureIds.includes(featureId));
-      if (!hasAllFeatures) {
-        return false;
+    if (filters.features && filters.features.length > 0 && car.features && Array.isArray(car.features)) {
+      // Check if features is an array of objects with 'included' property
+      if (car.features.length > 0 && typeof car.features[0] === 'object' && 'included' in car.features[0]) {
+        const carFeatureIds = (car.features as any[]).filter(f => f.included).map(f => f.id);
+        const hasAllFeatures = filters.features.every(featureId => carFeatureIds.includes(featureId));
+        if (!hasAllFeatures) {
+          return false;
+        }
       }
     }
 
@@ -113,7 +116,7 @@ export function sortCars(
         comparison = a.pricePerDay - b.pricePerDay;
         break;
       case 'rating':
-        comparison = a.rating - b.rating;
+        comparison = (a.rating || 0) - (b.rating || 0);
         break;
       case 'capacity':
         comparison = a.capacity - b.capacity;
@@ -402,7 +405,7 @@ export const MOCK_CAR_RENTALS: CarRental[] = [
  * Get available car suppliers from mock data
  */
 export function getAvailableSuppliers(): string[] {
-  const suppliers = MOCK_CAR_RENTALS.map(car => car.supplier.name);
+  const suppliers = MOCK_CAR_RENTALS.map(car => car.supplier?.name || 'Unknown').filter(name => name !== 'Unknown');
   const uniqueSuppliers = Array.from(new Set(suppliers));
   return uniqueSuppliers.sort();
 }
