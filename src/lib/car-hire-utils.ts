@@ -75,7 +75,7 @@ export function filterCars(
     }
 
     // Supplier filter
-    if (filters.supplier && filters.supplier.length > 0 && !filters.supplier.includes(car.supplier.name)) {
+    if (filters.supplier && filters.supplier.length > 0 && !filters.supplier.includes(car.supplier?.name || '')) {
       return false;
     }
 
