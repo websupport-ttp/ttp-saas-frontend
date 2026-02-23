@@ -103,6 +103,8 @@ export interface CarExtra {
 // Car search criteria
 export interface CarSearchCriteria {
   location: string;
+  pickupAddress?: string;
+  dropoffAddress?: string;
   pickupDate: Date;
   returnDate: Date;
   passengerCount: number;
