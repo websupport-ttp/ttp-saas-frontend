@@ -253,7 +253,7 @@ export function getDashboardRoute(user: User | null): string {
   }
 
   if (role === UserRole.BUSINESS) return '/dashboard/business';
-  if (role === UserRole.CUSTOMER) return '/dashboard/customer';
+  if (role === UserRole.USER) return '/dashboard/customer';
   
   // Default fallback for any other roles
   return '/dashboard/customer';
