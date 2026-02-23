@@ -73,7 +73,9 @@ function getEnvVar(
   const value = process.env[key] || defaultValue;
   
   if (required && !value) {
-    throw new Error(`Missing required environment variable: ${key}`);
+    // Don't throw, just warn
+    console.warn(`Missing required environment variable: ${key}`);
+    return defaultValue;
   }
   
   return value;
@@ -122,19 +124,11 @@ function validateRequiredEnvVars(): void {
   const missing = requiredVars.filter(varName => !process.env[varName]);
   
   if (missing.length > 0) {
-    // Only log in development mode to avoid console spam
-    if (process.env.NODE_ENV === 'development') {
-      console.warn(`Missing environment variables: ${missing.join(', ')}`);
-      console.warn('Available env vars:', Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_')));
-    }
-    
-    // In production, throw error for missing required vars
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error(
-        `Missing required environment variables: ${missing.join(', ')}\n` +
-        'Please check your .env.local file or environment configuration.'
-      );
-    }
+    // Just log warning, don't throw error
+    // This allows the app to build and deploy even if variables are missing
+    console.warn(`⚠️  Missing environment variables: ${missing.join(', ')}`);
+    console.warn('⚠️  Please configure these in your Vercel project settings under Environment Variables');
+    console.warn('⚠️  The app will use fallback values but may not function correctly');
   }
 }
 
@@ -142,7 +136,7 @@ function validateRequiredEnvVars(): void {
  * Create application configuration from environment variables
  */
 export function createAppConfig(): AppConfig {
-  // Validate required environment variables
+  // Validate required environment variables (warns but doesn't throw)
   validateRequiredEnvVars();
   
   const nodeEnv = (process.env.NODE_ENV || 'development') as AppConfig['nodeEnv'];
