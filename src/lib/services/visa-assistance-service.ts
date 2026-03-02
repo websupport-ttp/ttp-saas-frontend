@@ -1,5 +1,5 @@
 // Visa Assistance API Service
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
 
 export interface VisaRequestData {
   destinationCountry: string;
@@ -78,21 +78,21 @@ class VisaAssistanceService {
   }
 
   async createVisaRequest(requestData: VisaRequestData) {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/visa-assistance/request`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/visa-assistance/request`, {
       method: 'POST',
       body: JSON.stringify(requestData),
     });
   }
 
   async submitApplication(applicationData: VisaApplicationData) {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/visa-assistance/applications`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/visa-assistance/applications`, {
       method: 'POST',
       body: JSON.stringify(applicationData),
     });
   }
 
   async getApplicationByReference(reference: string) {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/visa-assistance/applications/${reference}`);
+    return this.fetchWithAuth(`${API_BASE_URL}/visa-assistance/applications/${reference}`);
   }
 
   async getOfficerApplications(filters?: { status?: string; urgency?: string }) {
@@ -101,14 +101,14 @@ class VisaAssistanceService {
     if (filters?.urgency) params.append('urgency', filters.urgency);
 
     const queryString = params.toString();
-    const url = `${API_BASE_URL}/api/v1/visa-assistance/officer/applications${queryString ? `?${queryString}` : ''}`;
+    const url = `${API_BASE_URL}/visa-assistance/officer/applications${queryString ? `?${queryString}` : ''}`;
 
     return this.fetchWithAuth(url);
   }
 
   async addFollowUpNote(applicationId: string, followUp: FollowUpNote) {
     return this.fetchWithAuth(
-      `${API_BASE_URL}/api/v1/visa-assistance/applications/${applicationId}/follow-up`,
+      `${API_BASE_URL}/visa-assistance/applications/${applicationId}/follow-up`,
       {
         method: 'POST',
         body: JSON.stringify(followUp),
@@ -118,7 +118,7 @@ class VisaAssistanceService {
 
   async generatePaymentLink(applicationId: string, paymentData: PaymentLinkRequest) {
     return this.fetchWithAuth(
-      `${API_BASE_URL}/api/v1/visa-assistance/applications/${applicationId}/generate-payment-link`,
+      `${API_BASE_URL}/visa-assistance/applications/${applicationId}/generate-payment-link`,
       {
         method: 'POST',
         body: JSON.stringify(paymentData),
@@ -128,7 +128,7 @@ class VisaAssistanceService {
 
   async updateApplicationStatus(applicationId: string, status: string, notes?: string) {
     return this.fetchWithAuth(
-      `${API_BASE_URL}/api/v1/visa-assistance/applications/${applicationId}/status`,
+      `${API_BASE_URL}/visa-assistance/applications/${applicationId}/status`,
       {
         method: 'PUT',
         body: JSON.stringify({ status, notes }),
@@ -138,7 +138,7 @@ class VisaAssistanceService {
 
   async assignApplication(applicationId: string, officerId: string) {
     return this.fetchWithAuth(
-      `${API_BASE_URL}/api/v1/visa-assistance/applications/${applicationId}/assign`,
+      `${API_BASE_URL}/visa-assistance/applications/${applicationId}/assign`,
       {
         method: 'PUT',
         body: JSON.stringify({ officerId }),
@@ -148,3 +148,4 @@ class VisaAssistanceService {
 }
 
 export const visaAssistanceService = new VisaAssistanceService();
+

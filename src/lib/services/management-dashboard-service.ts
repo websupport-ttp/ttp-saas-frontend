@@ -88,10 +88,11 @@ class ManagementDashboardService {
     }
 
     const queryString = queryParams.toString();
-    const url = `${API_BASE_URL}/api/v1/dashboard/management/financial-stats${queryString ? `?${queryString}` : ''}`;
+    const url = `${API_BASE_URL}/dashboard/management/financial-stats${queryString ? `?${queryString}` : ''}`;
 
     return this.fetchWithAuth(url);
   }
 }
 
 export const managementDashboardService = new ManagementDashboardService();
+

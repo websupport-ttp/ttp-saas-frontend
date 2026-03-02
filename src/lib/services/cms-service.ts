@@ -1,5 +1,5 @@
 // CMS API Service
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
 
 export interface HeroSlide {
   _id?: string;
@@ -88,26 +88,26 @@ class CMSService {
 
   // Hero Slides
   async getHeroSlides(activeOnly = false): Promise<{ data: HeroSlide[] }> {
-    const url = `${API_BASE_URL}/api/v1/cms/hero-slides${activeOnly ? '?active=true' : ''}`;
+    const url = `${API_BASE_URL}/cms/hero-slides${activeOnly ? '?active=true' : ''}`;
     return this.fetchWithAuth(url);
   }
 
   async createHeroSlide(slide: Omit<HeroSlide, '_id'>): Promise<{ data: HeroSlide }> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/hero-slides`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/hero-slides`, {
       method: 'POST',
       body: JSON.stringify(slide),
     });
   }
 
   async updateHeroSlide(id: string, slide: Partial<HeroSlide>): Promise<{ data: HeroSlide }> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/hero-slides/${id}`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/hero-slides/${id}`, {
       method: 'PUT',
       body: JSON.stringify(slide),
     });
   }
 
   async deleteHeroSlide(id: string): Promise<void> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/hero-slides/${id}`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/hero-slides/${id}`, {
       method: 'DELETE',
     });
   }
@@ -118,26 +118,26 @@ class CMSService {
     if (activeOnly) params.append('active', 'true');
     if (category) params.append('category', category);
     
-    const url = `${API_BASE_URL}/api/v1/cms/hot-deals${params.toString() ? `?${params.toString()}` : ''}`;
+    const url = `${API_BASE_URL}/cms/hot-deals${params.toString() ? `?${params.toString()}` : ''}`;
     return this.fetchWithAuth(url);
   }
 
   async createHotDeal(deal: Omit<HotDeal, '_id'>): Promise<{ data: HotDeal }> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/hot-deals`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/hot-deals`, {
       method: 'POST',
       body: JSON.stringify(deal),
     });
   }
 
   async updateHotDeal(id: string, deal: Partial<HotDeal>): Promise<{ data: HotDeal }> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/hot-deals/${id}`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/hot-deals/${id}`, {
       method: 'PUT',
       body: JSON.stringify(deal),
     });
   }
 
   async deleteHotDeal(id: string): Promise<void> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/hot-deals/${id}`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/hot-deals/${id}`, {
       method: 'DELETE',
     });
   }
@@ -149,37 +149,37 @@ class CMSService {
     if (category) params.append('category', category);
     if (featuredOnly) params.append('featured', 'true');
     
-    const url = `${API_BASE_URL}/api/v1/cms/articles${params.toString() ? `?${params.toString()}` : ''}`;
+    const url = `${API_BASE_URL}/cms/articles${params.toString() ? `?${params.toString()}` : ''}`;
     return this.fetchWithAuth(url);
   }
 
   async getArticleBySlug(slug: string): Promise<{ data: Article }> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/articles/${slug}`);
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/articles/${slug}`);
   }
 
   async createArticle(article: Omit<Article, '_id' | 'author' | 'viewCount'>): Promise<{ data: Article }> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/articles`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/articles`, {
       method: 'POST',
       body: JSON.stringify(article),
     });
   }
 
   async updateArticle(id: string, article: Partial<Article>): Promise<{ data: Article }> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/articles/${id}`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/articles/${id}`, {
       method: 'PUT',
       body: JSON.stringify(article),
     });
   }
 
   async deleteArticle(id: string): Promise<void> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/articles/${id}`, {
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/articles/${id}`, {
       method: 'DELETE',
     });
   }
 
   // Google Reviews
   async getGoogleReviews(): Promise<{ data: GoogleReview[] }> {
-    return this.fetchWithAuth(`${API_BASE_URL}/api/v1/cms/google-reviews`);
+    return this.fetchWithAuth(`${API_BASE_URL}/cms/google-reviews`);
   }
 }
 
