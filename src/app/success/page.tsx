@@ -109,10 +109,15 @@ export default function UniversalSuccessPageRoute() {
           verificationEndpoint = '/api/v1/products/hotels/verify-payment'
       }
 
-      console.log(`🎯 Calling endpoint: http://localhost:8080${verificationEndpoint}`)
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1'
+      const fullUrl = verificationEndpoint.startsWith('http') 
+        ? verificationEndpoint 
+        : `${apiBaseUrl.replace('/api/v1', '')}${verificationEndpoint}`
+      
+      console.log(`🎯 Calling endpoint: ${fullUrl}`)
       console.log(`📤 Request payload:`, { reference })
 
-      const response = await fetch(`http://localhost:8080${verificationEndpoint}`, {
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
