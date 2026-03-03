@@ -137,7 +137,7 @@ class AuthenticationService implements AuthService {
   public async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
       const response: ApiResponse<AuthResponse> = await apiClient.post(
-        '/api/v1/auth/login',
+        '/auth/login',
         credentials,
         { requiresAuth: false }
       );
@@ -174,7 +174,7 @@ class AuthenticationService implements AuthService {
   public async register(userData: RegisterData): Promise<AuthResponse> {
     try {
       const response: ApiResponse<AuthResponse> = await apiClient.post(
-        '/api/v1/auth/register',
+        '/auth/register',
         userData,
         { requiresAuth: false }
       );
@@ -216,7 +216,7 @@ class AuthenticationService implements AuthService {
     try {
       // Call logout endpoint if authenticated
       if (this.isAuthenticated()) {
-        await apiClient.post('/api/v1/auth/logout', {
+        await apiClient.post('/auth/logout', {
           refreshToken: this.refreshTokenValue
         });
       }
@@ -239,7 +239,7 @@ class AuthenticationService implements AuthService {
 
     try {
       const response: ApiResponse<{ token: string; refreshToken: string }> = await apiClient.post(
-        '/api/v1/auth/refresh',
+        '/auth/refresh',
         { refreshToken: this.refreshTokenValue },
         { requiresAuth: false }
       );
