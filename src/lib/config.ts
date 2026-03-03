@@ -159,7 +159,7 @@ export function createAppConfig(): AppConfig {
     gtmId: getEnvVar('NEXT_PUBLIC_GTM_ID'),
     
     // API Configuration (Required)
-    apiBaseUrl: getEnvVar('NEXT_PUBLIC_API_BASE_URL', 'http://localhost:8080/api/v1', false) || 'http://localhost:8080/api/v1',
+    apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || getEnvVar('NEXT_PUBLIC_API_BASE_URL', 'http://localhost:8080/api/v1', false) || 'http://localhost:8080/api/v1',
     apiTimeout: getNumberEnvVar('NEXT_PUBLIC_API_TIMEOUT', 30000) || 30000,
     apiKey: getEnvVar('API_KEY'),
     

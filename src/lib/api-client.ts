@@ -535,7 +535,7 @@ class ApiClient {
 // Create and configure API client instance
 const createApiClient = (): ApiClient => {
   const config: ApiClientConfig = {
-    baseURL: appConfig.apiBaseUrl || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1',
+    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || appConfig.apiBaseUrl || 'http://localhost:5000/api/v1',
     timeout: appConfig.apiTimeout || 30000,
     retries: 3,
     retryDelay: 1000,
