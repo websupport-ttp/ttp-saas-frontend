@@ -104,7 +104,7 @@ export enum UserRole {
 }
 
 export interface LoginCredentials {
-  email: string;
+  emailOrPhone: string;
   password: string;
 }
 
@@ -114,6 +114,7 @@ export interface RegisterData {
   email: string;
   password: string;
   phoneNumber?: string;
+  role?: string;
 }
 
 export interface AuthResponse {
