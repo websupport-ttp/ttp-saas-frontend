@@ -146,8 +146,8 @@ export function createAppConfig(): AppConfig {
     nodeEnv,
     
     // Site Configuration (Required)
-    siteName: getEnvVar('NEXT_PUBLIC_SITE_NAME', 'The Travel Place', false) || 'The Travel Place',
-    siteUrl: getEnvVar('NEXT_PUBLIC_SITE_URL', 'http://localhost:3000', false) || 'http://localhost:3000',
+    siteName: process.env.NEXT_PUBLIC_SITE_NAME || getEnvVar('NEXT_PUBLIC_SITE_NAME', 'The Travel Place', false) || 'The Travel Place',
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || getEnvVar('NEXT_PUBLIC_SITE_URL', 'http://localhost:3000', false) || 'http://localhost:3000',
     siteDescription: getEnvVar(
       'NEXT_PUBLIC_SITE_DESCRIPTION',
       'Discover amazing destinations and plan your perfect trip with The Travel Place',
