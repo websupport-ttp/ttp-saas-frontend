@@ -72,7 +72,7 @@ export default function LoginOverlay({
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -178,7 +178,7 @@ export default function LoginOverlay({
       // Format phone number with dial code
       const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
       
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -228,7 +228,7 @@ export default function LoginOverlay({
         scope: 'email profile',
       })
       
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/google`, {
+      const response = await fetch(`${API_BASE_URL}/auth/google`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
