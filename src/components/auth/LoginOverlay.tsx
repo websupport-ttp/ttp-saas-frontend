@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import CountryCodeSelector from '@/components/ui/CountryCodeSelector'
+import { authService } from '@/lib/auth-service'
 
 interface LoginOverlayProps {
   isOpen: boolean
@@ -52,8 +53,6 @@ export default function LoginOverlay({
 
   if (!isOpen) return null
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
-
   const handleLoginNext = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -72,47 +71,26 @@ export default function LoginOverlay({
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          emailOrPhone,
-          password,
-        }),
+      const authResponse = await authService.login({
+        emailOrPhone,
+        password,
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed')
+      // Call the onLogin callback if provided
+      if (onLogin) {
+        await onLogin(emailOrPhone, password)
       }
-
-      // Store user data if needed
-      if (data.data?.user) {
-        localStorage.setItem('user', JSON.stringify(data.data.user))
-        
-        // Call the onLogin callback if provided
-        if (onLogin) {
-          await onLogin(emailOrPhone, password)
-        }
-        
-        // Show success message
-        alert('Login successful! Welcome back.')
-        
-        // Close modal
-        onClose()
-        
-        // Small delay to ensure localStorage is written before reload
-        setTimeout(() => {
-          window.location.reload()
-        }, 100)
-      } else {
-        onClose()
+      
+      // Show success message
+      alert('Login successful! Welcome back.')
+      
+      // Close modal
+      onClose()
+      
+      // Small delay to ensure state is updated before reload
+      setTimeout(() => {
         window.location.reload()
-      }
+      }, 100)
     } catch (err: any) {
       setError(err.message || 'Login failed. Please try again.')
     } finally {
@@ -178,29 +156,17 @@ export default function LoginOverlay({
       // Format phone number with dial code
       const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
       
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firstName: signupData.firstName,
-          lastName: signupData.lastName,
-          email: signupData.email,
-          phoneNumber: fullPhoneNumber,
-          password: signupData.password,
-          role: 'Customer', // Changed from 'User' to match backend enum
-        }),
+      await authService.register({
+        firstName: signupData.firstName,
+        lastName: signupData.lastName,
+        email: signupData.email,
+        phoneNumber: fullPhoneNumber,
+        password: signupData.password,
+        role: 'Customer',
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed')
-      }
-
       // Show success message and switch to login
-      alert('Registration successful! Please check your email to verify your account.')
+      alert('Registration successful! Please check your email and phone to verify your account.')
       setFormMode('login')
       setSignupStep(1)
       setEmailOrPhone(signupData.email)
