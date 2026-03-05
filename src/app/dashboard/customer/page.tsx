@@ -10,7 +10,7 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem('user_data');
     if (!userStr) {
       router.push('/?login=true');
       return;

@@ -21,7 +21,7 @@ export default function CMSPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem('user_data');
     if (!userStr) {
       router.push('/?login=true');
       return;

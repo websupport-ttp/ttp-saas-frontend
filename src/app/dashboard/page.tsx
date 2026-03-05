@@ -13,7 +13,7 @@ export default function DashboardPage() {
     const getUserAndRedirect = async () => {
       try {
         // Try to get user from localStorage first
-        const userStr = localStorage.getItem('user');
+        const userStr = localStorage.getItem('user_data');
         
         if (!userStr) {
           // No user found, redirect to login
