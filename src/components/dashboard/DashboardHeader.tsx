@@ -12,10 +12,24 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    router.push('/');
+  const handleLogout = async () => {
+    try {
+      // Call auth service to clear backend session cookies
+      const { authService } = await import('@/lib/auth-service');
+      await authService.logout();
+      
+      // Dispatch event to notify other components (like HomeHeader)
+      window.dispatchEvent(new Event('userLoggedOut'));
+      
+      // Redirect to home page
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if API call fails, clear local data and redirect
+      localStorage.removeItem('user_data');
+      window.dispatchEvent(new Event('userLoggedOut'));
+      router.push('/');
+    }
   };
 
   const getRoleBadgeColor = (role: string) => {

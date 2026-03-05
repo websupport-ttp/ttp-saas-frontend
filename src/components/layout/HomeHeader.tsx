@@ -52,14 +52,19 @@ export function HomeHeader({ className = '' }: HomeHeaderProps) {
     // Check immediately
     checkUser()
 
-    // Listen for custom login event
+    // Listen for custom login and logout events
     const handleUserLoggedIn = () => {
+      checkUser()
+    }
+
+    const handleUserLoggedOut = () => {
       checkUser()
     }
 
     // Also check when storage changes (for cross-tab updates)
     window.addEventListener('storage', checkUser)
     window.addEventListener('userLoggedIn', handleUserLoggedIn)
+    window.addEventListener('userLoggedOut', handleUserLoggedOut)
     
     // Check again after a short delay to catch any race conditions
     const timer = setTimeout(checkUser, 100)
@@ -67,6 +72,7 @@ export function HomeHeader({ className = '' }: HomeHeaderProps) {
     return () => {
       window.removeEventListener('storage', checkUser)
       window.removeEventListener('userLoggedIn', handleUserLoggedIn)
+      window.removeEventListener('userLoggedOut', handleUserLoggedOut)
       clearTimeout(timer)
     }
   }, [])
