@@ -152,9 +152,13 @@ class AuthenticationService implements AuthService {
       return response.data;
     } catch (error: any) {
       // Preserve verification error details for frontend handling
-      if (error.response?.data?.requiresVerification) {
+      if (error.response?.data?.requiresVerification || error.details?.requiresVerification) {
         // Re-throw with original response data intact
-        throw error;
+        const verificationError = new Error(error.message) as any;
+        verificationError.response = {
+          data: error.details || error.response?.data
+        };
+        throw verificationError;
       }
       
       // Handle specific authentication errors

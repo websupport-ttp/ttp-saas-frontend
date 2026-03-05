@@ -328,11 +328,28 @@ class ApiClient {
           message: responseData?.message || 'Authentication required',
           statusCode: status,
         };
+      case 403:
+        // Preserve verification details for frontend handling
+        return {
+          type: ErrorType.AUTHENTICATION_ERROR,
+          message: responseData?.message || 'Access forbidden',
+          statusCode: status,
+          details: responseData, // Preserve full response including requiresVerification
+          response: error.response, // Preserve original response
+        } as any;
       case 404:
         return {
           type: ErrorType.NOT_FOUND,
           message: responseData?.message || 'Resource not found',
           statusCode: status,
+        };
+      case 409:
+        // Preserve conflict details (duplicate email/phone)
+        return {
+          type: ErrorType.VALIDATION_ERROR,
+          message: responseData?.message || 'Resource already exists',
+          statusCode: status,
+          details: responseData,
         };
       case 429:
         return {
