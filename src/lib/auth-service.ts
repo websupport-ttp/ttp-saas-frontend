@@ -136,7 +136,7 @@ class AuthenticationService implements AuthService {
    */
   public async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response: ApiResponse<AuthResponse> = await apiClient.post(
+      const response: ApiResponse<any> = await apiClient.post(
         '/auth/login',
         credentials,
         { requiresAuth: false }
@@ -146,10 +146,22 @@ class AuthenticationService implements AuthService {
         throw new Error(response.message || 'Login failed');
       }
 
-      // Save authentication data
-      this.saveAuthDataToStorage(response.data);
+      // Backend uses HTTP-only cookies for tokens, so we only save user data
+      const user = response.data.user;
+      
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user_data', JSON.stringify(user));
+      }
+      
+      this.currentUser = user;
 
-      return response.data;
+      // Return a mock AuthResponse for compatibility
+      return {
+        user,
+        token: 'cookie-based', // Tokens are in HTTP-only cookies
+        refreshToken: 'cookie-based',
+        expiresAt: new Date(Date.now() + 3600000).toISOString() // 1 hour
+      };
     } catch (error: any) {
       // Preserve verification error details for frontend handling
       if (error.response?.data?.requiresVerification || error.details?.requiresVerification) {
@@ -305,7 +317,8 @@ class AuthenticationService implements AuthService {
    * Check if user is authenticated
    */
   public isAuthenticated(): boolean {
-    return !!(this.authToken && this.refreshTokenValue && this.currentUser);
+    // With HTTP-only cookies, we just check if user data exists
+    return !!this.currentUser;
   }
 
   /**
