@@ -97,6 +97,9 @@ export default function LoginOverlay({
       // Show success message
       setSuccess('Login successful! Redirecting...')
       
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new Event('userLoggedIn'))
+      
       // Close modal
       onClose()
       

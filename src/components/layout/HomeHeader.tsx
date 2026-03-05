@@ -44,20 +44,29 @@ export function HomeHeader({ className = '' }: HomeHeaderProps) {
           console.error('Error parsing user data:', error)
           localStorage.removeItem('user_data')
         }
+      } else {
+        setUser(null)
       }
     }
 
     // Check immediately
     checkUser()
 
+    // Listen for custom login event
+    const handleUserLoggedIn = () => {
+      checkUser()
+    }
+
     // Also check when storage changes (for cross-tab updates)
     window.addEventListener('storage', checkUser)
+    window.addEventListener('userLoggedIn', handleUserLoggedIn)
     
     // Check again after a short delay to catch any race conditions
     const timer = setTimeout(checkUser, 100)
 
     return () => {
       window.removeEventListener('storage', checkUser)
+      window.removeEventListener('userLoggedIn', handleUserLoggedIn)
       clearTimeout(timer)
     }
   }, [])
