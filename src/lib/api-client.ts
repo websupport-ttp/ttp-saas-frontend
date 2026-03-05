@@ -36,6 +36,7 @@ class ApiClient {
     this.axiosInstance = axios.create({
       baseURL: config.baseURL,
       timeout: config.timeout,
+      withCredentials: true, // Enable sending cookies with requests
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
