@@ -20,6 +20,23 @@ interface ManagedUser {
   isEmailVerified: boolean;
   createdAt: string;
   lastLogin?: string;
+  staffDetails?: {
+    department?: string;
+    tier?: number;
+    designation?: string;
+    employeeId?: string;
+    isActive?: boolean;
+  };
+  vendorDetails?: {
+    businessName?: string;
+    isApproved?: boolean;
+    commissionRate?: number;
+  };
+  agentDetails?: {
+    agencyName?: string;
+    agentCode?: string;
+    isApproved?: boolean;
+  };
 }
 
 export default function UserManagement({ currentUser }: UserManagementProps) {
@@ -37,6 +54,20 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
     staffClearanceLevel: 1,
     employeeId: '',
     isActive: true,
+    // New staff structure
+    staffDepartment: '',
+    staffTier: 1,
+    staffDesignation: '',
+    staffEmployeeId: '',
+    // Vendor details
+    vendorBusinessName: '',
+    vendorCommissionRate: 15,
+    vendorIsApproved: false,
+    // Agent details
+    agentAgencyName: '',
+    agentCode: '',
+    agentCommissionRate: 10,
+    agentIsApproved: false,
   });
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
@@ -75,6 +106,20 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
       staffClearanceLevel: user.staffClearanceLevel || 1,
       employeeId: user.employeeId || '',
       isActive: user.isActive,
+      // New staff structure
+      staffDepartment: user.staffDetails?.department || '',
+      staffTier: user.staffDetails?.tier || 1,
+      staffDesignation: user.staffDetails?.designation || '',
+      staffEmployeeId: user.staffDetails?.employeeId || '',
+      // Vendor details
+      vendorBusinessName: user.vendorDetails?.businessName || '',
+      vendorCommissionRate: user.vendorDetails?.commissionRate || 15,
+      vendorIsApproved: user.vendorDetails?.isApproved || false,
+      // Agent details
+      agentAgencyName: user.agentDetails?.agencyName || '',
+      agentCode: user.agentDetails?.agentCode || '',
+      agentCommissionRate: user.agentDetails?.commissionRate || 10,
+      agentIsApproved: user.agentDetails?.isApproved || false,
     });
     setShowEditModal(true);
   };
@@ -83,13 +128,49 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
     if (!editingUser) return;
 
     try {
+      // Build the update payload based on role
+      const payload: any = {
+        role: editForm.role,
+        isActive: editForm.isActive,
+      };
+
+      // Add staff details if role is Staff
+      if (editForm.role === 'Staff') {
+        payload.staffDetails = {
+          department: editForm.staffDepartment,
+          tier: editForm.staffTier,
+          designation: editForm.staffDesignation,
+          employeeId: editForm.staffEmployeeId,
+          isActive: editForm.isActive,
+        };
+      }
+
+      // Add vendor details if role is Vendor
+      if (editForm.role === 'Vendor') {
+        payload.vendorDetails = {
+          businessName: editForm.vendorBusinessName,
+          commissionRate: editForm.vendorCommissionRate,
+          isApproved: editForm.vendorIsApproved,
+        };
+      }
+
+      // Add agent details if role is Agent
+      if (editForm.role === 'Agent') {
+        payload.agentDetails = {
+          agencyName: editForm.agentAgencyName,
+          agentCode: editForm.agentCode,
+          commissionRate: editForm.agentCommissionRate,
+          isApproved: editForm.agentIsApproved,
+        };
+      }
+
       const response = await fetch(`${API_BASE_URL}/users/${editingUser._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(editForm),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -162,8 +243,11 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
       Staff: 'bg-blue-100 text-blue-800',
       Manager: 'bg-green-100 text-green-800',
       Executive: 'bg-orange-100 text-orange-800',
-      Business: 'bg-indigo-100 text-indigo-800',
+      Vendor: 'bg-indigo-100 text-indigo-800',
+      Agent: 'bg-pink-100 text-pink-800',
+      Customer: 'bg-gray-100 text-gray-800',
       User: 'bg-gray-100 text-gray-800',
+      Business: 'bg-indigo-100 text-indigo-800',
     };
     return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -208,8 +292,9 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
             >
               <option value="">All Roles</option>
-              <option value="User">User</option>
-              <option value="Business">Business</option>
+              <option value="Customer">Customer</option>
+              <option value="Vendor">Vendor</option>
+              <option value="Agent">Agent</option>
               <option value="Staff">Staff</option>
               <option value="Manager">Manager</option>
               <option value="Executive">Executive</option>
@@ -305,9 +390,26 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
                         {user.role}
                       </span>
-                      {user.role === 'Staff' && user.staffClearanceLevel && (
+                      {user.role === 'Staff' && user.staffDetails?.tier && (
                         <span className="ml-2 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                          Tier {user.staffClearanceLevel}
+                          Tier {user.staffDetails.tier}
+                        </span>
+                      )}
+                      {user.role === 'Staff' && user.staffDetails?.designation && (
+                        <div className="text-xs text-gray-500 mt-1">{user.staffDetails.designation}</div>
+                      )}
+                      {user.role === 'Vendor' && user.vendorDetails && (
+                        <span className={`ml-2 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          user.vendorDetails.isApproved ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {user.vendorDetails.isApproved ? 'Approved' : 'Pending'}
+                        </span>
+                      )}
+                      {user.role === 'Agent' && user.agentDetails && (
+                        <span className={`ml-2 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          user.agentDetails.isApproved ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {user.agentDetails.isApproved ? 'Approved' : 'Pending'}
                         </span>
                       )}
                     </td>
@@ -381,7 +483,7 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-96 overflow-y-auto">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select
@@ -389,8 +491,9 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
                 >
-                  <option value="User">User</option>
-                  <option value="Business">Business</option>
+                  <option value="Customer">Customer</option>
+                  <option value="Vendor">Vendor</option>
+                  <option value="Agent">Agent</option>
                   <option value="Staff">Staff</option>
                   <option value="Manager">Manager</option>
                   <option value="Executive">Executive</option>
@@ -400,48 +503,216 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
 
               {editForm.role === 'Staff' && (
                 <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Staff Clearance Level
-                    </label>
-                    <select
-                      value={editForm.staffClearanceLevel}
-                      onChange={(e) => setEditForm({ ...editForm, staffClearanceLevel: parseInt(e.target.value) })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
-                    >
-                      <option value={1}>Tier 1 - Basic Access</option>
-                      <option value={2}>Tier 2 - Booking & Inventory</option>
-                      <option value={3}>Tier 3 - Team Oversight</option>
-                      <option value={4}>Tier 4 - Full Management</option>
-                    </select>
-                  </div>
+                  <div className="border-t pt-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Staff Details</h4>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Department
+                        </label>
+                        <select
+                          value={editForm.staffDepartment}
+                          onChange={(e) => setEditForm({ ...editForm, staffDepartment: e.target.value })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        >
+                          <option value="">Select Department</option>
+                          <option value="Operations">Operations</option>
+                          <option value="Sales">Sales</option>
+                          <option value="Customer Service">Customer Service</option>
+                          <option value="Finance">Finance</option>
+                          <option value="Marketing">Marketing</option>
+                          <option value="IT">IT</option>
+                          <option value="HR">HR</option>
+                        </select>
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Employee ID
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.employeeId}
-                      onChange={(e) => setEditForm({ ...editForm, employeeId: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
-                      placeholder="EMP-001"
-                    />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Tier Level
+                        </label>
+                        <select
+                          value={editForm.staffTier}
+                          onChange={(e) => setEditForm({ ...editForm, staffTier: parseInt(e.target.value) })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        >
+                          <option value={1}>Tier 1 - Junior Staff</option>
+                          <option value={2}>Tier 2 - Senior Staff</option>
+                          <option value={3}>Tier 3 - Department Head</option>
+                          <option value={4}>Tier 4 - Executive</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Designation
+                        </label>
+                        <select
+                          value={editForm.staffDesignation}
+                          onChange={(e) => setEditForm({ ...editForm, staffDesignation: e.target.value })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        >
+                          <option value="">Select Designation</option>
+                          <option value="Operations Officer">Operations Officer</option>
+                          <option value="Head of Operations">Head of Operations</option>
+                          <option value="Sales Officer">Sales Officer</option>
+                          <option value="Head of Sales">Head of Sales</option>
+                          <option value="Customer Service Rep">Customer Service Rep</option>
+                          <option value="Head of Customer Service">Head of Customer Service</option>
+                          <option value="Finance Officer">Finance Officer</option>
+                          <option value="Head of Finance">Head of Finance</option>
+                          <option value="Marketing Officer">Marketing Officer</option>
+                          <option value="Head of Marketing">Head of Marketing</option>
+                          <option value="IT Support">IT Support</option>
+                          <option value="Head of IT">Head of IT</option>
+                          <option value="HR Officer">HR Officer</option>
+                          <option value="Head of HR">Head of HR</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Employee ID
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.staffEmployeeId}
+                          onChange={(e) => setEditForm({ ...editForm, staffEmployeeId: e.target.value })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          placeholder="EMP-001"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={editForm.isActive}
-                  onChange={(e) => setEditForm({ ...editForm, isActive: e.target.checked })}
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                />
-                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-                  Active Account
-                </label>
+              {editForm.role === 'Vendor' && (
+                <>
+                  <div className="border-t pt-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Vendor Details</h4>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Business Name
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.vendorBusinessName}
+                          onChange={(e) => setEditForm({ ...editForm, vendorBusinessName: e.target.value })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          placeholder="ABC Car Rentals"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Commission Rate (%)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={editForm.vendorCommissionRate}
+                          onChange={(e) => setEditForm({ ...editForm, vendorCommissionRate: parseFloat(e.target.value) })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        />
+                      </div>
+
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="vendorApproved"
+                          checked={editForm.vendorIsApproved}
+                          onChange={(e) => setEditForm({ ...editForm, vendorIsApproved: e.target.checked })}
+                          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="vendorApproved" className="ml-2 block text-sm text-gray-900">
+                          Approved Vendor
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {editForm.role === 'Agent' && (
+                <>
+                  <div className="border-t pt-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Agent Details</h4>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Agency Name
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.agentAgencyName}
+                          onChange={(e) => setEditForm({ ...editForm, agentAgencyName: e.target.value })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          placeholder="XYZ Travel Agency"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Agent Code
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.agentCode}
+                          onChange={(e) => setEditForm({ ...editForm, agentCode: e.target.value })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          placeholder="AGT-001"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Commission Rate (%)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={editForm.agentCommissionRate}
+                          onChange={(e) => setEditForm({ ...editForm, agentCommissionRate: parseFloat(e.target.value) })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        />
+                      </div>
+
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="agentApproved"
+                          checked={editForm.agentIsApproved}
+                          onChange={(e) => setEditForm({ ...editForm, agentIsApproved: e.target.checked })}
+                          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="agentApproved" className="ml-2 block text-sm text-gray-900">
+                          Approved Agent
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="border-t pt-4">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={editForm.isActive}
+                    onChange={(e) => setEditForm({ ...editForm, isActive: e.target.checked })}
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+                    Active Account
+                  </label>
+                </div>
               </div>
             </div>
 
