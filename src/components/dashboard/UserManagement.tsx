@@ -53,7 +53,7 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
       if (filters.status) params.set('status', filters.status);
       if (filters.search) params.set('search', filters.search);
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/users?${params.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/users?${params.toString()}`, {
         credentials: 'include',
       });
 
@@ -83,7 +83,7 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
     if (!editingUser) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/users/${editingUser._id}`, {
+      const response = await fetch(`${API_BASE_URL}/users/${editingUser._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ export default function UserManagement({ currentUser }: UserManagementProps) {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
         method: 'DELETE',
         credentials: 'include',
       });

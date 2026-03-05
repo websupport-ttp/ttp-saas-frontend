@@ -32,7 +32,7 @@ export default function ManagerDashboard({ user }: ManagerDashboardProps) {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/v1/dashboard/manager/stats`, {
+      const response = await fetch(`${API_BASE_URL}/dashboard/manager/stats`, {
         credentials: 'include',
       });
 

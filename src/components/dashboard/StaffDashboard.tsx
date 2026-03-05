@@ -32,7 +32,7 @@ export default function StaffDashboard({ user }: StaffDashboardProps) {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/v1/dashboard/staff/stats`, {
+      const response = await fetch(`${API_BASE_URL}/dashboard/staff/stats`, {
         credentials: 'include',
       });
 
