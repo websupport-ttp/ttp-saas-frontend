@@ -151,6 +151,12 @@ class AuthenticationService implements AuthService {
 
       return response.data;
     } catch (error: any) {
+      // Preserve verification error details for frontend handling
+      if (error.response?.data?.requiresVerification) {
+        // Re-throw with original response data intact
+        throw error;
+      }
+      
       // Handle specific authentication errors
       if (error.type === ErrorType.AUTHENTICATION_ERROR) {
         throw new Error('Invalid email or password');
@@ -198,7 +204,8 @@ class AuthenticationService implements AuthService {
       }
 
       if (error.statusCode === 409) {
-        throw new Error('An account with this email already exists');
+        // Use the specific error message from backend (email or phone)
+        throw new Error(error.message || 'An account with this email or phone number already exists');
       }
 
       if (error.type === ErrorType.NETWORK_ERROR) {
