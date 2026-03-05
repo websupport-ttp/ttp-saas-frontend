@@ -35,14 +35,14 @@ export function HomeHeader({ className = '' }: HomeHeaderProps) {
   // Check for logged-in user
   useEffect(() => {
     const checkUser = () => {
-      const userData = localStorage.getItem('user')
+      const userData = localStorage.getItem('user_data')
       if (userData) {
         try {
           const parsedUser = JSON.parse(userData)
           setUser(parsedUser)
         } catch (error) {
           console.error('Error parsing user data:', error)
-          localStorage.removeItem('user')
+          localStorage.removeItem('user_data')
         }
       }
     }
