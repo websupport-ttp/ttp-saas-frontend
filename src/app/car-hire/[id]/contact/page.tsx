@@ -62,7 +62,7 @@ export default function CarContactPage({ params }: CarContactPageProps) {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`${API_BASE_URL}/api/v1/car-hire/${params.id}`);
+        const response = await fetch(`${API_BASE_URL}/car-hire/${params.id}`);
         
         if (!response.ok) {
           throw new Error('Car not found');

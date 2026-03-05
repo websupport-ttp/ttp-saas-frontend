@@ -28,7 +28,7 @@ export default function PaymentVerifyPage() {
   const verifyPayment = async () => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/v1/car-hire/verify-payment`,
+        `${API_BASE_URL}/car-hire/verify-payment`,
         {
           method: 'POST',
           headers: {

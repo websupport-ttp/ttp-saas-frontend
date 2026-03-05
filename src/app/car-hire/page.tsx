@@ -25,7 +25,7 @@ export default function CarHirePage() {
   const fetchCars = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/v1/car-hire`);
+      const response = await fetch(`${API_BASE_URL}/car-hire`);
       
       if (response.ok) {
         const data = await response.json();

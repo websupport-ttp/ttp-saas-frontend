@@ -27,7 +27,7 @@ export default function CarDetailsPage() {
         setError(null);
         
         const carId = params.id as string;
-        const response = await fetch(`${API_BASE_URL}/api/v1/car-hire/${carId}`);
+        const response = await fetch(`${API_BASE_URL}/car-hire/${carId}`);
         
         if (!response.ok) {
           throw new Error('Car not found');

@@ -55,7 +55,7 @@ export default function CarInventoryManagement({ user, permissions }: CarInvento
       if (filters.type) params.set('type', filters.type);
       if (filters.location) params.set('location', filters.location);
       
-      const response = await fetch(`${API_BASE_URL}/api/v1/car-hire?${params.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/car-hire?${params.toString()}`, {
         credentials: 'include',
       });
 
@@ -84,7 +84,7 @@ export default function CarInventoryManagement({ user, permissions }: CarInvento
     if (!confirm('Are you sure you want to delete this car?')) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/car-hire/${carId}`, {
+      const response = await fetch(`${API_BASE_URL}/car-hire/${carId}`, {
         method: 'DELETE',
         credentials: 'include',
       });

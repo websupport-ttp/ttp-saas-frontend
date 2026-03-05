@@ -103,7 +103,7 @@ export default function CarForm({ car, onClose, user }: CarFormProps) {
       const formDataUpload = new FormData();
       formDataUpload.append('image', imageFile);
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/car-hire/upload-image`, {
+      const response = await fetch(`${API_BASE_URL}/car-hire/upload-image`, {
         method: 'POST',
         credentials: 'include',
         body: formDataUpload,
@@ -156,8 +156,8 @@ export default function CarForm({ car, onClose, user }: CarFormProps) {
       };
 
       const url = car
-        ? `${API_BASE_URL}/api/v1/car-hire/${car._id}`
-        : `${API_BASE_URL}/api/v1/car-hire`;
+        ? `${API_BASE_URL}/car-hire/${car._id}`
+        : `${API_BASE_URL}/car-hire`;
 
       const response = await fetch(url, {
         method: car ? 'PUT' : 'POST',
