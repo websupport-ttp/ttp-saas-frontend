@@ -13,21 +13,30 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
+    console.log('[LOGOUT] Starting logout process...');
+    
     try {
       // Call auth service to clear backend session cookies
       const { authService } = await import('@/lib/auth-service');
+      console.log('[LOGOUT] Calling authService.logout()...');
       await authService.logout();
+      console.log('[LOGOUT] Auth service logout completed');
       
       // Dispatch event to notify other components (like HomeHeader)
+      console.log('[LOGOUT] Dispatching userLoggedOut event');
       window.dispatchEvent(new Event('userLoggedOut'));
       
       // Redirect to home page
+      console.log('[LOGOUT] Redirecting to home page');
       router.push('/');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('[LOGOUT] Logout error:', error);
       // Even if API call fails, clear local data and redirect
+      console.log('[LOGOUT] Clearing user_data from localStorage');
       localStorage.removeItem('user_data');
+      console.log('[LOGOUT] Dispatching userLoggedOut event (error path)');
       window.dispatchEvent(new Event('userLoggedOut'));
+      console.log('[LOGOUT] Redirecting to home page (error path)');
       router.push('/');
     }
   };
