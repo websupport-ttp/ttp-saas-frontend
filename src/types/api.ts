@@ -111,6 +111,7 @@ export interface LoginCredentials {
 export interface RegisterData {
   firstName: string;
   lastName: string;
+  otherNames?: string;
   email: string;
   password: string;
   phoneNumber?: string;

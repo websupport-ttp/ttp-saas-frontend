@@ -136,6 +136,18 @@ function validateRequiredEnvVars(): void {
  * Create application configuration from environment variables
  */
 export function createAppConfig(): AppConfig {
+  // DEBUG: Log what Next.js is seeing
+  if (typeof window === 'undefined') {
+    console.log('🔍 SERVER - Environment variables at config creation:');
+    console.log('  NEXT_PUBLIC_API_BASE_URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
+    console.log('  NEXT_PUBLIC_SITE_NAME:', process.env.NEXT_PUBLIC_SITE_NAME);
+    console.log('  NODE_ENV:', process.env.NODE_ENV);
+  } else {
+    console.log('🔍 CLIENT - Environment variables at config creation:');
+    console.log('  NEXT_PUBLIC_API_BASE_URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
+    console.log('  NEXT_PUBLIC_SITE_NAME:', process.env.NEXT_PUBLIC_SITE_NAME);
+  }
+  
   // Validate required environment variables (warns but doesn't throw)
   validateRequiredEnvVars();
   

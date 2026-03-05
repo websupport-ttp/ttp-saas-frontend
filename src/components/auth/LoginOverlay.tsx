@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import CountryCodeSelector from '@/components/ui/CountryCodeSelector'
 import { authService } from '@/lib/auth-service'
+import { appConfig } from '@/lib/config'
 
 interface LoginOverlayProps {
   isOpen: boolean
@@ -23,6 +25,7 @@ export default function LoginOverlay({
   onSignUp,
   onForgotPassword
 }: LoginOverlayProps) {
+  const router = useRouter()
   const [formMode, setFormMode] = useState<FormMode>('login')
   const [loginStep, setLoginStep] = useState<LoginStep>(1)
   const [signupStep, setSignupStep] = useState<SignupStep>(1)
@@ -37,6 +40,7 @@ export default function LoginOverlay({
   const [signupData, setSignupData] = useState({
     firstName: '',
     lastName: '',
+    otherNames: '',
     email: '',
     phoneNumber: '',
     countryCode: 'NG',
@@ -48,8 +52,15 @@ export default function LoginOverlay({
   const [showSignupPassword, setShowSignupPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   
+  // Verification state
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(false)
+  const [verificationType, setVerificationType] = useState<'email' | 'phone'>('email')
+  const [verificationContact, setVerificationContact] = useState('')
+  const [resendingVerification, setResendingVerification] = useState(false)
+  
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   if (!isOpen) return null
 
@@ -68,10 +79,12 @@ export default function LoginOverlay({
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccess('')
+    setShowVerificationPrompt(false)
     setIsLoading(true)
 
     try {
-      const authResponse = await authService.login({
+      await authService.login({
         emailOrPhone,
         password,
       })
@@ -82,19 +95,61 @@ export default function LoginOverlay({
       }
       
       // Show success message
-      alert('Login successful! Welcome back.')
+      setSuccess('Login successful! Redirecting...')
       
       // Close modal
       onClose()
       
-      // Small delay to ensure state is updated before reload
+      // Use Next.js router for smooth navigation (no page reload)
       setTimeout(() => {
-        window.location.reload()
-      }, 100)
+        router.push('/')
+      }, 500)
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please try again.')
+      // Check if verification is required
+      if (err.response?.data?.requiresVerification) {
+        setVerificationType(err.response.data.verificationType)
+        setVerificationContact(
+          err.response.data.email || err.response.data.phoneNumber
+        )
+        setShowVerificationPrompt(true)
+        setError(err.response.data.message)
+      } else {
+        setError(err.message || 'Login failed. Please try again.')
+      }
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    setResendingVerification(true)
+    setError('')
+    setSuccess('')
+    
+    try {
+      const response = await fetch(`${appConfig.apiBaseUrl}/auth/resend-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emailOrPhone: verificationContact,
+          type: verificationType
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok && data.status === 'success') {
+        setSuccess(data.message || 'Verification sent successfully')
+        setError('')
+      } else {
+        setError(data.message || 'Failed to resend verification')
+        setSuccess('')
+      }
+    } catch (err: any) {
+      setError('Failed to resend verification. Please try again.')
+      setSuccess('')
+    } finally {
+      setResendingVerification(false)
     }
   }
 
@@ -135,6 +190,7 @@ export default function LoginOverlay({
   const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccess('')
     
     if (signupData.password.length < 8) {
       setError('Password must be at least 8 characters')
@@ -159,6 +215,7 @@ export default function LoginOverlay({
       await authService.register({
         firstName: signupData.firstName,
         lastName: signupData.lastName,
+        otherNames: signupData.otherNames || undefined,
         email: signupData.email,
         phoneNumber: fullPhoneNumber,
         password: signupData.password,
@@ -166,10 +223,13 @@ export default function LoginOverlay({
       })
 
       // Show success message and switch to login
-      alert('Registration successful! Please check your email and phone to verify your account.')
-      setFormMode('login')
-      setSignupStep(1)
-      setEmailOrPhone(signupData.email)
+      setSuccess('Registration successful! Please check your email and phone to verify your account.')
+      setTimeout(() => {
+        setFormMode('login')
+        setSignupStep(1)
+        setEmailOrPhone(signupData.email)
+        setSuccess('')
+      }, 3000)
     } catch (err: any) {
       setError(err.message || 'Signup failed. Please try again.')
     } finally {
@@ -294,6 +354,43 @@ export default function LoginOverlay({
                 {error && (
                   <div className="p-3 bg-red-50 border border-red-200 rounded-md mb-4">
                     <p className="text-sm text-red-600">{error}</p>
+                  </div>
+                )}
+
+                {success && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-md mb-4">
+                    <p className="text-sm text-green-600">{success}</p>
+                  </div>
+                )}
+
+                {showVerificationPrompt && (
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
+                    <div className="flex items-start">
+                      <svg className="h-5 w-5 text-yellow-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-medium text-yellow-800 mb-1">
+                          Verification Required
+                        </h4>
+                        <p className="text-sm text-yellow-700 mb-3">
+                          {verificationType === 'email' 
+                            ? `Please verify your email (${verificationContact}) before logging in.`
+                            : `Please verify your phone number (${verificationContact}) before logging in.`
+                          }
+                        </p>
+                        <button
+                          onClick={handleResendVerification}
+                          disabled={resendingVerification}
+                          className="text-sm font-medium text-yellow-800 hover:text-yellow-900 underline disabled:opacity-50"
+                        >
+                          {resendingVerification 
+                            ? 'Sending...' 
+                            : `Resend verification ${verificationType === 'email' ? 'email' : 'code'}`
+                          }
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -486,6 +583,20 @@ export default function LoginOverlay({
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
                         placeholder="Doe"
                         required
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="otherNames" className="block text-sm font-medium text-gray-700 mb-2">
+                        Other Names <span className="text-gray-400 text-xs">(Optional)</span>
+                      </label>
+                      <input
+                        id="otherNames"
+                        type="text"
+                        value={signupData.otherNames}
+                        onChange={(e) => setSignupData({...signupData, otherNames: e.target.value})}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                        placeholder="Middle name or other names"
                       />
                     </div>
 
