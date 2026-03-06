@@ -116,6 +116,7 @@ export interface RegisterData {
   password: string;
   phoneNumber?: string;
   role?: string;
+  verificationToken?: string;
 }
 
 export interface AuthResponse {

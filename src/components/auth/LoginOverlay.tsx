@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import CountryCodeSelector from '@/components/ui/CountryCodeSelector'
 import { authService } from '@/lib/auth-service'
@@ -16,7 +16,7 @@ interface LoginOverlayProps {
 
 type FormMode = 'login' | 'signup'
 type LoginStep = 1 | 2
-type SignupStep = 1 | 2 | 3
+type SignupStep = 1 | 2 | 3 | 4
 
 export default function LoginOverlay({
   isOpen,
@@ -52,7 +52,15 @@ export default function LoginOverlay({
   const [showSignupPassword, setShowSignupPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   
-  // Verification state
+  // Pre-registration verification state (NEW)
+  const [emailOtp, setEmailOtp] = useState('')
+  const [phoneOtp, setPhoneOtp] = useState('')
+  const [verificationToken, setVerificationToken] = useState('')
+  const [phoneVerificationMethod, setPhoneVerificationMethod] = useState<'sms' | 'whatsapp' | 'call'>('sms')
+  const [resendEmailTimer, setResendEmailTimer] = useState(0)
+  const [resendPhoneTimer, setResendPhoneTimer] = useState(0)
+  
+  // Verification state (for post-registration)
   const [showVerificationPrompt, setShowVerificationPrompt] = useState(false)
   const [verificationType, setVerificationType] = useState<'email' | 'phone'>('email')
   const [verificationContact, setVerificationContact] = useState('')
@@ -165,7 +173,7 @@ export default function LoginOverlay({
     setSignupData(prev => ({ ...prev, countryCode, dialCode }))
   }
 
-  const handleSignupNext = (e: React.FormEvent) => {
+  const handleSignupNext = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     
@@ -186,7 +194,51 @@ export default function LoginOverlay({
         setError('Please enter a valid email address')
         return
       }
-      setSignupStep(3)
+      
+      // Send verification codes
+      setIsLoading(true)
+      try {
+        const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+        await authService.sendVerificationCodes(signupData.email, fullPhoneNumber)
+        setSuccess('Verification codes sent! Please check your email and phone.')
+        setSignupStep(3)
+        // Start resend timers
+        setResendEmailTimer(60)
+        setResendPhoneTimer(60)
+      } catch (err: any) {
+        setError(err.message || 'Failed to send verification codes. Please try again.')
+      } finally {
+        setIsLoading(false)
+      }
+    } else if (signupStep === 3) {
+      // Verify codes
+      if (!emailOtp || !phoneOtp) {
+        setError('Please enter both verification codes')
+        return
+      }
+      
+      if (emailOtp.length !== 6 || phoneOtp.length !== 6) {
+        setError('Verification codes must be 6 digits')
+        return
+      }
+      
+      setIsLoading(true)
+      try {
+        const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+        const result = await authService.verifyRegistrationCodes(
+          signupData.email,
+          fullPhoneNumber,
+          emailOtp,
+          phoneOtp
+        )
+        setVerificationToken(result.verificationToken)
+        setSuccess('Verification successful! Please create your password.')
+        setSignupStep(4)
+      } catch (err: any) {
+        setError(err.message || 'Verification failed. Please check your codes.')
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -223,22 +275,76 @@ export default function LoginOverlay({
         phoneNumber: fullPhoneNumber,
         password: signupData.password,
         role: 'Customer',
+        verificationToken: verificationToken, // Include verification token
       })
 
-      // Show success message and switch to login
-      setSuccess('Registration successful! Please check your email and phone to verify your account.')
+      // Show success message and redirect to dashboard
+      setSuccess('Registration successful! Your account is ready. Redirecting to dashboard...')
+      
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('userLoggedIn'))
+      
       setTimeout(() => {
-        setFormMode('login')
-        setSignupStep(1)
-        setEmailOrPhone(signupData.email)
-        setSuccess('')
-      }, 3000)
+        router.push('/dashboard')
+        onClose()
+      }, 2000)
     } catch (err: any) {
       setError(err.message || 'Signup failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
   }
+
+  const handleResendEmailOtp = async () => {
+    if (resendEmailTimer > 0) return
+    
+    setError('')
+    setIsLoading(true)
+    try {
+      const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+      await authService.resendEmailOtp(signupData.email, fullPhoneNumber)
+      setSuccess('Email code resent successfully!')
+      setResendEmailTimer(60)
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend email code')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleResendPhoneOtp = async () => {
+    if (resendPhoneTimer > 0) return
+    
+    setError('')
+    setIsLoading(true)
+    try {
+      const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+      await authService.resendPhoneOtp(signupData.email, fullPhoneNumber, phoneVerificationMethod)
+      setSuccess(`Phone code resent via ${phoneVerificationMethod}!`)
+      setResendPhoneTimer(60)
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend phone code')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Timer effects
+  useEffect(() => {
+    if (resendEmailTimer > 0) {
+      const timer = setTimeout(() => setResendEmailTimer(resendEmailTimer - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [resendEmailTimer])
+
+  useEffect(() => {
+    if (resendPhoneTimer > 0) {
+      const timer = setTimeout(() => setResendPhoneTimer(resendPhoneTimer - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [resendPhoneTimer])
 
   const handleGoogleLogin = async () => {
     setError('')
@@ -682,6 +788,93 @@ export default function LoginOverlay({
                 )}
 
                 {signupStep === 3 && (
+                  <form onSubmit={handleSignupNext} className="space-y-4">
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Verify Your Contact Details</h3>
+                      <p className="text-sm text-gray-600">
+                        We've sent verification codes to your email and phone number
+                      </p>
+                    </div>
+
+                    <div>
+                      <label htmlFor="emailOtp" className="block text-sm font-medium text-gray-700 mb-2">
+                        Email Verification Code
+                      </label>
+                      <input
+                        id="emailOtp"
+                        type="text"
+                        value={emailOtp}
+                        onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent text-center text-2xl tracking-widest"
+                        placeholder="000000"
+                        maxLength={6}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={handleResendEmailOtp}
+                        disabled={resendEmailTimer > 0 || isLoading}
+                        className="mt-2 text-sm text-brand-red hover:text-brand-red-600 disabled:text-gray-400 disabled:cursor-not-allowed"
+                      >
+                        {resendEmailTimer > 0 ? `Resend in ${resendEmailTimer}s` : 'Resend Email Code'}
+                      </button>
+                    </div>
+
+                    <div>
+                      <label htmlFor="phoneOtp" className="block text-sm font-medium text-gray-700 mb-2">
+                        Phone Verification Code
+                      </label>
+                      <input
+                        id="phoneOtp"
+                        type="text"
+                        value={phoneOtp}
+                        onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent text-center text-2xl tracking-widest"
+                        placeholder="000000"
+                        maxLength={6}
+                        required
+                      />
+                      <div className="mt-2 flex items-center justify-between">
+                        <select
+                          value={phoneVerificationMethod}
+                          onChange={(e) => setPhoneVerificationMethod(e.target.value as 'sms' | 'whatsapp' | 'call')}
+                          className="text-sm border border-gray-300 rounded px-2 py-1"
+                        >
+                          <option value="sms">SMS</option>
+                          <option value="whatsapp">WhatsApp</option>
+                          <option value="call">Voice Call</option>
+                        </select>
+                        <button
+                          type="button"
+                          onClick={handleResendPhoneOtp}
+                          disabled={resendPhoneTimer > 0 || isLoading}
+                          className="text-sm text-brand-red hover:text-brand-red-600 disabled:text-gray-400 disabled:cursor-not-allowed"
+                        >
+                          {resendPhoneTimer > 0 ? `Resend in ${resendPhoneTimer}s` : 'Resend Phone Code'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={handleSignupBack}
+                        className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="flex-1 bg-brand-red text-white py-3 rounded-lg font-medium hover:bg-brand-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isLoading ? 'Verifying...' : 'Verify Codes'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {signupStep === 4 && (
                   <form onSubmit={handleSignupSubmit} className="space-y-4">
                     <div>
                       <label htmlFor="signupPassword" className="block text-sm font-medium text-gray-700 mb-2">

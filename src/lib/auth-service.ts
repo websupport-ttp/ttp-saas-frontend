@@ -20,6 +20,10 @@ export interface AuthService {
   login(credentials: LoginCredentials): Promise<AuthResponse>;
   logout(): Promise<void>;
   register(userData: RegisterData): Promise<AuthResponse>;
+  sendVerificationCodes(email: string, phoneNumber: string): Promise<any>;
+  verifyRegistrationCodes(email: string, phoneNumber: string, emailOtp: string, phoneOtp: string): Promise<any>;
+  resendEmailOtp(email: string, phoneNumber: string): Promise<any>;
+  resendPhoneOtp(email: string, phoneNumber: string, method?: 'sms' | 'whatsapp' | 'call'): Promise<any>;
   refreshToken(): Promise<string>;
   getCurrentUser(): User | null;
   isAuthenticated(): boolean;
@@ -421,6 +425,114 @@ class AuthenticationService implements AuthService {
     }
 
     return this.authToken;
+  }
+
+  /**
+   * Send verification codes to email and phone before registration
+   */
+  public async sendVerificationCodes(email: string, phoneNumber: string): Promise<any> {
+    try {
+      const response: ApiResponse<any> = await apiClient.post(
+        '/auth/send-verification-codes',
+        { email, phoneNumber },
+        { requiresAuth: false }
+      );
+
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to send verification codes');
+      }
+
+      return response.data;
+    } catch (error: any) {
+      if (error.statusCode === 409) {
+        throw new Error(error.message || 'Email or phone number already registered');
+      }
+      throw new Error(error.message || 'Failed to send verification codes. Please try again.');
+    }
+  }
+
+  /**
+   * Verify email and phone OTPs
+   */
+  public async verifyRegistrationCodes(
+    email: string,
+    phoneNumber: string,
+    emailOtp: string,
+    phoneOtp: string
+  ): Promise<any> {
+    try {
+      const response: ApiResponse<any> = await apiClient.post(
+        '/auth/verify-registration-codes',
+        { email, phoneNumber, emailOtp, phoneOtp },
+        { requiresAuth: false }
+      );
+
+      if (!response.success) {
+        throw new Error(response.message || 'Verification failed');
+      }
+
+      return response.data;
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        throw new Error('Verification session expired. Please request new codes.');
+      }
+      if (error.statusCode === 429) {
+        throw new Error('Too many attempts. Please request new codes.');
+      }
+      throw new Error(error.message || 'Verification failed. Please check your codes.');
+    }
+  }
+
+  /**
+   * Resend email OTP
+   */
+  public async resendEmailOtp(email: string, phoneNumber: string): Promise<any> {
+    try {
+      const response: ApiResponse<any> = await apiClient.post(
+        '/auth/resend-email-otp',
+        { email, phoneNumber },
+        { requiresAuth: false }
+      );
+
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to resend email code');
+      }
+
+      return response.data;
+    } catch (error: any) {
+      if (error.statusCode === 429) {
+        throw new Error('Please wait before requesting a new code');
+      }
+      throw new Error(error.message || 'Failed to resend email code. Please try again.');
+    }
+  }
+
+  /**
+   * Resend phone OTP with method selection
+   */
+  public async resendPhoneOtp(
+    email: string,
+    phoneNumber: string,
+    method: 'sms' | 'whatsapp' | 'call' = 'sms'
+  ): Promise<any> {
+    try {
+      const response: ApiResponse<any> = await apiClient.post(
+        '/auth/resend-phone-otp',
+        { email, phoneNumber, method },
+        { requiresAuth: false }
+      );
+
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to resend phone code');
+      }
+
+      return response.data;
+    } catch (error: any) {
+      if (error.statusCode === 429) {
+        throw new Error('Please wait before requesting a new code');
+      }
+      throw new Error(error.message || 'Failed to resend phone code. Please try again.');
+    }
   }
 }
 
