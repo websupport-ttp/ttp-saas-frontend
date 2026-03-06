@@ -70,6 +70,21 @@ export default function LoginOverlay({
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  // Timer effects - MUST be before early return to follow Rules of Hooks
+  useEffect(() => {
+    if (resendEmailTimer > 0) {
+      const timer = setTimeout(() => setResendEmailTimer(resendEmailTimer - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [resendEmailTimer])
+
+  useEffect(() => {
+    if (resendPhoneTimer > 0) {
+      const timer = setTimeout(() => setResendPhoneTimer(resendPhoneTimer - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [resendPhoneTimer])
+
   if (!isOpen) return null
 
   const handleLoginNext = (e: React.FormEvent) => {
@@ -330,21 +345,6 @@ export default function LoginOverlay({
       setIsLoading(false)
     }
   }
-
-  // Timer effects
-  useEffect(() => {
-    if (resendEmailTimer > 0) {
-      const timer = setTimeout(() => setResendEmailTimer(resendEmailTimer - 1), 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [resendEmailTimer])
-
-  useEffect(() => {
-    if (resendPhoneTimer > 0) {
-      const timer = setTimeout(() => setResendPhoneTimer(resendPhoneTimer - 1), 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [resendPhoneTimer])
 
   const handleGoogleLogin = async () => {
     setError('')
