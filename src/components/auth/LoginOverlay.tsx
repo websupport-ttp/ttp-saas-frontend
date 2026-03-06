@@ -16,7 +16,7 @@ interface LoginOverlayProps {
 
 type FormMode = 'login' | 'signup'
 type LoginStep = 1 | 2
-type SignupStep = 1 | 2 | 3 | 4
+type SignupStep = 1 | 2 | 3 | 4 | 5
 
 export default function LoginOverlay({
   isOpen,
@@ -52,9 +52,11 @@ export default function LoginOverlay({
   const [showSignupPassword, setShowSignupPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   
-  // Pre-registration verification state (NEW)
+  // Pre-registration verification state (NEW - separate steps)
   const [emailOtp, setEmailOtp] = useState('')
   const [phoneOtp, setPhoneOtp] = useState('')
+  const [emailVerified, setEmailVerified] = useState(false)
+  const [phoneVerified, setPhoneVerified] = useState(false)
   const [verificationToken, setVerificationToken] = useState('')
   const [phoneVerificationMethod, setPhoneVerificationMethod] = useState<'sms' | 'whatsapp' | 'call'>('sms')
   const [resendEmailTimer, setResendEmailTimer] = useState(0)
@@ -215,25 +217,55 @@ export default function LoginOverlay({
       try {
         const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
         await authService.sendVerificationCodes(signupData.email, fullPhoneNumber)
-        setSuccess('Verification codes sent! Please check your email and phone.')
+        setSuccess('Verification code sent to your email!')
         setSignupStep(3)
-        // Start resend timers
+        // Start email resend timer
         setResendEmailTimer(60)
-        setResendPhoneTimer(60)
       } catch (err: any) {
-        setError(err.message || 'Failed to send verification codes. Please try again.')
+        setError(err.message || 'Failed to send verification code. Please try again.')
       } finally {
         setIsLoading(false)
       }
     } else if (signupStep === 3) {
-      // Verify codes
-      if (!emailOtp || !phoneOtp) {
-        setError('Please enter both verification codes')
+      // Verify email OTP
+      if (!emailOtp) {
+        setError('Please enter the email verification code')
         return
       }
       
-      if (emailOtp.length !== 6 || phoneOtp.length !== 6) {
-        setError('Verification codes must be 6 digits')
+      if (emailOtp.length !== 6) {
+        setError('Verification code must be 6 digits')
+        return
+      }
+      
+      setIsLoading(true)
+      try {
+        const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+        const result = await authService.verifyRegistrationCodes(
+          signupData.email,
+          fullPhoneNumber,
+          emailOtp,
+          '000000' // Placeholder for phone OTP (not verified yet)
+        )
+        setEmailVerified(true)
+        setSuccess('Email verified! Now verifying your phone number...')
+        setSignupStep(4)
+        // Start phone resend timer
+        setResendPhoneTimer(60)
+      } catch (err: any) {
+        setError(err.message || 'Email verification failed. Please check your code.')
+      } finally {
+        setIsLoading(false)
+      }
+    } else if (signupStep === 4) {
+      // Verify phone OTP
+      if (!phoneOtp) {
+        setError('Please enter the phone verification code')
+        return
+      }
+      
+      if (phoneOtp.length !== 6) {
+        setError('Verification code must be 6 digits')
         return
       }
       
@@ -247,10 +279,11 @@ export default function LoginOverlay({
           phoneOtp
         )
         setVerificationToken(result.verificationToken)
-        setSuccess('Verification successful! Please create your password.')
-        setSignupStep(4)
+        setPhoneVerified(true)
+        setSuccess('Phone verified! Please create your password.')
+        setSignupStep(5)
       } catch (err: any) {
-        setError(err.message || 'Verification failed. Please check your codes.')
+        setError(err.message || 'Phone verification failed. Please check your code.')
       } finally {
         setIsLoading(false)
       }
@@ -647,13 +680,21 @@ export default function LoginOverlay({
                 {/* Signup Form - Progressive Steps */}
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h2>
-                  <p className="text-sm text-gray-500">Step {signupStep} of 3</p>
+                  <p className="text-sm text-gray-500">
+                    {signupStep === 1 && 'Step 1 of 5: Your Name'}
+                    {signupStep === 2 && 'Step 2 of 5: Contact Details'}
+                    {signupStep === 3 && 'Step 3 of 5: Verify Email'}
+                    {signupStep === 4 && 'Step 4 of 5: Verify Phone'}
+                    {signupStep === 5 && 'Step 5 of 5: Create Password'}
+                  </p>
                   
                   {/* Progress Bar */}
                   <div className="mt-4 flex gap-2">
                     <div className={`h-1 flex-1 rounded ${signupStep >= 1 ? 'bg-brand-red' : 'bg-gray-200'}`} />
                     <div className={`h-1 flex-1 rounded ${signupStep >= 2 ? 'bg-brand-red' : 'bg-gray-200'}`} />
                     <div className={`h-1 flex-1 rounded ${signupStep >= 3 ? 'bg-brand-red' : 'bg-gray-200'}`} />
+                    <div className={`h-1 flex-1 rounded ${signupStep >= 4 ? 'bg-brand-red' : 'bg-gray-200'}`} />
+                    <div className={`h-1 flex-1 rounded ${signupStep >= 5 ? 'bg-brand-red' : 'bg-gray-200'}`} />
                   </div>
                 </div>
 
@@ -790,11 +831,23 @@ export default function LoginOverlay({
                 {signupStep === 3 && (
                   <form onSubmit={handleSignupNext} className="space-y-4">
                     <div className="text-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Verify Your Contact Details</h3>
+                      <div className="mx-auto w-16 h-16 bg-brand-red/10 rounded-full flex items-center justify-center mb-3">
+                        <svg className="w-8 h-8 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Verify Your Email</h3>
                       <p className="text-sm text-gray-600">
-                        We've sent verification codes to your email and phone number
+                        We've sent a 6-digit code to<br />
+                        <span className="font-medium text-gray-900">{signupData.email}</span>
                       </p>
                     </div>
+
+                    {success && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                        <p className="text-sm text-green-600">{success}</p>
+                      </div>
+                    )}
 
                     <div>
                       <label htmlFor="emailOtp" className="block text-sm font-medium text-gray-700 mb-2">
@@ -809,16 +862,59 @@ export default function LoginOverlay({
                         placeholder="000000"
                         maxLength={6}
                         required
+                        autoFocus
                       />
+                      <div className="mt-2 text-center">
+                        <button
+                          type="button"
+                          onClick={handleResendEmailOtp}
+                          disabled={resendEmailTimer > 0 || isLoading}
+                          className="text-sm text-brand-red hover:text-brand-red-600 disabled:text-gray-400 disabled:cursor-not-allowed"
+                        >
+                          {resendEmailTimer > 0 ? `Resend in ${resendEmailTimer}s` : 'Resend Email Code'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
                       <button
                         type="button"
-                        onClick={handleResendEmailOtp}
-                        disabled={resendEmailTimer > 0 || isLoading}
-                        className="mt-2 text-sm text-brand-red hover:text-brand-red-600 disabled:text-gray-400 disabled:cursor-not-allowed"
+                        onClick={handleSignupBack}
+                        className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
                       >
-                        {resendEmailTimer > 0 ? `Resend in ${resendEmailTimer}s` : 'Resend Email Code'}
+                        Back
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isLoading || emailOtp.length !== 6}
+                        className="flex-1 bg-brand-red text-white py-3 rounded-lg font-medium hover:bg-brand-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isLoading ? 'Verifying...' : 'Verify Email'}
                       </button>
                     </div>
+                  </form>
+                )}
+
+                {signupStep === 4 && (
+                  <form onSubmit={handleSignupNext} className="space-y-4">
+                    <div className="text-center mb-4">
+                      <div className="mx-auto w-16 h-16 bg-brand-red/10 rounded-full flex items-center justify-center mb-3">
+                        <svg className="w-8 h-8 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Verify Your Phone</h3>
+                      <p className="text-sm text-gray-600">
+                        We've sent a 6-digit code to<br />
+                        <span className="font-medium text-gray-900">{signupData.dialCode} {signupData.phoneNumber}</span>
+                      </p>
+                    </div>
+
+                    {success && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                        <p className="text-sm text-green-600">{success}</p>
+                      </div>
+                    )}
 
                     <div>
                       <label htmlFor="phoneOtp" className="block text-sm font-medium text-gray-700 mb-2">
@@ -833,6 +929,7 @@ export default function LoginOverlay({
                         placeholder="000000"
                         maxLength={6}
                         required
+                        autoFocus
                       />
                       <div className="mt-2 flex items-center justify-between">
                         <select
@@ -865,16 +962,16 @@ export default function LoginOverlay({
                       </button>
                       <button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isLoading || phoneOtp.length !== 6}
                         className="flex-1 bg-brand-red text-white py-3 rounded-lg font-medium hover:bg-brand-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {isLoading ? 'Verifying...' : 'Verify Codes'}
+                        {isLoading ? 'Verifying...' : 'Verify Phone'}
                       </button>
                     </div>
                   </form>
                 )}
 
-                {signupStep === 4 && (
+                {signupStep === 5 && (
                   <form onSubmit={handleSignupSubmit} className="space-y-4">
                     <div>
                       <label htmlFor="signupPassword" className="block text-sm font-medium text-gray-700 mb-2">
