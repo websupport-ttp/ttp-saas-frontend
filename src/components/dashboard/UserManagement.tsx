@@ -35,8 +35,8 @@ interface ManagedUser {
   agentDetails?: {
     agencyName?: string;
     agentCode?: string;
-    commissionRate?: number;
     isApproved?: boolean;
+    commissionRate?: number;
   };
 }
 
