@@ -1,6 +1,7 @@
 // lib/auth/permissions.ts
 /**
  * Permission and access control utilities for role-based dashboards
+ * Updated: 2024
  */
 
 export enum UserRole {
