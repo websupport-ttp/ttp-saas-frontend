@@ -29,6 +29,18 @@ export interface User {
   staffClearanceLevel?: StaffClearanceLevel;
   staffDepartment?: string;
   staffEmployeeId?: string;
+  staffDesignation?: string;
+  vendorDetails?: {
+    businessName?: string;
+    commissionRate?: number;
+    isApproved?: boolean;
+  };
+  agentDetails?: {
+    agencyName?: string;
+    agentCode?: string;
+    commissionRate?: number;
+    isApproved?: boolean;
+  };
   profilePicture?: {
     url: string;
     publicId: string;
