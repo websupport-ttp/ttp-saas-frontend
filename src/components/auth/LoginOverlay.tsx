@@ -906,7 +906,7 @@ export default function LoginOverlay({
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Verify Your Phone</h3>
                       <p className="text-sm text-gray-600">
                         We've sent a 6-digit code to<br />
-                        <span className="font-medium text-gray-900">{signupData.dialCode} {signupData.phoneNumber}</span>
+                        <span className="font-medium text-gray-900">{signupData.dialCode} {signupData.phoneNumber.replace(/^0+/, '')}</span>
                       </p>
                     </div>
 
