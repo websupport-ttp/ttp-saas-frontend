@@ -2,6 +2,7 @@
 
 import { CarRental, DriverInformation, CarExtra } from '@/types/car-hire';
 import { calculateRentalDays } from '@/lib/car-hire-utils';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface CarBookingSummaryProps {
   car: CarRental;
@@ -26,6 +27,7 @@ export default function CarBookingSummary({
   taxes,
   total
 }: CarBookingSummaryProps) {
+  const { formatAmount } = useCurrency();
   const rentalDays = calculateRentalDays(pickupDate, returnDate);
 
   return (
@@ -98,7 +100,7 @@ export default function CarBookingSummary({
           <span className="text-gray-600">
             Car rental ({rentalDays} day{rentalDays !== 1 ? 's' : ''})
           </span>
-          <span className="text-gray-900">${(car.pricePerDay * rentalDays).toFixed(2)}</span>
+          <span className="text-gray-900">{formatAmount(car.pricePerDay * rentalDays)}</span>
         </div>
         
         {extras && extras.length > 0 && (
@@ -109,7 +111,7 @@ export default function CarBookingSummary({
                   {extra.name} ({extra.quantity}x)
                 </span>
                 <span className="text-gray-900">
-                  ${(extra.pricePerDay * extra.quantity * rentalDays).toFixed(2)}
+                  {formatAmount(extra.pricePerDay * extra.quantity * rentalDays)}
                 </span>
               </div>
             ))}
@@ -118,13 +120,13 @@ export default function CarBookingSummary({
         
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Taxes & fees</span>
-          <span className="text-gray-900">${taxes.toFixed(2)}</span>
+          <span className="text-gray-900">{formatAmount(taxes)}</span>
         </div>
         
         <div className="border-t border-gray-200 pt-2">
           <div className="flex justify-between font-semibold">
             <span className="text-gray-900">Total</span>
-            <span className="text-gray-900">${total.toFixed(2)}</span>
+            <span className="text-gray-900">{formatAmount(total)}</span>
           </div>
         </div>
       </div>

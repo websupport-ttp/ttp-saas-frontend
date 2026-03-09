@@ -3,8 +3,10 @@
 import { CarCardProps } from '@/types/car-hire';
 import { formatCarFeatures } from '@/lib/car-hire-utils';
 import { getUIIcon } from '@/lib/constants/icons';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function CarCard({ car, onSelect, className = '' }: CarCardProps) {
+  const { formatAmount } = useCurrency();
   const handleSelect = () => {
     onSelect(car.id);
   };
@@ -124,7 +126,7 @@ export default function CarCard({ car, onSelect, className = '' }: CarCardProps)
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div className="text-left">
             <div className="text-xl sm:text-2xl font-bold text-brand-red">
-              ${car.pricePerDay}
+              {formatAmount(car.pricePerDay)}
             </div>
             <div className="text-sm text-gray-500">
               per day

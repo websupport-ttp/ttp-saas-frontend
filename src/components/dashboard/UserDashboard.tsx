@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { User, getDashboardPermissions } from '@/lib/auth/permissions';
 import Link from 'next/link';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface UserDashboardProps {
   user: User;
@@ -31,6 +32,7 @@ interface DashboardStats {
 }
 
 export default function UserDashboard({ user }: UserDashboardProps) {
+  const { formatAmount } = useCurrency();
   const [stats, setStats] = useState<DashboardStats>({
     totalBookings: 0,
     pendingBookings: 0,
@@ -238,7 +240,7 @@ export default function UserDashboard({ user }: UserDashboardProps) {
                           {booking.status}
                         </span>
                         <p className="text-sm font-semibold text-gray-900 mt-2">
-                          ${booking.totalPrice.toFixed(2)}
+                          {formatAmount(booking.totalPrice)}
                         </p>
                       </div>
                     </div>

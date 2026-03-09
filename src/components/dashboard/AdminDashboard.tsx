@@ -7,13 +7,17 @@ import CarInventoryManagement from './CarInventoryManagement';
 import BookingManagement from './BookingManagement';
 import UserManagement from './UserManagement';
 import SystemSettings from './SystemSettings';
+import CurrencyManagement from './CurrencyManagement';
+import TransactionDashboard from './TransactionDashboard';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface AdminDashboardProps {
   user: User;
 }
 
 export default function AdminDashboard({ user }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'inventory' | 'bookings' | 'settings'>('overview');
+  const { formatAmount } = useCurrency();
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'inventory' | 'bookings' | 'transactions' | 'currencies' | 'settings'>('overview');
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalBookings: 0,
@@ -59,6 +63,10 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
         return <BookingManagement user={user} permissions={permissions} />;
       case 'users':
         return <UserManagement currentUser={user} />;
+      case 'transactions':
+        return <TransactionDashboard />;
+      case 'currencies':
+        return <CurrencyManagement />;
       case 'settings':
         return <SystemSettings />;
       default:
@@ -124,7 +132,7 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm text-gray-600">Total Revenue</p>
-                    <p className="text-2xl font-bold text-gray-900">{loading ? '-' : `$${stats.totalRevenue.toFixed(2)}`}</p>
+                    <p className="text-2xl font-bold text-gray-900">{loading ? '-' : formatAmount(stats.totalRevenue)}</p>
                   </div>
                 </div>
               </div>
@@ -253,6 +261,28 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
             }`}
           >
             Inventory
+          </button>
+
+          <button
+            onClick={() => setActiveTab('transactions')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'transactions'
+                ? 'border-brand-red text-brand-red'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Transactions
+          </button>
+
+          <button
+            onClick={() => setActiveTab('currencies')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'currencies'
+                ? 'border-brand-red text-brand-red'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Currencies
           </button>
 
           <button

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { LoginOverlay } from '@/components/auth'
+import CurrencyPicker from '@/components/CurrencyPicker'
 
 interface HeaderProps {
   className?: string
@@ -15,11 +16,9 @@ export function Header({ className = '' }: HeaderProps) {
   const [isLoginOverlayOpen, setIsLoginOverlayOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState('EN')
-  const [selectedCurrency, setSelectedCurrency] = useState('NGN')
   const pathname = usePathname()
 
   const languages = ['EN', 'FR', 'ES', 'DE']
-  const currencies = ['NGN', 'USD', 'EUR', 'GBP']
 
   const navigationItems = [
     { label: 'Home', href: '/', active: pathname === '/' },
@@ -81,6 +80,9 @@ export function Header({ className = '' }: HeaderProps) {
 
           {/* Right Side - Account & Settings */}
           <div className="hidden md:flex items-center gap-4">
+            {/* Currency Picker */}
+            <CurrencyPicker />
+
             {/* Account Button */}
             <button
               onClick={() => setIsLoginOverlayOpen(true)}
@@ -92,13 +94,13 @@ export function Header({ className = '' }: HeaderProps) {
               Account
             </button>
 
-            {/* Country | Language | Currency Dropdown */}
+            {/* Language Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setIsSettingsOpen(!isSettingsOpen)}
                 className="flex items-center gap-2 text-sm text-gray-600 hover:text-brand-red transition-colors px-3 py-2 rounded hover:bg-gray-50"
               >
-                <span className="font-medium">NG | {selectedLanguage} | {selectedCurrency}</span>
+                <span className="font-medium">NG | {selectedLanguage}</span>
                 <svg 
                   className={`w-4 h-4 transition-transform ${isSettingsOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
@@ -113,7 +115,7 @@ export function Header({ className = '' }: HeaderProps) {
               {isSettingsOpen && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50">
                   {/* Language Dropdown */}
-                  <div className="mb-4">
+                  <div>
                     <label className="block text-xs text-gray-500 font-medium mb-2">LANGUAGE</label>
                     <select
                       value={selectedLanguage}
@@ -124,21 +126,6 @@ export function Header({ className = '' }: HeaderProps) {
                       <option value="FR">Français</option>
                       <option value="ES">Español</option>
                       <option value="DE">Deutsch</option>
-                    </select>
-                  </div>
-                  
-                  {/* Currency Dropdown */}
-                  <div>
-                    <label className="block text-xs text-gray-500 font-medium mb-2">CURRENCY</label>
-                    <select
-                      value={selectedCurrency}
-                      onChange={(e) => setSelectedCurrency(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                    >
-                      <option value="NGN">NGN - Nigerian Naira</option>
-                      <option value="USD">USD - US Dollar</option>
-                      <option value="EUR">EUR - Euro</option>
-                      <option value="GBP">GBP - British Pound</option>
                     </select>
                   </div>
                 </div>
