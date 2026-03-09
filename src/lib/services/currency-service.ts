@@ -42,8 +42,9 @@ class CurrencyService {
    */
   async getCurrencies(): Promise<Currency[]> {
     try {
-      const response = await apiClient.get<{ currencies: Currency[] }>(this.baseUrl);
-      return response.data.currencies;
+      const response = await apiClient.get<any>(this.baseUrl);
+      // response.data contains { count, currencies }
+      return response.data?.currencies || [];
     } catch (error) {
       console.error('Failed to fetch currencies:', error);
       // Return empty array instead of throwing to prevent app crash
@@ -56,8 +57,9 @@ class CurrencyService {
    */
   async getAllCurrencies(): Promise<Currency[]> {
     try {
-      const response = await apiClient.get<{ currencies: Currency[] }>(`${this.baseUrl}/all`);
-      return response.data.currencies;
+      const response = await apiClient.get<any>(`${this.baseUrl}/all`);
+      // response.data contains { count, currencies }
+      return response.data?.currencies || [];
     } catch (error) {
       console.error('Failed to fetch all currencies:', error);
       throw new Error('Failed to load all currencies');

@@ -191,8 +191,8 @@ const CurrencyManagement: React.FC = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{currency.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{currency.symbol}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{currency.rate.toFixed(4)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{currency.markup}%</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{currency.rate?.toFixed(4) || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{currency.markup || 0}%</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 text-xs rounded-full ${currency.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                     {currency.isActive ? 'Active' : 'Inactive'}
