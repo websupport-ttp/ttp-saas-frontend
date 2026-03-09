@@ -5,6 +5,7 @@ import { User, getDashboardPermissions } from '@/lib/auth/permissions';
 import DashboardLayout from './DashboardLayout';
 import CarInventoryManagement from './CarInventoryManagement';
 import BookingManagement from './BookingManagement';
+import UserManagement from './UserManagement';
 import SystemSettings from './SystemSettings';
 
 interface AdminDashboardProps {
