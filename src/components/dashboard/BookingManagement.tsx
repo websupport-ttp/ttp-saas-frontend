@@ -57,7 +57,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
       if (filters.status) params.set('status', filters.status);
       if (filters.paymentStatus) params.set('paymentStatus', filters.paymentStatus);
 
-      const response = await fetch(`${API_BASE_URL}/car-hire/bookings?${params.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/car-hire/bookings/all?${params.toString()}`, {
         credentials: 'include',
       });
 

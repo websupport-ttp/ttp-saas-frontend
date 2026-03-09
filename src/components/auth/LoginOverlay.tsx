@@ -248,10 +248,21 @@ export default function LoginOverlay({
           '000000' // Placeholder for phone OTP (not verified yet)
         )
         setEmailVerified(true)
-        setSuccess('Email verified! Now verifying your phone number...')
-        setSignupStep(4)
-        // Start phone resend timer
-        setResendPhoneTimer(60)
+        
+        // Check if backend auto-verified phone (dev mode)
+        if (result.phoneVerified && result.verificationToken) {
+          // Backend is in dev mode - phone auto-verified
+          setPhoneVerified(true)
+          setVerificationToken(result.verificationToken)
+          setSuccess('Email verified! Phone verification skipped (dev mode). Please create your password.')
+          setSignupStep(5) // Skip to password step
+        } else {
+          // Normal flow - proceed to phone verification
+          setSuccess('Email verified! Now verifying your phone number...')
+          setSignupStep(4)
+          // Start phone resend timer
+          setResendPhoneTimer(60)
+        }
       } catch (err: any) {
         setError(err.message || 'Email verification failed. Please check your code.')
       } finally {
