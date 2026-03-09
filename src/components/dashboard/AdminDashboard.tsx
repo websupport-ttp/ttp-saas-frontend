@@ -5,7 +5,7 @@ import { User, getDashboardPermissions } from '@/lib/auth/permissions';
 import DashboardLayout from './DashboardLayout';
 import CarInventoryManagement from './CarInventoryManagement';
 import BookingManagement from './BookingManagement';
-import UserManagement from './UserManagement';
+import SystemSettings from './SystemSettings';
 
 interface AdminDashboardProps {
   user: User;
@@ -59,12 +59,7 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
       case 'users':
         return <UserManagement currentUser={user} />;
       case 'settings':
-        return (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">System Settings</h3>
-            <p className="text-gray-600">System settings interface coming soon...</p>
-          </div>
-        );
+        return <SystemSettings />;
       default:
         return (
           <div>
