@@ -2,9 +2,10 @@
 
 import { ReactNode } from 'react'
 import { NotificationProvider } from '@/contexts/notification-context'
-import { SimpleAuthProvider } from '@/contexts/simple-auth-context'
+import { AuthProvider } from '@/contexts/auth-context'
 import { SimpleLoadingProvider } from '@/contexts/simple-loading-context'
 import { CurrencyProvider } from '@/contexts/CurrencyContext'
+import { SiteSettingsProvider } from '@/contexts/SiteSettingsContext'
 
 interface ProvidersProps {
   children: ReactNode
@@ -13,13 +14,15 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <SimpleLoadingProvider>
-      <SimpleAuthProvider>
+      <AuthProvider>
         <CurrencyProvider>
-          <NotificationProvider>
-            {children}
-          </NotificationProvider>
+          <SiteSettingsProvider>
+            <NotificationProvider>
+              {children}
+            </NotificationProvider>
+          </SiteSettingsProvider>
         </CurrencyProvider>
-      </SimpleAuthProvider>
+      </AuthProvider>
     </SimpleLoadingProvider>
   )
 }
