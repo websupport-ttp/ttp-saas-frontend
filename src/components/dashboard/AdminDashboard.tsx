@@ -9,6 +9,8 @@ import UserManagement from './UserManagement';
 import SystemSettings from './SystemSettings';
 import CurrencyManagement from './CurrencyManagement';
 import TransactionDashboard from './TransactionDashboard';
+import PricingManagement from './PricingManagement';
+import AnalyticsDashboard from './AnalyticsDashboard';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface AdminDashboardProps {
@@ -17,7 +19,7 @@ interface AdminDashboardProps {
 
 export default function AdminDashboard({ user }: AdminDashboardProps) {
   const { formatAmount } = useCurrency();
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'inventory' | 'bookings' | 'transactions' | 'currencies' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'inventory' | 'bookings' | 'transactions' | 'currencies' | 'pricing' | 'analytics' | 'settings'>('overview');
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalBookings: 0,
@@ -67,6 +69,10 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
         return <TransactionDashboard />;
       case 'currencies':
         return <CurrencyManagement />;
+      case 'pricing':
+        return <PricingManagement />;
+      case 'analytics':
+        return <AnalyticsDashboard />;
       case 'settings':
         return <SystemSettings />;
       default:
@@ -283,6 +289,28 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
             }`}
           >
             Currencies
+          </button>
+
+          <button
+            onClick={() => setActiveTab('pricing')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'pricing'
+                ? 'border-brand-red text-brand-red'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Pricing
+          </button>
+
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'analytics'
+                ? 'border-brand-red text-brand-red'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Analytics
           </button>
 
           <button
