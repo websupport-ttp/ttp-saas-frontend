@@ -344,6 +344,16 @@ export default function FlightsPage() {
           const shouldShowHotels = hasSearched && searchResults && searchResults.data && searchResults.data.length > 0 && initialSearchData && initialSearchData.to && initialSearchData.departure;
           const extractedDestination = initialSearchData?.to ? extractDestinationCity(initialSearchData.to) : '';
           
+          // Calculate adults count from passengers data
+          let adultsCount = 1;
+          if (initialSearchData?.passengers) {
+            if (typeof initialSearchData.passengers === 'object' && initialSearchData.passengers.adults) {
+              adultsCount = initialSearchData.passengers.adults;
+            } else if (typeof initialSearchData.passengers === 'string' || typeof initialSearchData.passengers === 'number') {
+              adultsCount = parseInt(initialSearchData.passengers.toString()) || 1;
+            }
+          }
+          
           return shouldShowHotels ? (
             <div className="mb-8">
               <HotelSlider
@@ -351,7 +361,7 @@ export default function FlightsPage() {
                 destination={extractedDestination}
                 checkInDate={initialSearchData.departure}
                 checkOutDate={getCheckOutDate(initialSearchData.departure, initialSearchData.return)}
-                rooms={[{ adults: Math.max(1, parseInt(initialSearchData.passengers || '1') || 1), children: 0 }]}
+                rooms={[{ adults: Math.max(1, adultsCount), children: 0 }]}
               />
             </div>
           ) : null;
