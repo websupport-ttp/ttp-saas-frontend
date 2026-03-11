@@ -1,5 +1,5 @@
 // lib/services/site-settings-service.ts
-import { apiClient } from './api-client';
+import { apiClient } from '../api-client';
 
 export interface SiteSettings {
   _id: string;

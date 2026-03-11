@@ -1,5 +1,5 @@
 // lib/services/team-service.ts
-import { apiClient } from './api-client';
+import { apiClient } from '../api-client';
 
 export interface TeamMember {
   _id: string;
