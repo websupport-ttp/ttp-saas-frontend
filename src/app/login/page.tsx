@@ -1,11 +1,11 @@
 'use client'
 
 import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
+import dynamicImport from 'next/dynamic'
 import { Header } from '@/components/layout/Header'
 
 // Dynamically import LoginForm with no SSR
-const LoginForm = dynamic(() => import('@/components/auth/LoginForm'), {
+const LoginForm = dynamicImport(() => import('@/components/auth/LoginForm'), {
   ssr: false,
   loading: () => (
     <div className="max-w-md w-full flex items-center justify-center">
