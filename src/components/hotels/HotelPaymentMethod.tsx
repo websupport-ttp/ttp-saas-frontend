@@ -188,11 +188,12 @@ export default function HotelPaymentMethod({
       });
 
       // Call the hotel booking API
-      const response = await fetch('http://localhost:8080/api/v1/products/hotels/book', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/products/hotels/book`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(bookingPayload)
       });
 
