@@ -26,7 +26,7 @@ export function ProtectedRoute({
   children,
   requiredRole,
   requireVerification = false,
-  fallbackPath = '/auth/login',
+  fallbackPath = '/login',
   loadingComponent
 }: ProtectedRouteProps) {
   const { isAuthenticated, user, isLoading } = useSimpleAuth();

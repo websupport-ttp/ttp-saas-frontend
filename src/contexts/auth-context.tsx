@@ -25,6 +25,7 @@ export interface AuthContextType {
 
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
+  loginWithGoogle: (googleUser: { googleId: string; email: string; firstName: string; lastName: string; otherNames?: string }) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -115,6 +116,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   /**
+   * Login with Google
+   */
+  const loginWithGoogle = async (googleUser: { 
+    googleId: string; 
+    email: string; 
+    firstName: string; 
+    lastName: string; 
+    otherNames?: string 
+  }): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const authResponse: AuthResponse = await authService.loginWithGoogle(googleUser);
+      setUser(authResponse.user);
+
+      // Redirect to dashboard or intended page
+      const redirectTo = sessionStorage.getItem('redirectAfterLogin') || '/dashboard';
+      sessionStorage.removeItem('redirectAfterLogin');
+      router.push(redirectTo);
+    } catch (error: any) {
+      setError(error.message || 'Google login failed');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
    * Register new user
    */
   const register = async (userData: RegisterData): Promise<void> => {
@@ -157,7 +187,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(false);
       
       if (redirectToLogin) {
-        router.push('/auth/login');
+        router.push('/login');
       }
     }
   };
@@ -216,6 +246,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Actions
     login,
+    loginWithGoogle,
     register,
     logout,
     refreshUser,
@@ -279,10 +310,11 @@ export function useUser(): User | null {
  */
 export function useAuthActions(): {
   login: (credentials: LoginCredentials) => Promise<void>;
+  loginWithGoogle: (googleUser: { googleId: string; email: string; firstName: string; lastName: string; otherNames?: string }) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 } {
-  const { login, register, logout, refreshUser } = useAuth();
-  return { login, register, logout, refreshUser };
+  const { login, loginWithGoogle, register, logout, refreshUser } = useAuth();
+  return { login, loginWithGoogle, register, logout, refreshUser };
 }

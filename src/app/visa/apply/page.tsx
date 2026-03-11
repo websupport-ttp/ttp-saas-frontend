@@ -82,7 +82,7 @@ export default function VisaApplicationPage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/auth/login?redirect=/visa/apply');
+      router.push('/login?redirect=/visa/apply');
     }
   }, [isAuthenticated, router]);
 

@@ -18,6 +18,7 @@ import {
 
 export interface AuthService {
   login(credentials: LoginCredentials): Promise<AuthResponse>;
+  loginWithGoogle(googleUser: { googleId: string; email: string; firstName: string; lastName: string; otherNames?: string }): Promise<AuthResponse>;
   logout(): Promise<void>;
   register(userData: RegisterData): Promise<AuthResponse>;
   sendVerificationCodes(email: string, phoneNumber: string): Promise<any>;
@@ -191,6 +192,52 @@ class AuthenticationService implements AuthService {
       }
 
       throw new Error(error.message || 'Login failed. Please try again.');
+    }
+  }
+
+  /**
+   * Login with Google
+   */
+  public async loginWithGoogle(googleUser: { 
+    googleId: string; 
+    email: string; 
+    firstName: string; 
+    lastName: string; 
+    otherNames?: string 
+  }): Promise<AuthResponse> {
+    try {
+      const response: ApiResponse<any> = await apiClient.post(
+        '/auth/google',
+        googleUser,
+        { requiresAuth: false }
+      );
+
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Google login failed');
+      }
+
+      // Backend uses HTTP-only cookies for tokens, so we only save user data
+      const user = response.data.user;
+      
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user_data', JSON.stringify(user));
+      }
+      
+      this.currentUser = user;
+
+      // Return a mock AuthResponse for compatibility
+      return {
+        user,
+        token: 'cookie-based', // Tokens are in HTTP-only cookies
+        refreshToken: 'cookie-based',
+        expiresAt: new Date(Date.now() + 3600000).toISOString() // 1 hour
+      };
+    } catch (error: any) {
+      if (error.type === ErrorType.NETWORK_ERROR) {
+        throw new Error('Network error. Please check your connection and try again.');
+      }
+
+      throw new Error(error.message || 'Google login failed. Please try again.');
     }
   }
 
