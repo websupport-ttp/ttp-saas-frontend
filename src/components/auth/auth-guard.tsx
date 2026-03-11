@@ -6,7 +6,7 @@
 'use client';
 
 import React, { useEffect, useState, ReactNode } from 'react';
-import { useSimpleAuth } from '@/contexts/simple-auth-context';
+import { useAuth } from '@/contexts/auth-context';
 import { authService } from '@/lib/auth-service';
 import { tokenStorage } from '@/lib/token-storage';
 
@@ -27,7 +27,7 @@ export function AuthGuard({
   refreshInterval = 5, // 5 minutes
   enableSecurityMonitoring = true
 }: AuthGuardProps) {
-  const { isAuthenticated, logout } = useSimpleAuth();
+  const { isAuthenticated, logout } = useAuth();
   // Mock implementation for missing method
   const refreshUser = async () => {};
   const [securityIssues, setSecurityIssues] = useState<string[]>([]);

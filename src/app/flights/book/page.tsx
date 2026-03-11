@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ServiceLayout } from '@/components/layout'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
-import { useSimpleAuth } from '@/contexts/simple-auth-context'
+import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/Button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -27,7 +27,7 @@ interface PaymentData {
 export default function FlightBookingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { isAuthenticated, login, isLoading: authLoading } = useSimpleAuth()
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
   const [selectedFlight, setSelectedFlight] = useState<any>(null)
   const [passengerData, setPassengerData] = useState<PassengerData | null>(null)
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null)

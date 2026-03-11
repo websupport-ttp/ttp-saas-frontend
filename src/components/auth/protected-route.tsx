@@ -7,7 +7,7 @@
 
 import React, { useEffect, ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useSimpleAuth } from '@/contexts/simple-auth-context';
+import { useAuth } from '@/contexts/auth-context';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface ProtectedRouteProps {
@@ -29,7 +29,7 @@ export function ProtectedRoute({
   fallbackPath = '/login',
   loadingComponent
 }: ProtectedRouteProps) {
-  const { isAuthenticated, user, isLoading } = useSimpleAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
   // Mock implementations for missing methods
   const hasRole = (role: string) => true;
   const isUserVerified = () => true;

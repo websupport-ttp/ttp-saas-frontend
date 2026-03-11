@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { PackageDetails, PackagePurchaseData, ParticipantInfo } from '@/types/api';
-import { useSimpleAuth } from '@/contexts/simple-auth-context';
+import { useAuth } from '@/contexts/auth-context';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 interface PackagePurchaseFormProps {
@@ -20,7 +20,7 @@ export default function PackagePurchaseForm({
   isProcessing,
   error
 }: PackagePurchaseFormProps) {
-  const { user } = useSimpleAuth();
+  const { user } = useAuth();
   const [participants, setParticipants] = useState<ParticipantInfo[]>([]);
   const [specialRequests, setSpecialRequests] = useState('');
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});

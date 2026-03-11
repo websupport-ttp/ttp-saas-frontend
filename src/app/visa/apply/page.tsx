@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { visaService } from '@/lib/services/visa-service';
 import { VisaApplicationData, VisaRequirements, VisaFees } from '@/types/api';
 import { useNotificationHelpers } from '@/contexts/notification-context';
-import { useSimpleAuth } from '@/contexts/simple-auth-context';
+import { useAuth } from '@/contexts/auth-context';
 
 // Import step components
 import VisaApplicationStepIndicator from '@/components/visa-application/VisaApplicationStepIndicator';
@@ -18,7 +18,7 @@ export default function VisaApplicationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showError, showSuccess } = useNotificationHelpers();
-  const { user, isAuthenticated } = useSimpleAuth();
+  const { user, isAuthenticated } = useAuth();
 
   // Get initial values from URL params
   const initialCountry = searchParams.get('country') || '';
