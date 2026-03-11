@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ServiceLayout } from '@/components/layout'
 import { flightService } from '@/lib/services/flight-service'
-import { useSimpleAuth } from '@/contexts/simple-auth-context'
+import { useAuth } from '@/contexts/auth-context'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import { Button } from '@/components/ui/Button'
@@ -27,7 +27,7 @@ interface Booking {
 }
 
 export default function BookingsPage() {
-  const { user, isAuthenticated } = useSimpleAuth()
+  const { user, isAuthenticated } = useAuth()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | undefined>()
