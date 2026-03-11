@@ -55,7 +55,7 @@ export const emailTemplateService = {
     
     const url = `/email-templates${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
     const response = await apiClient.get(url)
-    return response.data.templates
+    return (response.data as any).templates
   },
 
   /**
@@ -63,7 +63,7 @@ export const emailTemplateService = {
    */
   async getById(id: string): Promise<EmailTemplate> {
     const response = await apiClient.get(`/email-templates/${id}`)
-    return response.data.template
+    return (response.data as any).template
   },
 
   /**
@@ -71,7 +71,7 @@ export const emailTemplateService = {
    */
   async getByName(name: string): Promise<EmailTemplate> {
     const response = await apiClient.get(`/email-templates/name/${name}`)
-    return response.data.template
+    return (response.data as any).template
   },
 
   /**
@@ -79,7 +79,7 @@ export const emailTemplateService = {
    */
   async create(data: CreateEmailTemplateData): Promise<EmailTemplate> {
     const response = await apiClient.post('/email-templates', data)
-    return response.data.template
+    return (response.data as any).template
   },
 
   /**
@@ -87,7 +87,7 @@ export const emailTemplateService = {
    */
   async update(id: string, data: UpdateEmailTemplateData): Promise<EmailTemplate> {
     const response = await apiClient.put(`/email-templates/${id}`, data)
-    return response.data.template
+    return (response.data as any).template
   },
 
   /**
@@ -102,6 +102,6 @@ export const emailTemplateService = {
    */
   async preview(id: string, sampleData: Record<string, any>): Promise<string> {
     const response = await apiClient.post(`/email-templates/${id}/preview`, { sampleData })
-    return response.data.html
+    return (response.data as any).html
   },
 }
