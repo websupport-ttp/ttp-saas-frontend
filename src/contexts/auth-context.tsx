@@ -54,27 +54,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Initialize authentication state
   useEffect(() => {
     initializeAuth();
-    
-    // Set up periodic auth check (every 5 minutes)
-    const authCheckInterval = setInterval(() => {
-      if (user) {
+  }, []);
+
+  // Set up periodic auth check (every 5 minutes)
+  useEffect(() => {
+    if (!user) return;
+
+    const authCheckInterval = setInterval(async () => {
+      try {
         // Silently verify auth is still valid
-        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/profile`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/profile`, {
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
-        }).then(response => {
-          if (!response.ok) {
-            // Auth expired, logout
-            handleLogout(false);
-          }
-        }).catch(() => {
-          // Network error, don't logout
         });
+        
+        if (!response.ok) {
+          // Auth expired, clear state and redirect
+          console.log('Auth session expired, logging out');
+          setUser(null);
+          authService.clearAuthData();
+          router.push('/login');
+        }
+      } catch (error) {
+        // Network error, don't logout
+        console.error('Auth check failed:', error);
       }
     }, 5 * 60 * 1000); // 5 minutes
 
     return () => clearInterval(authCheckInterval);
-  }, [user]);
+  }, [user, router]);
 
   /**
    * Initialize authentication state from storage

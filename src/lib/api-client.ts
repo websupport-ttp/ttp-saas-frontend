@@ -218,7 +218,7 @@ class ApiClient {
               
               // Redirect to login page
               if (typeof window !== 'undefined') {
-                window.location.href = '/auth/login';
+                window.location.href = '/login';
               }
               
               return Promise.reject(refreshError);
@@ -231,7 +231,7 @@ class ApiClient {
             
             // Only redirect if it's not a guest request and not an auth endpoint
             if (typeof window !== 'undefined' && !isAuthEndpoint && !isGuestRequest) {
-              window.location.href = '/auth/login';
+              window.location.href = '/login';
             }
           }
         }
