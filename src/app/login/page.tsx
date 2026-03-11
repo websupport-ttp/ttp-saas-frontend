@@ -50,7 +50,7 @@ export default function LoginPage() {
 
     try {
       await login({
-        email: formData.email,
+        emailOrPhone: formData.email,
         password: formData.password
       })
       
