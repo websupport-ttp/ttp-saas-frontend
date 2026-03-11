@@ -36,6 +36,11 @@ export const initializeGoogleSignIn = (callback: (user: GoogleUser) => void) => 
         client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         callback: (response: any) => handleGoogleResponse(response, callback),
       });
+      
+      // Render button after initialization
+      setTimeout(() => {
+        renderGoogleButton('google-signin-button');
+      }, 100);
     }
   };
 

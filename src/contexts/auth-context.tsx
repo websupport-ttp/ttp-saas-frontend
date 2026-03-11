@@ -54,7 +54,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Initialize authentication state
   useEffect(() => {
     initializeAuth();
-  }, []);
+    
+    // Set up periodic auth check (every 5 minutes)
+    const authCheckInterval = setInterval(() => {
+      if (user) {
+        // Silently verify auth is still valid
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/profile`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        }).then(response => {
+          if (!response.ok) {
+            // Auth expired, logout
+            handleLogout(false);
+          }
+        }).catch(() => {
+          // Network error, don't logout
+        });
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(authCheckInterval);
+  }, [user]);
 
   /**
    * Initialize authentication state from storage
@@ -63,25 +83,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setIsLoading(true);
       
-      // Get current user from auth service
+      // Get current user from localStorage
       const currentUser = authService.getCurrentUser();
       
-      if (currentUser && authService.isAuthenticated()) {
-        // Check if token is expired
-        if (authService.isTokenExpired()) {
-          try {
-            // Try to refresh token
-            await authService.refreshToken();
+      if (currentUser) {
+        // Since we use HTTP-only cookies, verify auth by making an API call
+        try {
+          // Try to fetch user profile to verify cookie is still valid
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/profile`, {
+            credentials: 'include', // Send cookies
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            // Cookie is valid, user is authenticated
             setUser(currentUser);
-          } catch (refreshError) {
-            // Refresh failed, clear auth data
+          } else {
+            // Cookie expired or invalid, clear auth
             await handleLogout(false);
           }
-        } else {
-          setUser(currentUser);
+        } catch (error) {
+          // Network error or auth failed, clear auth
+          console.error('Auth verification failed:', error);
+          await handleLogout(false);
         }
       } else {
-        // No valid authentication found
+        // No user data in localStorage
         setUser(null);
       }
     } catch (error) {
