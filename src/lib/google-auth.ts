@@ -24,6 +24,22 @@ export interface GoogleUser {
 export const initializeGoogleSignIn = (callback: (user: GoogleUser) => void) => {
   if (typeof window === 'undefined') return;
 
+  // Check if Google Client ID is configured
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    console.error('Google Client ID not configured');
+    // Show fallback message
+    const buttonContainer = document.getElementById('google-signin-button');
+    if (buttonContainer) {
+      buttonContainer.innerHTML = `
+        <div class="text-center text-sm text-gray-500 py-3">
+          Google Sign-In integration coming soon!
+        </div>
+      `;
+    }
+    return;
+  }
+
   // Load Google Sign-In script
   const script = document.createElement('script');
   script.src = 'https://accounts.google.com/gsi/client';
@@ -33,7 +49,7 @@ export const initializeGoogleSignIn = (callback: (user: GoogleUser) => void) => 
   script.onload = () => {
     if (window.google) {
       window.google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        client_id: clientId,
         callback: (response: any) => handleGoogleResponse(response, callback),
       });
       
@@ -41,6 +57,18 @@ export const initializeGoogleSignIn = (callback: (user: GoogleUser) => void) => 
       setTimeout(() => {
         renderGoogleButton('google-signin-button');
       }, 100);
+    }
+  };
+
+  script.onerror = () => {
+    console.error('Failed to load Google Sign-In script');
+    const buttonContainer = document.getElementById('google-signin-button');
+    if (buttonContainer) {
+      buttonContainer.innerHTML = `
+        <div class="text-center text-sm text-red-500 py-3">
+          Failed to load Google Sign-In. Please try again later.
+        </div>
+      `;
     }
   };
 
