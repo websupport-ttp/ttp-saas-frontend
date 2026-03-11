@@ -1,5 +1,7 @@
 // Management Dashboard API Service
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+import { appConfig } from '@/lib/config';
+
+const API_BASE_URL = appConfig.apiBaseUrl;
 
 export interface FinancialStatsParams {
   period?: '7days' | '30days' | '90days' | '365days';
