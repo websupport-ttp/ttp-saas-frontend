@@ -46,12 +46,12 @@ class SiteSettingsService {
 
   async getSiteSettings(): Promise<SiteSettings> {
     const response = await apiClient.get<SiteSettings>(this.baseUrl);
-    return response;
+    return response.data;
   }
 
   async updateSiteSettings(data: UpdateSiteSettingsData): Promise<SiteSettings> {
     const response = await apiClient.put<SiteSettings>(this.baseUrl, data);
-    return response;
+    return response.data;
   }
 }
 

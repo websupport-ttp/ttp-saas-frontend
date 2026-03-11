@@ -57,22 +57,22 @@ class TeamService {
 
   async getTeamMembers(): Promise<TeamMember[]> {
     const response = await apiClient.get<TeamMember[]>(this.baseUrl);
-    return response;
+    return response.data;
   }
 
   async getAllTeamMembers(): Promise<TeamMember[]> {
     const response = await apiClient.get<TeamMember[]>(`${this.baseUrl}/all`);
-    return response;
+    return response.data;
   }
 
   async createTeamMember(data: CreateTeamMemberData): Promise<TeamMember> {
     const response = await apiClient.post<TeamMember>(this.baseUrl, data);
-    return response;
+    return response.data;
   }
 
   async updateTeamMember(id: string, data: UpdateTeamMemberData): Promise<TeamMember> {
     const response = await apiClient.put<TeamMember>(`${this.baseUrl}/${id}`, data);
-    return response;
+    return response.data;
   }
 
   async deleteTeamMember(id: string): Promise<void> {
