@@ -1,11 +1,15 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Header } from '@/components/layout/Header'
 import { useAuth } from '@/contexts/auth-context'
 import { initializeGoogleSignIn, GoogleUser } from '@/lib/google-auth'
+
+// Disable SSR for this page to avoid AuthProvider issues during build
+export const dynamic = 'force-dynamic'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
