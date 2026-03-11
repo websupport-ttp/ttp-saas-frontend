@@ -23,7 +23,9 @@ export function Header({ className = '' }: HeaderProps) {
   const navigationItems = [
     { label: 'Home', href: '/', active: pathname === '/' },
     { label: 'Services', href: '/services', active: pathname.startsWith('/services') },
-    { label: 'About', href: '/about', active: pathname === '/about' }
+    { label: 'About', href: '/about', active: pathname === '/about' },
+    { label: 'Blog', href: '/blog', active: pathname.startsWith('/blog') },
+    { label: 'Contact Us', href: '/contact', active: pathname === '/contact' }
   ]
 
   const handleLogin = async (email: string, password: string) => {

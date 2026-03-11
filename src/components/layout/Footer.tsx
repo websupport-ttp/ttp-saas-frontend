@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { siteSettingsService, SiteSettings } from '@/lib/services/site-settings-service'
 
 
 // Enhanced SVG icons for social media
@@ -97,34 +98,6 @@ const footerData = {
   }
 }
 
-const contactInfo = [
-  {
-    icon: Phone,
-    label: '+1 (555) 123-4567',
-    href: 'tel:+15551234567',
-    description: '24/7 Customer Support'
-  },
-  {
-    icon: Mail,
-    label: 'info@travelplace.com',
-    href: 'mailto:info@travelplace.com',
-    description: 'General Inquiries'
-  },
-  {
-    icon: MapPin,
-    label: '123 Travel Street, New York, NY 10001',
-    href: 'https://maps.google.com/?q=123+Travel+Street+New+York+NY',
-    description: 'Visit Our Office'
-  },
-]
-
-const socialLinks = [
-  { icon: Facebook, href: 'https://facebook.com/travelplace', label: 'Facebook', color: 'hover:text-blue-500' },
-  { icon: Instagram, href: 'https://instagram.com/travelplace', label: 'Instagram', color: 'hover:text-pink-500' },
-  { icon: Twitter, href: 'https://twitter.com/travelplace', label: 'Twitter', color: 'hover:text-blue-400' },
-  { icon: LinkedIn, href: 'https://linkedin.com/company/travelplace', label: 'LinkedIn', color: 'hover:text-blue-600' },
-]
-
 interface FooterProps {
   className?: string;
 }
@@ -133,6 +106,73 @@ export default function Footer({ className = '' }: FooterProps) {
   const [email, setEmail] = useState('')
   const [isSubscribing, setIsSubscribing] = useState(false)
   const [subscriptionStatus, setSubscriptionStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [settings, setSettings] = useState<SiteSettings | null>(null)
+
+  useEffect(() => {
+    // Fetch site settings
+    const fetchSettings = async () => {
+      try {
+        const data = await siteSettingsService.getSiteSettings()
+        setSettings(data)
+      } catch (error) {
+        console.error('Failed to fetch site settings:', error)
+      }
+    }
+    fetchSettings()
+  }, [])
+
+  // Default contact info (fallback if settings not loaded)
+  const contactInfo = settings ? [
+    {
+      icon: Phone,
+      label: settings.phone,
+      href: `tel:${settings.phone.replace(/\D/g, '')}`,
+      description: settings.phoneDescription
+    },
+    {
+      icon: Mail,
+      label: settings.email,
+      href: `mailto:${settings.email}`,
+      description: settings.emailDescription
+    },
+    {
+      icon: MapPin,
+      label: settings.address,
+      href: 'https://maps.google.com/?q=' + encodeURIComponent(settings.address),
+      description: settings.addressDescription
+    },
+  ] : [
+    {
+      icon: Phone,
+      label: '+234 (0) 903 557 3593',
+      href: 'tel:+2349035573593',
+      description: '24/7 Customer Support'
+    },
+    {
+      icon: Mail,
+      label: 'info@thetravelplace.ng',
+      href: 'mailto:info@thetravelplace.ng',
+      description: 'General Inquiries'
+    },
+    {
+      icon: MapPin,
+      label: 'Lagos, Nigeria',
+      href: 'https://maps.google.com/?q=Lagos+Nigeria',
+      description: 'Visit Our Office'
+    },
+  ]
+
+  const socialLinks = settings ? [
+    { icon: Facebook, href: settings.socialLinks.facebook, label: 'Facebook', color: 'hover:text-blue-500' },
+    { icon: Instagram, href: settings.socialLinks.instagram, label: 'Instagram', color: 'hover:text-pink-500' },
+    { icon: Twitter, href: settings.socialLinks.twitter, label: 'Twitter', color: 'hover:text-blue-400' },
+    { icon: LinkedIn, href: settings.socialLinks.linkedin, label: 'LinkedIn', color: 'hover:text-blue-600' },
+  ] : [
+    { icon: Facebook, href: 'https://facebook.com/thetravelplace', label: 'Facebook', color: 'hover:text-blue-500' },
+    { icon: Instagram, href: 'https://instagram.com/thetravelplace', label: 'Instagram', color: 'hover:text-pink-500' },
+    { icon: Twitter, href: 'https://twitter.com/thetravelplace', label: 'Twitter', color: 'hover:text-blue-400' },
+    { icon: LinkedIn, href: 'https://linkedin.com/company/thetravelplace', label: 'LinkedIn', color: 'hover:text-blue-600' },
+  ]
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -282,7 +322,7 @@ export default function Footer({ className = '' }: FooterProps) {
             </Link>
 
             <p className="text-gray-300 mb-6 leading-relaxed">
-              Your trusted partner for seamless travel experiences. From flights and hotels to visa applications and car rentals, we make travel planning effortless.
+              {settings?.tagline || 'Your trusted partner for seamless travel experiences. From flights and hotels to visa applications and car rentals, we make travel planning effortless.'}
             </p>
 
             {/* Contact Information */}
@@ -352,7 +392,7 @@ export default function Footer({ className = '' }: FooterProps) {
             {/* Copyright and Legal */}
             <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-8 text-gray-400 text-sm text-center lg:text-left">
               <div>
-                © {new Date().getFullYear()} The Travel Place Limited. All rights reserved.
+                © {new Date().getFullYear()} {settings?.companyName || 'The Travel Place'} Limited. All rights reserved.
               </div>
               <div className="flex items-center space-x-4">
                 <Link href="/privacy" className="hover:text-white transition-colors duration-200">
