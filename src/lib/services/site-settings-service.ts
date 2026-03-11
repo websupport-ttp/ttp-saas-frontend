@@ -42,7 +42,7 @@ export interface UpdateSiteSettingsData {
 }
 
 class SiteSettingsService {
-  private baseUrl = '/settings/site';
+  private baseUrl = '/settings';
 
   async getSiteSettings(): Promise<SiteSettings> {
     const response = await apiClient.get<SiteSettings>(this.baseUrl);
