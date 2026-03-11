@@ -49,7 +49,12 @@ export const emailTemplateService = {
    * Get all email templates
    */
   async getAll(params?: { category?: string; isActive?: boolean }): Promise<EmailTemplate[]> {
-    const response = await apiClient.get('/email-templates', { params })
+    const queryParams = new URLSearchParams()
+    if (params?.category) queryParams.append('category', params.category)
+    if (params?.isActive !== undefined) queryParams.append('isActive', String(params.isActive))
+    
+    const url = `/email-templates${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    const response = await apiClient.get(url)
     return response.data.templates
   },
 
