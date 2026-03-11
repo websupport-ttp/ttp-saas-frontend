@@ -17,11 +17,13 @@ import ArticlesManager from '@/components/cms/ArticlesManager';
 import ReviewsManager from '@/components/cms/ReviewsManager';
 import SiteSettings from '@/components/dashboard/SiteSettings';
 import TeamManagement from '@/components/dashboard/TeamManagement';
+import EmailTemplates from '@/components/dashboard/EmailTemplates';
+import EmailIcon from '@mui/icons-material/Email';
 
 export default function CMSPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'hero' | 'deals' | 'articles' | 'reviews' | 'settings' | 'team'>('hero');
+  const [activeTab, setActiveTab] = useState<'hero' | 'deals' | 'articles' | 'reviews' | 'settings' | 'team' | 'emails'>('hero');
   const router = useRouter();
 
   useEffect(() => {
@@ -60,6 +62,7 @@ export default function CMSPage() {
     { id: 'reviews', label: 'Reviews', icon: StarIcon },
     { id: 'settings', label: 'Site Settings', icon: SettingsIcon },
     { id: 'team', label: 'Team', icon: GroupIcon },
+    { id: 'emails', label: 'Email Templates', icon: EmailIcon },
   ];
 
   return (
@@ -110,6 +113,7 @@ export default function CMSPage() {
             {activeTab === 'reviews' && <ReviewsManager />}
             {activeTab === 'settings' && <SiteSettings />}
             {activeTab === 'team' && <TeamManagement />}
+            {activeTab === 'emails' && <EmailTemplates />}
           </div>
         </div>
       </div>
