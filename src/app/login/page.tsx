@@ -7,10 +7,13 @@ import { Header } from '@/components/layout/Header'
 import { useAuth } from '@/contexts/auth-context'
 import { initializeGoogleSignIn, GoogleUser } from '@/lib/google-auth'
 
-// Disable SSR for this page to avoid AuthProvider issues during build
+// Force dynamic rendering - no static generation
 export const dynamic = 'force-dynamic'
+export const dynamicParams = true
+export const revalidate = 0
 
 export default function LoginPage() {
+  const [mounted, setMounted] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -19,6 +22,11 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const router = useRouter()
   const { login, loginWithGoogle } = useAuth()
+
+  // Ensure component is mounted before using auth
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Initialize Google Sign-In
   useEffect(() => {
@@ -70,6 +78,15 @@ export default function LoginPage() {
       ...prev,
       [e.target.name]: e.target.value
     }))
+  }
+
+  // Show loading state until mounted
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-red"></div>
+      </div>
+    )
   }
 
   return (
