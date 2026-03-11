@@ -201,30 +201,32 @@ const CurrencyManagement: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                   {new Date(currency.lastUpdated).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                  <button
-                    onClick={() => handleOpenModal(currency)}
-                    className="text-blue-600 hover:text-blue-900 inline-flex items-center"
-                    title="Edit currency"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  {!currency.isBaseCurrency && (
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={() => handleDelete(currency.code)}
-                      className={`inline-flex items-center transition-colors ${
-                        deleteConfirm === currency.code 
-                          ? 'text-red-600 font-bold' 
-                          : 'text-gray-600 hover:text-red-600'
-                      }`}
-                      title={deleteConfirm === currency.code ? 'Click again to confirm delete' : 'Delete currency'}
+                      onClick={() => handleOpenModal(currency)}
+                      className="text-blue-600 hover:text-blue-900 inline-flex items-center"
+                      title="Edit currency"
                     >
-                      <Trash2 className={`w-4 h-4 ${deleteConfirm === currency.code ? 'animate-pulse' : ''}`} />
-                      {deleteConfirm === currency.code && (
-                        <span className="ml-1 text-xs">Confirm?</span>
-                      )}
+                      <Edit2 className="w-4 h-4" />
                     </button>
-                  )}
+                    {!currency.isBaseCurrency && (
+                      <button
+                        onClick={() => handleDelete(currency.code)}
+                        className={`inline-flex items-center gap-1 transition-colors ${
+                          deleteConfirm === currency.code 
+                            ? 'text-red-600 font-bold' 
+                            : 'text-gray-600 hover:text-red-600'
+                        }`}
+                        title={deleteConfirm === currency.code ? 'Click again to confirm delete' : 'Delete currency'}
+                      >
+                        <Trash2 className={`w-4 h-4 ${deleteConfirm === currency.code ? 'animate-pulse' : ''}`} />
+                        {deleteConfirm === currency.code && (
+                          <span className="text-xs whitespace-nowrap">Confirm?</span>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

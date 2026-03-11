@@ -9,15 +9,19 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import ArticleIcon from '@mui/icons-material/Article';
 import StarIcon from '@mui/icons-material/Star';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
+import SettingsIcon from '@mui/icons-material/Settings';
+import GroupIcon from '@mui/icons-material/Group';
 import HeroSlidesManager from '@/components/cms/HeroSlidesManager';
 import HotDealsManager from '@/components/cms/HotDealsManager';
 import ArticlesManager from '@/components/cms/ArticlesManager';
 import ReviewsManager from '@/components/cms/ReviewsManager';
+import SiteSettings from '@/components/dashboard/SiteSettings';
+import TeamManagement from '@/components/dashboard/TeamManagement';
 
 export default function CMSPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'hero' | 'deals' | 'articles' | 'reviews'>('hero');
+  const [activeTab, setActiveTab] = useState<'hero' | 'deals' | 'articles' | 'reviews' | 'settings' | 'team'>('hero');
   const router = useRouter();
 
   useEffect(() => {
@@ -54,6 +58,8 @@ export default function CMSPage() {
     { id: 'deals', label: 'Hot Deals', icon: LocalFireDepartmentIcon },
     { id: 'articles', label: 'Articles', icon: ArticleIcon },
     { id: 'reviews', label: 'Reviews', icon: StarIcon },
+    { id: 'settings', label: 'Site Settings', icon: SettingsIcon },
+    { id: 'team', label: 'Team', icon: GroupIcon },
   ];
 
   return (
@@ -102,6 +108,8 @@ export default function CMSPage() {
             {activeTab === 'deals' && <HotDealsManager />}
             {activeTab === 'articles' && <ArticlesManager />}
             {activeTab === 'reviews' && <ReviewsManager />}
+            {activeTab === 'settings' && <SiteSettings />}
+            {activeTab === 'team' && <TeamManagement />}
           </div>
         </div>
       </div>
