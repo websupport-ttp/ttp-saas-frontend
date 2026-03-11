@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Header } from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -292,6 +293,8 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   )
 }
