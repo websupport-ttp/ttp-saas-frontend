@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import CountryCodeSelector from '@/components/ui/CountryCodeSelector'
 import { authService } from '@/lib/auth-service'
 import { appConfig } from '@/lib/config'
+import { initializeGoogleSignIn, GoogleUser } from '@/lib/google-auth'
 
 interface LoginOverlayProps {
   isOpen: boolean
@@ -86,6 +87,13 @@ export default function LoginOverlay({
       return () => clearTimeout(timer)
     }
   }, [resendPhoneTimer])
+
+  // Initialize Google Sign-In when overlay opens
+  useEffect(() => {
+    if (isOpen && formMode === 'login') {
+      initializeGoogleSignIn(handleGoogleLogin)
+    }
+  }, [isOpen, formMode])
 
   if (!isOpen) return null
 
@@ -390,50 +398,34 @@ export default function LoginOverlay({
     }
   }
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (googleUser?: GoogleUser) => {
     setError('')
     setIsLoading(true)
     
     try {
-      // Initialize Google Sign-In
-      // Note: You'll need to add Google Sign-In SDK to your project
-      // For now, this is a placeholder
-      alert('Google Sign-In integration coming soon!')
-      
-      // Example of what the implementation would look like:
-      /*
-      const googleUser = await window.google.accounts.oauth2.initTokenClient({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        scope: 'email profile',
-      })
-      
-      const response = await fetch(`${API_BASE_URL}/auth/google`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          googleId: googleUser.sub,
-          email: googleUser.email,
-          firstName: googleUser.given_name,
-          lastName: googleUser.family_name,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Google login failed')
+      if (!googleUser) {
+        // If no googleUser provided, trigger the Google Sign-In flow
+        if (typeof window !== 'undefined' && window.google) {
+          // Trigger the One Tap UI
+          window.google.accounts.id.prompt();
+        } else {
+          throw new Error('Google Sign-In SDK not loaded. Please refresh the page.');
+        }
+        return;
       }
 
-      if (data.data?.user) {
-        localStorage.setItem('user', JSON.stringify(data.data.user))
-      }
+      // Call the backend with Google credentials
+      const response = await authService.loginWithGoogle({
+        googleId: googleUser.googleId,
+        email: googleUser.email,
+        firstName: googleUser.firstName,
+        lastName: googleUser.lastName,
+        otherNames: googleUser.otherNames
+      });
 
-      onClose()
-      window.location.reload()
-      */
+      // Close the overlay and redirect
+      onClose();
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Google sign-in failed. Please try again.')
     } finally {
