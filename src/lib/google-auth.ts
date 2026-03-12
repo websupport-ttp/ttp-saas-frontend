@@ -26,8 +26,10 @@ export const initializeGoogleSignIn = (callback: (user: GoogleUser) => void) => 
 
   // Check if Google Client ID is configured
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  console.log('Google Client ID from env:', clientId ? 'Present' : 'Missing');
+  
   if (!clientId) {
-    console.error('Google Client ID not configured');
+    console.error('Google Client ID not configured in environment variables');
     // Show fallback message
     const buttonContainer = document.getElementById('google-signin-button');
     if (buttonContainer) {
@@ -40,6 +42,20 @@ export const initializeGoogleSignIn = (callback: (user: GoogleUser) => void) => 
     return;
   }
 
+  // Check if script is already loaded
+  if (window.google) {
+    console.log('Google SDK already loaded, initializing...');
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: (response: any) => handleGoogleResponse(response, callback),
+    });
+    
+    setTimeout(() => {
+      renderGoogleButton('google-signin-button');
+    }, 100);
+    return;
+  }
+
   // Load Google Sign-In script
   const script = document.createElement('script');
   script.src = 'https://accounts.google.com/gsi/client';
@@ -47,7 +63,9 @@ export const initializeGoogleSignIn = (callback: (user: GoogleUser) => void) => 
   script.defer = true;
   
   script.onload = () => {
+    console.log('Google SDK script loaded successfully');
     if (window.google) {
+      console.log('Initializing Google Sign-In with client ID:', clientId.substring(0, 10) + '...');
       window.google.accounts.id.initialize({
         client_id: clientId,
         callback: (response: any) => handleGoogleResponse(response, callback),
@@ -55,13 +73,16 @@ export const initializeGoogleSignIn = (callback: (user: GoogleUser) => void) => 
       
       // Render button after initialization
       setTimeout(() => {
+        console.log('Rendering Google Sign-In button');
         renderGoogleButton('google-signin-button');
       }, 100);
+    } else {
+      console.error('window.google not available after script load');
     }
   };
 
   script.onerror = () => {
-    console.error('Failed to load Google Sign-In script');
+    console.error('Failed to load Google Sign-In script from accounts.google.com');
     const buttonContainer = document.getElementById('google-signin-button');
     if (buttonContainer) {
       buttonContainer.innerHTML = `
@@ -72,6 +93,7 @@ export const initializeGoogleSignIn = (callback: (user: GoogleUser) => void) => 
     }
   };
 
+  console.log('Appending Google SDK script to document');
   document.body.appendChild(script);
 };
 
@@ -80,9 +102,17 @@ export const initializeGoogleSignIn = (callback: (user: GoogleUser) => void) => 
  */
 const handleGoogleResponse = (response: any, callback: (user: GoogleUser) => void) => {
   try {
+    console.log('Google Sign-In response received');
+    
     // Decode JWT token from Google
     const credential = response.credential;
+    if (!credential) {
+      console.error('No credential in Google response');
+      throw new Error('No credential received from Google');
+    }
+    
     const payload = parseJwt(credential);
+    console.log('Google JWT decoded successfully');
 
     const googleUser: GoogleUser = {
       googleId: payload.sub,
@@ -93,9 +123,11 @@ const handleGoogleResponse = (response: any, callback: (user: GoogleUser) => voi
       picture: payload.picture,
     };
 
+    console.log('Google user data extracted:', { email: googleUser.email, name: googleUser.firstName });
     callback(googleUser);
   } catch (error) {
     console.error('Error handling Google response:', error);
+    throw error;
   }
 };
 
@@ -123,17 +155,37 @@ const parseJwt = (token: string) => {
  * Render Google Sign-In button
  */
 export const renderGoogleButton = (elementId: string) => {
-  if (typeof window === 'undefined' || !window.google) return;
+  if (typeof window === 'undefined') {
+    console.log('Window is undefined, skipping button render');
+    return;
+  }
+  
+  if (!window.google) {
+    console.error('window.google is not available');
+    return;
+  }
 
-  window.google.accounts.id.renderButton(
-    document.getElementById(elementId),
-    {
-      theme: 'outline',
-      size: 'large',
-      width: '100%',
-      text: 'continue_with',
-    }
-  );
+  const element = document.getElementById(elementId);
+  if (!element) {
+    console.error(`Element with id "${elementId}" not found`);
+    return;
+  }
+
+  try {
+    console.log('Rendering Google Sign-In button into element:', elementId);
+    window.google.accounts.id.renderButton(
+      element,
+      {
+        theme: 'outline',
+        size: 'large',
+        width: '100%',
+        text: 'continue_with',
+      }
+    );
+    console.log('Google Sign-In button rendered successfully');
+  } catch (error) {
+    console.error('Error rendering Google Sign-In button:', error);
+  }
 };
 
 /**
