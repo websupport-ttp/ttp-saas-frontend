@@ -427,70 +427,83 @@ export default function LoginOverlay({
     setIsLoading(true)
     
     try {
-      // Load Google SDK if not already loaded
-      if (typeof window !== 'undefined') {
-        if (!window.google) {
-          // Load the Google SDK script
-          const script = document.createElement('script');
-          script.src = 'https://accounts.google.com/gsi/client';
-          script.async = true;
-          script.defer = true;
-          
-          script.onload = () => {
-            if (window.google) {
-              // Initialize Google Sign-In
-              window.google.accounts.id.initialize({
-                client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-                callback: (response: any) => {
-                  try {
-                    const credential = response.credential;
-                    if (!credential) {
-                      throw new Error('No credential received from Google');
-                    }
-                    
-                    // Decode JWT
-                    const base64Url = credential.split('.')[1];
-                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                    const jsonPayload = decodeURIComponent(
-                      atob(base64)
-                        .split('')
-                        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                        .join('')
-                    );
-                    const payload = JSON.parse(jsonPayload);
-                    
-                    const googleUser: GoogleUser = {
-                      googleId: payload.sub,
-                      email: payload.email,
-                      firstName: payload.given_name || '',
-                      lastName: payload.family_name || '',
-                      otherNames: payload.middle_name,
-                      picture: payload.picture,
-                    };
-                    
-                    handleGoogleLoginCallback(googleUser);
-                  } catch (err: any) {
-                    setError(err.message || 'Failed to process Google login');
-                    setIsLoading(false);
-                  }
-                },
-              });
-              
-              // Trigger the One Tap UI
-              window.google.accounts.id.prompt();
+      // Use the Google SDK's tokenClient for a more reliable flow
+      if (typeof window !== 'undefined' && window.google) {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+          scope: 'openid email profile',
+          callback: (response: any) => {
+            if (response.access_token) {
+              // Fetch user info using the access token
+              fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                headers: { Authorization: `Bearer ${response.access_token}` }
+              })
+                .then(res => res.json())
+                .then(data => {
+                  const googleUser: GoogleUser = {
+                    googleId: data.id,
+                    email: data.email,
+                    firstName: data.given_name || '',
+                    lastName: data.family_name || '',
+                    picture: data.picture,
+                  };
+                  handleGoogleLoginCallback(googleUser);
+                })
+                .catch(err => {
+                  setError('Failed to fetch user info from Google');
+                  setIsLoading(false);
+                });
             }
-          };
-          
-          script.onerror = () => {
-            setError('Failed to load Google Sign-In SDK');
-            setIsLoading(false);
-          };
-          
-          document.body.appendChild(script);
-        } else {
-          // Google SDK already loaded, just trigger prompt
-          window.google.accounts.id.prompt();
-        }
+          },
+        });
+        
+        tokenClient.requestAccessToken();
+      } else {
+        // Fallback: Load Google SDK if not available
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        
+        script.onload = () => {
+          if (window.google) {
+            const tokenClient = window.google.accounts.oauth2.initTokenClient({
+              client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+              scope: 'openid email profile',
+              callback: (response: any) => {
+                if (response.access_token) {
+                  fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                    headers: { Authorization: `Bearer ${response.access_token}` }
+                  })
+                    .then(res => res.json())
+                    .then(data => {
+                      const googleUser: GoogleUser = {
+                        googleId: data.id,
+                        email: data.email,
+                        firstName: data.given_name || '',
+                        lastName: data.family_name || '',
+                        picture: data.picture,
+                      };
+                      handleGoogleLoginCallback(googleUser);
+                    })
+                    .catch(err => {
+                      setError('Failed to fetch user info from Google');
+                      setIsLoading(false);
+                    });
+                }
+              },
+            });
+            
+            tokenClient.requestAccessToken();
+          }
+        };
+        
+        script.onerror = () => {
+          setError('Failed to load Google Sign-In SDK');
+          setIsLoading(false);
+        };
+        
+        document.body.appendChild(script);
       }
     } catch (err: any) {
       setError(err.message || 'Google sign-in failed. Please try again.')
