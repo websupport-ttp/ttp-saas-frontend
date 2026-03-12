@@ -5,7 +5,15 @@ import { useRouter } from 'next/navigation'
 import CountryCodeSelector from '@/components/ui/CountryCodeSelector'
 import { authService } from '@/lib/auth-service'
 import { appConfig } from '@/lib/config'
-import { initializeGoogleSignIn, GoogleUser } from '@/lib/google-auth'
+
+interface GoogleUser {
+  googleId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  otherNames?: string;
+  picture?: string;
+}
 
 interface LoginOverlayProps {
   isOpen: boolean
@@ -87,13 +95,6 @@ export default function LoginOverlay({
       return () => clearTimeout(timer)
     }
   }, [resendPhoneTimer])
-
-  // Initialize Google Sign-In when overlay opens
-  useEffect(() => {
-    if (isOpen && formMode === 'login') {
-      initializeGoogleSignIn(handleGoogleLoginCallback)
-    }
-  }, [isOpen, formMode])
 
   if (!isOpen) return null
 
@@ -417,22 +418,79 @@ export default function LoginOverlay({
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Google sign-in failed. Please try again.')
-    } finally {
       setIsLoading(false)
     }
   }
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setError('')
     setIsLoading(true)
     
     try {
-      // Trigger the Google Sign-In flow
-      if (typeof window !== 'undefined' && window.google) {
-        // Trigger the One Tap UI
-        window.google.accounts.id.prompt();
-      } else {
-        throw new Error('Google Sign-In SDK not loaded. Please refresh the page.');
+      // Load Google SDK if not already loaded
+      if (typeof window !== 'undefined') {
+        if (!window.google) {
+          // Load the Google SDK script
+          const script = document.createElement('script');
+          script.src = 'https://accounts.google.com/gsi/client';
+          script.async = true;
+          script.defer = true;
+          
+          script.onload = () => {
+            if (window.google) {
+              // Initialize Google Sign-In
+              window.google.accounts.id.initialize({
+                client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+                callback: (response: any) => {
+                  try {
+                    const credential = response.credential;
+                    if (!credential) {
+                      throw new Error('No credential received from Google');
+                    }
+                    
+                    // Decode JWT
+                    const base64Url = credential.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(
+                      atob(base64)
+                        .split('')
+                        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                        .join('')
+                    );
+                    const payload = JSON.parse(jsonPayload);
+                    
+                    const googleUser: GoogleUser = {
+                      googleId: payload.sub,
+                      email: payload.email,
+                      firstName: payload.given_name || '',
+                      lastName: payload.family_name || '',
+                      otherNames: payload.middle_name,
+                      picture: payload.picture,
+                    };
+                    
+                    handleGoogleLoginCallback(googleUser);
+                  } catch (err: any) {
+                    setError(err.message || 'Failed to process Google login');
+                    setIsLoading(false);
+                  }
+                },
+              });
+              
+              // Trigger the One Tap UI
+              window.google.accounts.id.prompt();
+            }
+          };
+          
+          script.onerror = () => {
+            setError('Failed to load Google Sign-In SDK');
+            setIsLoading(false);
+          };
+          
+          document.body.appendChild(script);
+        } else {
+          // Google SDK already loaded, just trigger prompt
+          window.google.accounts.id.prompt();
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Google sign-in failed. Please try again.')
