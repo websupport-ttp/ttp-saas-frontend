@@ -73,7 +73,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           console.log('Auth session expired, logging out');
           setUser(null);
           authService.clearAuthData();
-          router.push('/login');
+          router.push('/');
         }
       } catch (error) {
         // Network error, don't logout
@@ -224,7 +224,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(false);
       
       if (redirectToLogin) {
-        router.push('/login');
+        router.push('/');
       }
     }
   };

@@ -26,7 +26,7 @@ export function ProtectedRoute({
   children,
   requiredRole,
   requireVerification = false,
-  fallbackPath = '/login',
+  fallbackPath = '/',
   loadingComponent
 }: ProtectedRouteProps) {
   const { isAuthenticated, user, isLoading } = useAuth();

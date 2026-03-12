@@ -152,7 +152,7 @@ export default function BookingsPage() {
               <p className="text-gray-600 mb-6">You need to be logged in to view your bookings.</p>
               <Button
                 variant="primary"
-                onClick={() => window.location.href = '/login'}
+                onClick={() => window.location.href = '/'}
               >
                 Log In
               </Button>
