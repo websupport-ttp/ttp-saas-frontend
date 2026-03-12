@@ -91,7 +91,7 @@ export default function LoginOverlay({
   // Initialize Google Sign-In when overlay opens
   useEffect(() => {
     if (isOpen && formMode === 'login') {
-      initializeGoogleSignIn(handleGoogleLogin)
+      initializeGoogleSignIn(handleGoogleLoginCallback)
     }
   }, [isOpen, formMode])
 
@@ -398,22 +398,11 @@ export default function LoginOverlay({
     }
   }
 
-  const handleGoogleLogin = async (googleUser?: GoogleUser) => {
+  const handleGoogleLoginCallback = async (googleUser: GoogleUser) => {
     setError('')
     setIsLoading(true)
     
     try {
-      if (!googleUser) {
-        // If no googleUser provided, trigger the Google Sign-In flow
-        if (typeof window !== 'undefined' && window.google) {
-          // Trigger the One Tap UI
-          window.google.accounts.id.prompt();
-        } else {
-          throw new Error('Google Sign-In SDK not loaded. Please refresh the page.');
-        }
-        return;
-      }
-
       // Call the backend with Google credentials
       const response = await authService.loginWithGoogle({
         googleId: googleUser.googleId,
@@ -429,6 +418,24 @@ export default function LoginOverlay({
     } catch (err: any) {
       setError(err.message || 'Google sign-in failed. Please try again.')
     } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = () => {
+    setError('')
+    setIsLoading(true)
+    
+    try {
+      // Trigger the Google Sign-In flow
+      if (typeof window !== 'undefined' && window.google) {
+        // Trigger the One Tap UI
+        window.google.accounts.id.prompt();
+      } else {
+        throw new Error('Google Sign-In SDK not loaded. Please refresh the page.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Google sign-in failed. Please try again.')
       setIsLoading(false)
     }
   }
