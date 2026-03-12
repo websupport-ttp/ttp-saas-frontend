@@ -422,7 +422,8 @@ export default function LoginOverlay({
     }
   }
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
     setError('')
     setIsLoading(true)
     
