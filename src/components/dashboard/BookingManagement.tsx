@@ -283,7 +283,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">Total Price</span>
                     <span className="text-xl font-bold text-brand-red">
-                      ${booking.totalPrice.toFixed(2)}
+                      ${booking.totalPrice ? booking.totalPrice.toFixed(2) : '0.00'}
                     </span>
                   </div>
                 </div>
