@@ -74,8 +74,8 @@ export default function BookingManagement({ user, permissions }: BookingManageme
 
   const updateBookingStatus = async (bookingId: string, status: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/car-hire/bookings/${bookingId}/status`, {
-        method: 'PATCH',
+      const response = await fetch(`${API_BASE_URL}/car-hire/bookings/${bookingId}/process`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
