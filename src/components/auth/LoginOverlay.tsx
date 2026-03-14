@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import CountryCodeSelector from '@/components/ui/CountryCodeSelector'
 import { authService } from '@/lib/auth-service'
 import { appConfig } from '@/lib/config'
+import { useAuth } from '@/contexts/auth-context'
 
 interface GoogleUser {
   googleId: string;
@@ -35,6 +36,7 @@ export default function LoginOverlay({
   onForgotPassword
 }: LoginOverlayProps) {
   const router = useRouter()
+  const { loginWithGoogle: contextLoginWithGoogle } = useAuth()
   const [formMode, setFormMode] = useState<FormMode>('login')
   const [loginStep, setLoginStep] = useState<LoginStep>(1)
   const [signupStep, setSignupStep] = useState<SignupStep>(1)
@@ -404,8 +406,8 @@ export default function LoginOverlay({
     setIsLoading(true)
     
     try {
-      // Call the backend with Google credentials
-      const response = await authService.loginWithGoogle({
+      // Use auth context's loginWithGoogle to properly set user state and start refresh interval
+      await contextLoginWithGoogle({
         googleId: googleUser.googleId,
         email: googleUser.email,
         firstName: googleUser.firstName,
@@ -413,9 +415,8 @@ export default function LoginOverlay({
         otherNames: googleUser.otherNames
       });
 
-      // Close the overlay and redirect
+      // Close the overlay (router.push will be handled by auth context)
       onClose();
-      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Google sign-in failed. Please try again.')
       setIsLoading(false)
