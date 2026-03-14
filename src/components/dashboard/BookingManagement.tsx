@@ -99,10 +99,10 @@ export default function BookingManagement({ user, permissions }: BookingManageme
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       return (
-        booking.bookingReference.toLowerCase().includes(searchLower) ||
+        booking.bookingReference?.toLowerCase().includes(searchLower) ||
         (booking.user?.email?.toLowerCase().includes(searchLower) || false) ||
         (booking.user ? `${booking.user.firstName} ${booking.user.lastName}`.toLowerCase().includes(searchLower) : false) ||
-        booking.car.name.toLowerCase().includes(searchLower)
+        (booking.car?.name?.toLowerCase().includes(searchLower) || false)
       );
     }
     return true;
@@ -243,10 +243,16 @@ export default function BookingManagement({ user, permissions }: BookingManageme
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Vehicle</h4>
                     <div className="space-y-1 text-sm text-gray-600">
-                      <p className="font-medium text-gray-900">{booking.car.name}</p>
-                      <p>{booking.car.brand} {booking.car.model}</p>
-                      {booking.car.registrationNumber && (
-                        <p>Reg: {booking.car.registrationNumber}</p>
+                      {booking.car ? (
+                        <>
+                          <p className="font-medium text-gray-900">{booking.car.name || 'N/A'}</p>
+                          <p>{booking.car.brand || ''} {booking.car.model || ''}</p>
+                          {booking.car.registrationNumber && (
+                            <p>Reg: {booking.car.registrationNumber}</p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-gray-500">Vehicle information not available</p>
                       )}
                     </div>
                   </div>
