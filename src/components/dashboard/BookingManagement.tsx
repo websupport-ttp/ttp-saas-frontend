@@ -100,8 +100,8 @@ export default function BookingManagement({ user, permissions }: BookingManageme
       const searchLower = filters.search.toLowerCase();
       return (
         booking.bookingReference.toLowerCase().includes(searchLower) ||
-        booking.user.email.toLowerCase().includes(searchLower) ||
-        `${booking.user.firstName} ${booking.user.lastName}`.toLowerCase().includes(searchLower) ||
+        (booking.user?.email?.toLowerCase().includes(searchLower) || false) ||
+        (booking.user ? `${booking.user.firstName} ${booking.user.lastName}`.toLowerCase().includes(searchLower) : false) ||
         booking.car.name.toLowerCase().includes(searchLower)
       );
     }
@@ -225,11 +225,17 @@ export default function BookingManagement({ user, permissions }: BookingManageme
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Customer</h4>
                     <div className="space-y-1 text-sm text-gray-600">
-                      <p className="font-medium text-gray-900">
-                        {booking.user.firstName} {booking.user.lastName}
-                      </p>
-                      <p>{booking.user.email}</p>
-                      {booking.user.phoneNumber && <p>{booking.user.phoneNumber}</p>}
+                      {booking.user ? (
+                        <>
+                          <p className="font-medium text-gray-900">
+                            {booking.user.firstName} {booking.user.lastName}
+                          </p>
+                          <p>{booking.user.email}</p>
+                          {booking.user.phoneNumber && <p>{booking.user.phoneNumber}</p>}
+                        </>
+                      ) : (
+                        <p className="text-gray-500">Customer information not available</p>
+                      )}
                     </div>
                   </div>
 
