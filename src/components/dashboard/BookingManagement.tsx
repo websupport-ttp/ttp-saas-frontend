@@ -30,7 +30,7 @@ interface Booking {
   pickupLocation: string;
   dropoffLocation: string;
   totalPrice: number;
-  status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'refunded';
   createdAt: string;
 }
@@ -112,7 +112,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800',
       confirmed: 'bg-blue-100 text-blue-800',
-      active: 'bg-green-100 text-green-800',
+      'in-progress': 'bg-green-100 text-green-800',
       completed: 'bg-gray-100 text-gray-800',
       cancelled: 'bg-red-100 text-red-800',
     };
@@ -157,7 +157,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
               <option value="confirmed">Confirmed</option>
-              <option value="active">Active</option>
+              <option value="in-progress">In Progress</option>
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
             </select>
@@ -315,13 +315,13 @@ export default function BookingManagement({ user, permissions }: BookingManageme
                     )}
                     {booking.status === 'confirmed' && (
                       <button
-                        onClick={() => updateBookingStatus(booking._id, 'active')}
+                        onClick={() => updateBookingStatus(booking._id, 'in-progress')}
                         className="px-3 py-1.5 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
                       >
-                        Mark as Active
+                        Mark as In Progress
                       </button>
                     )}
-                    {booking.status === 'active' && (
+                    {booking.status === 'in-progress' && (
                       <button
                         onClick={() => updateBookingStatus(booking._id, 'completed')}
                         className="px-3 py-1.5 bg-gray-600 text-white rounded-md text-sm font-medium hover:bg-gray-700"
