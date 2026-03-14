@@ -91,7 +91,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Since we use HTTP-only cookies, verify auth by making an API call
         try {
           // Try to fetch user profile to verify cookie is still valid
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/profile`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/me`, {
             credentials: 'include', // Send cookies
             headers: {
               'Content-Type': 'application/json'
