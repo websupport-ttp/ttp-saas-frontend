@@ -305,16 +305,15 @@ class AuthenticationService implements AuthService {
 
   /**
    * Refresh authentication token
+   * Note: Backend uses HTTP-only cookies for refresh token, so we don't need to send it in the body
    */
   public async refreshToken(): Promise<string> {
-    if (!this.refreshTokenValue) {
-      throw new Error('No refresh token available');
-    }
-
     try {
+      // Call refresh endpoint without body - the refresh token is in HTTP-only cookies
+      // and will be sent automatically by the browser
       const response: ApiResponse<{ token: string; refreshToken: string }> = await apiClient.post(
         '/auth/refresh',
-        { refreshToken: this.refreshTokenValue },
+        {}, // Empty body - refresh token is in cookies
         { requiresAuth: false }
       );
 
@@ -322,11 +321,11 @@ class AuthenticationService implements AuthService {
         throw new Error(response.message || 'Token refresh failed');
       }
 
-      // Update tokens
+      // Update tokens (though they're mainly in cookies)
       this.authToken = response.data.token;
       this.refreshTokenValue = response.data.refreshToken;
 
-      // Save to secure storage
+      // Save to secure storage for reference
       if (typeof window !== 'undefined') {
         const tokenData: TokenData = {
           accessToken: response.data.token,
