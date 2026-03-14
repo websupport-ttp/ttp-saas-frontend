@@ -58,7 +58,6 @@ const footerData = {
       { label: 'About Travel Place', href: '/about' },
       { label: 'How it works', href: '/how-it-works' },
       { label: 'Careers', href: '/careers' },
-      { label: 'Press & Media', href: '/press' },
       { label: 'Blog', href: '/blog' },
       { label: 'Partnerships', href: '/partnerships' },
     ]
@@ -71,7 +70,6 @@ const footerData = {
       { label: 'Car Hire', href: '/car-hire' },
       { label: 'Visa Applications', href: '/visa-applications' },
       { label: 'Travel Insurance', href: '/insurance' },
-      { label: 'Group Travel', href: '/group-travel' },
     ]
   },
   support: {
@@ -79,21 +77,15 @@ const footerData = {
     links: [
       { label: 'Help Center', href: '/help' },
       { label: 'Contact Us', href: '/contact' },
-      { label: 'Customer Service', href: '/customer-service' },
-      { label: 'Travel Guides', href: '/guides' },
       { label: 'FAQ', href: '/faq' },
       { label: 'Booking Management', href: '/manage-booking' },
     ]
   },
-  legal: {
-    title: 'Legal',
+  partners: {
+    title: 'Partners',
     links: [
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Terms of Service', href: '/terms' },
-      { label: 'Cookie Policy', href: '/cookies' },
-      { label: 'Trust & Safety', href: '/safety' },
-      { label: 'Accessibility', href: '/accessibility' },
-      { label: 'Sitemap', href: '/sitemap' },
+      { label: 'Become a Vendor', href: '/vendor-agent-signup' },
+      { label: 'Become an Agent', href: '/vendor-agent-signup' },
     ]
   }
 }
