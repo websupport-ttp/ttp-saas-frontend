@@ -102,13 +102,17 @@ export default function VendorAgentSignupPage() {
     const { name, value } = e.target
     if (name.includes('.')) {
       const [parent, child] = name.split('.')
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...(typeof prev[parent as keyof FormData] === 'object' ? prev[parent as keyof FormData] : {}),
-          [child]: value,
-        },
-      }))
+      setFormData(prev => {
+        const parentValue = prev[parent as keyof FormData]
+        const parentObj = typeof parentValue === 'object' && parentValue !== null ? (parentValue as Record<string, any>) : {}
+        return {
+          ...prev,
+          [parent]: {
+            ...parentObj,
+            [child]: value,
+          },
+        }
+      })
     } else {
       setFormData(prev => ({
         ...prev,
