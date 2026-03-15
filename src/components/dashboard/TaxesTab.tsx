@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { pricingService, Tax } from '@/lib/services/pricing-service'
 
+// Tax management with full CRUD functionality
 export default function TaxesTab() {
   const [taxes, setTaxes] = useState<Tax[]>([])
   const [loading, setLoading] = useState(true)
