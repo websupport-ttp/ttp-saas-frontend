@@ -117,10 +117,10 @@ export class FlightService {
 	/**
 	 * Create a flight booking (alias for bookFlight with enhanced data processing)
 	 */
-	async createBooking(bookingData: any): Promise<{ success: boolean; paymentUrl?: string; error?: string; bookingReference?: string }> {
+	async createBooking(bookingData: any, discountCode?: string): Promise<{ success: boolean; paymentUrl?: string; error?: string; bookingReference?: string }> {
 		try {
 			// Transform the booking data to match the expected FlightBookingData format
-			const transformedData: FlightBookingData = {
+			const transformedData: any = {
 				flightDetails: bookingData.flight,
 				passengerDetails: [
 					{
@@ -158,6 +158,11 @@ export class FlightService {
 					dialCode: "+234",
 				},
 			};
+
+			// Add discount code if provided
+			if (discountCode) {
+				transformedData.discountCode = discountCode;
+			}
 
 			const response = await this.bookFlight(transformedData, true); // Book as guest
 

@@ -31,6 +31,7 @@ export default function FlightBookingPage() {
   const [selectedFlight, setSelectedFlight] = useState<any>(null)
   const [passengerData, setPassengerData] = useState<PassengerData | null>(null)
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null)
+  const [discountCode, setDiscountCode] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | undefined>()
   const [currentStep, setCurrentStep] = useState<'passenger-details' | 'payment-method' | 'booking'>('passenger-details')
@@ -120,8 +121,8 @@ export default function FlightBookingPage() {
         currency: selectedFlight.price?.currency || 'NGN'
       }
 
-      // Process booking through flight service
-      const result = await flightService.createBooking(bookingData)
+      // Process booking through flight service with optional discount code
+      const result = await flightService.createBooking(bookingData, discountCode || undefined)
       
       if (result.success && result.paymentUrl) {
         // Redirect to Paystack payment page
@@ -237,6 +238,23 @@ export default function FlightBookingPage() {
 
                 <div className="flex justify-center">
                   <PaymentMethodForm onDataChange={handlePaymentDataChange} />
+                </div>
+
+                {/* Discount Code Section */}
+                <div className="max-w-md mx-auto bg-gray-50 rounded-lg p-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Discount Code (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                    placeholder="Enter discount code"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    If you have a discount code, enter it here to apply savings to your booking.
+                  </p>
                 </div>
 
                 <div className="flex justify-center space-x-4">
