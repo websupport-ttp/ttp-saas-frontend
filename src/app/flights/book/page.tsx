@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import PassengerInfo from '@/components/flights/PassengerInfo'
 import PaymentMethodForm from '@/components/flights/PaymentMethodForm'
+import PriceBreakdown from '@/components/common/PriceBreakdown'
 import { flightService } from '@/lib/services/flight-service'
 import { PassengerData } from '@/types'
 
@@ -32,6 +33,7 @@ export default function FlightBookingPage() {
   const [passengerData, setPassengerData] = useState<PassengerData | null>(null)
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null)
   const [discountCode, setDiscountCode] = useState<string>('')
+  const [finalPrice, setFinalPrice] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | undefined>()
   const [currentStep, setCurrentStep] = useState<'passenger-details' | 'payment-method' | 'booking'>('passenger-details')
@@ -226,59 +228,77 @@ export default function FlightBookingPage() {
                 onProceed={handlePassengerDataSubmit}
               />
             ) : currentStep === 'payment-method' ? (
-              <div className="space-y-8">
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                    Payment Method
-                  </h2>
-                  <p className="text-gray-600">
-                    Choose your preferred payment method
-                  </p>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left side - Payment form and discount code */}
+                <div className="lg:col-span-2 space-y-8">
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                      Payment Method
+                    </h2>
+                    <p className="text-gray-600">
+                      Choose your preferred payment method
+                    </p>
+                  </div>
+
+                  <div className="flex justify-center">
+                    <PaymentMethodForm onDataChange={handlePaymentDataChange} />
+                  </div>
+
+                  {/* Discount Code Section */}
+                  <div className="max-w-md mx-auto bg-gray-50 rounded-lg p-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Discount Code (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={discountCode}
+                      onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                      placeholder="Enter discount code"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      If you have a discount code, enter it here to apply savings to your booking.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-center space-x-4">
+                    <Button
+                      variant="outline"
+                      onClick={handleBack}
+                      disabled={isLoading}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      onClick={handleBookingSubmit}
+                      disabled={isLoading || !paymentData}
+                      className="bg-red-600 hover:bg-red-700 text-white px-8"
+                    >
+                      {isLoading ? (
+                        <>
+                          <LoadingSpinner size="sm" color="white" />
+                          <span className="ml-2">Processing...</span>
+                        </>
+                      ) : (
+                        'Complete Booking'
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
-                <div className="flex justify-center">
-                  <PaymentMethodForm onDataChange={handlePaymentDataChange} />
-                </div>
-
-                {/* Discount Code Section */}
-                <div className="max-w-md mx-auto bg-gray-50 rounded-lg p-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Discount Code (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={discountCode}
-                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                    placeholder="Enter discount code"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    If you have a discount code, enter it here to apply savings to your booking.
-                  </p>
-                </div>
-
-                <div className="flex justify-center space-x-4">
-                  <Button
-                    variant="outline"
-                    onClick={handleBack}
-                    disabled={isLoading}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    onClick={handleBookingSubmit}
-                    disabled={isLoading || !paymentData}
-                    className="bg-red-600 hover:bg-red-700 text-white px-8"
-                  >
-                    {isLoading ? (
-                      <>
-                        <LoadingSpinner size="sm" color="white" />
-                        <span className="ml-2">Processing...</span>
-                      </>
-                    ) : (
-                      'Complete Booking'
-                    )}
-                  </Button>
+                {/* Right side - Price Breakdown */}
+                <div className="lg:col-span-1">
+                  <div className="sticky top-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Summary</h3>
+                    <PriceBreakdown
+                      basePrice={parseFloat(selectedFlight.price?.total || '0')}
+                      serviceType="flights"
+                      userRole="user"
+                      discountCode={discountCode}
+                      onPriceCalculated={(breakdown) => setFinalPrice(breakdown.finalPrice)}
+                      showDetails={true}
+                    />
+                  </div>
                 </div>
               </div>
             ) : null}
