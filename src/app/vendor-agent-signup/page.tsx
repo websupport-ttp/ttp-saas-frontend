@@ -105,7 +105,7 @@ export default function VendorAgentSignupPage() {
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof FormData],
+          ...(typeof prev[parent as keyof FormData] === 'object' ? prev[parent as keyof FormData] : {}),
           [child]: value,
         },
       }))
