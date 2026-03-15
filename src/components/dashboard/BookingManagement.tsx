@@ -57,7 +57,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
       if (filters.status) params.set('status', filters.status);
       if (filters.paymentStatus) params.set('paymentStatus', filters.paymentStatus);
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/car-hire/bookings/all?${params.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/car-hire/bookings/all?${params.toString()}`, {
         credentials: 'include',
       });
 
@@ -74,7 +74,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
 
   const updateBookingStatus = async (bookingId: string, status: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/car-hire/bookings/${bookingId}/process`, {
+      const response = await fetch(`${API_BASE_URL}/car-hire/bookings/${bookingId}/process`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

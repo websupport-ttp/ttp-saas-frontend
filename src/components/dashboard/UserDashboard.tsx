@@ -52,7 +52,7 @@ export default function UserDashboard({ user }: UserDashboardProps) {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/v1/dashboard/stats`, {
+      const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
         credentials: 'include',
       });
 
