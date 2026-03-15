@@ -24,12 +24,12 @@ interface Booking {
     lastName: string;
     email: string;
     phoneNumber?: string;
-  };
+  } | null;
   pickupDate: string;
-  dropoffDate: string;
+  returnDate: string;
   pickupLocation: string;
-  dropoffLocation: string;
-  totalPrice: number;
+  returnLocation: string;
+  totalAmount: number;
   status: 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'refunded';
   createdAt: string;
@@ -57,7 +57,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
       if (filters.status) params.set('status', filters.status);
       if (filters.paymentStatus) params.set('paymentStatus', filters.paymentStatus);
 
-      const response = await fetch(`${API_BASE_URL}/car-hire/bookings/all?${params.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/car-hire/bookings/all?${params.toString()}`, {
         credentials: 'include',
       });
 
@@ -74,7 +74,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
 
   const updateBookingStatus = async (bookingId: string, status: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/car-hire/bookings/${bookingId}/process`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/car-hire/bookings/${bookingId}/process`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -265,7 +265,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
                         <span className="font-medium">Pickup:</span> {formatDate(booking.pickupDate)}
                       </p>
                       <p>
-                        <span className="font-medium">Dropoff:</span> {formatDate(booking.dropoffDate)}
+                        <span className="font-medium">Dropoff:</span> {formatDate(booking.returnDate)}
                       </p>
                     </div>
                   </div>
@@ -278,7 +278,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
                         <span className="font-medium">Pickup:</span> {booking.pickupLocation}
                       </p>
                       <p>
-                        <span className="font-medium">Dropoff:</span> {booking.dropoffLocation}
+                        <span className="font-medium">Dropoff:</span> {booking.returnLocation || 'Not specified'}
                       </p>
                     </div>
                   </div>
@@ -289,7 +289,7 @@ export default function BookingManagement({ user, permissions }: BookingManageme
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">Total Price</span>
                     <span className="text-xl font-bold text-brand-red">
-                      ${booking.totalPrice ? booking.totalPrice.toFixed(2) : '0.00'}
+                      ₦{booking.totalAmount ? booking.totalAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                     </span>
                   </div>
                 </div>
