@@ -49,9 +49,14 @@ export default function AnalyticsDashboard() {
       if (response.ok) {
         const data = await response.json();
         setAnalytics(data.data);
+      } else if (response.status === 404) {
+        // Analytics endpoint not available
+        console.warn('Analytics endpoint not available');
+        setAnalytics(null);
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
+      setAnalytics(null);
     } finally {
       setLoading(false);
     }
@@ -78,7 +83,7 @@ export default function AnalyticsDashboard() {
   if (!analytics) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600">No analytics data available</p>
+        <p className="text-gray-600">Analytics data is not currently available. Please check back later.</p>
       </div>
     );
   }
