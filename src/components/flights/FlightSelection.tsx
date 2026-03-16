@@ -238,7 +238,7 @@ export default function FlightSelection({
           })}
         </div>
         
-        <div className="figma-price-summary">
+        <div className="figma-price-summary" style={{ width: '100%' }}>
           <PriceBreakdown
             basePrice={parseFloat(selectedFlight.price?.total || '0')}
             serviceType="flights"
