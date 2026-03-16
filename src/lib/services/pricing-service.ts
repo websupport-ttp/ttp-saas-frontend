@@ -35,6 +35,38 @@ export interface ApplicableDiscount {
   isStackable: boolean;
 }
 
+export interface Discount {
+  _id: string;
+  name: string;
+  description?: string;
+  code?: string;
+  type: 'percentage' | 'fixed' | 'role-based' | 'provider-specific';
+  value?: number;
+  roleDiscounts?: {
+    user: number;
+    staff: number;
+    agent: number;
+    business: number;
+  };
+  provider?: {
+    type: string;
+    name: string;
+    code: string;
+  };
+  appliesTo: string[];
+  minPurchaseAmount?: number;
+  maxDiscountAmount?: number;
+  usageLimit?: number;
+  usageCount?: number;
+  validFrom?: string;
+  validUntil?: string;
+  isActive: boolean;
+  isStackable: boolean;
+  priority: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export class PricingService {
   /**
    * Calculate price with all charges, taxes, and discounts
@@ -145,6 +177,74 @@ export class PricingService {
     } catch (error) {
       console.error("Error getting best discount:", error);
       return null;
+    }
+  }
+
+  /**
+   * Get all discounts (admin)
+   */
+  async getAllDiscounts(): Promise<{ data: { discounts: Discount[] } }> {
+    try {
+      const response = await apiClient.get<{ data: { discounts: Discount[] } }>(
+        "/discounts",
+        { requiresAuth: true }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching discounts:", error);
+      return { data: { discounts: [] } };
+    }
+  }
+
+  /**
+   * Create a new discount (admin)
+   */
+  async createDiscount(data: Partial<Discount>): Promise<{ data: { discount: Discount } }> {
+    try {
+      const response = await apiClient.post<{ data: { discount: Discount } }>(
+        "/discounts",
+        data,
+        { requiresAuth: true }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error creating discount:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update a discount (admin)
+   */
+  async updateDiscount(id: string, data: Partial<Discount>): Promise<{ data: { discount: Discount } }> {
+    try {
+      const response = await apiClient.put<{ data: { discount: Discount } }>(
+        `/discounts/${id}`,
+        data,
+        { requiresAuth: true }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error updating discount:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a discount (admin)
+   */
+  async deleteDiscount(id: string): Promise<void> {
+    try {
+      await apiClient.delete(
+        `/discounts/${id}`,
+        { requiresAuth: true }
+      );
+    } catch (error) {
+      console.error("Error deleting discount:", error);
+      throw error;
     }
   }
 }
