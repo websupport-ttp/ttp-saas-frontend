@@ -218,11 +218,19 @@ export class PricingService {
         { requiresAuth: true }
       );
 
+      console.log("getAllDiscounts response:", response);
+      console.log("response.data:", response.data);
+      console.log("response.data.data:", response.data.data);
+      
       // Backend returns { status, data: { count, discounts } }
-      // apiClient wraps it, so response.data is the full response
+      // apiClient transforms it to { success, message, data: { count, discounts } }
+      // So response.data is the transformed response
+      const discounts = response.data?.data?.discounts || [];
+      console.log("Extracted discounts:", discounts);
+      
       return {
         data: {
-          discounts: response.data.data?.discounts || []
+          discounts
         }
       };
     } catch (error) {
