@@ -46,13 +46,8 @@ export default function DiscountsTab() {
   const loadDiscounts = async () => {
     try {
       setLoading(true)
-      console.log("Loading discounts...")
       const response = await pricingService.getAllDiscounts()
-      console.log("Response from getAllDiscounts:", response)
-      console.log("response.data:", response.data)
-      console.log("response.data.discounts:", response.data.discounts)
       setDiscounts(response.data.discounts || [])
-      console.log("Discounts set to:", response.data.discounts || [])
     } catch (error) {
       console.error('Error loading discounts:', error)
     } finally {

@@ -218,19 +218,12 @@ export class PricingService {
         { requiresAuth: true }
       );
 
-      console.log("getAllDiscounts response:", response);
-      console.log("response.data:", response.data);
-      console.log("response.data.data:", response.data.data);
-      
       // Backend returns { status, data: { count, discounts } }
       // apiClient transforms it to { success, message, data: { count, discounts } }
       // So response.data is the transformed response
-      const discounts = response.data?.data?.discounts || [];
-      console.log("Extracted discounts:", discounts);
-      
       return {
         data: {
-          discounts
+          discounts: response.data?.data?.discounts || []
         }
       };
     } catch (error) {
@@ -301,10 +294,11 @@ export class PricingService {
       );
 
       // Backend returns { status, data: { count, serviceCharges } }
-      // apiClient wraps it, so response.data is the full response
+      // apiClient transforms it to { success, message, data: { count, serviceCharges } }
+      // So response.data is the transformed response
       return {
         data: {
-          serviceCharges: response.data.data?.serviceCharges || []
+          serviceCharges: response.data?.data?.serviceCharges || []
         }
       };
     } catch (error) {
@@ -375,10 +369,11 @@ export class PricingService {
       );
 
       // Backend returns { status, data: { count, taxes } }
-      // apiClient wraps it, so response.data is the full response
+      // apiClient transforms it to { success, message, data: { count, taxes } }
+      // So response.data is the transformed response
       return {
         data: {
-          taxes: response.data.data?.taxes || []
+          taxes: response.data?.data?.taxes || []
         }
       };
     } catch (error) {
