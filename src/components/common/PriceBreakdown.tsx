@@ -119,8 +119,8 @@ export default function PriceBreakdown({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-      <div className="space-y-3">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 w-full">
+      <div className="space-y-3 w-full">
         {/* Base Price */}
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Base Price</span>
