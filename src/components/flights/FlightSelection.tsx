@@ -3,6 +3,7 @@
 import { FlightOffer, LocationInfo, AircraftInfo } from '@/types/api'
 import { useState, useEffect } from 'react'
 import { pricingService, ApplicableDiscount } from '@/lib/services/pricing-service'
+import PriceBreakdown from '@/components/common/PriceBreakdown'
 
 interface FlightSelectionProps {
   selectedFlight?: FlightOffer;
@@ -238,41 +239,14 @@ export default function FlightSelection({
         </div>
         
         <div className="figma-price-summary">
-          <div className="figma-price-labels">
-            <div className="figma-price-label">Subtotal</div>
-            {applicableDiscount && (
-              <div className="figma-price-label" style={{ color: '#10b981' }}>
-                {applicableDiscount.name}
-              </div>
-            )}
-            <div className="figma-price-label">Taxes and Fees</div>
-            <div className="figma-price-label">Total</div>
-          </div>
-          
-          <div className="figma-price-values">
-            <div className="figma-price-value">
-              {formatPrice(selectedFlight.price.base, selectedFlight.price.currency)}
-            </div>
-            {applicableDiscount && (
-              <div className="figma-price-value" style={{ color: '#10b981' }}>
-                -{formatPrice(
-                  applicableDiscount.type === 'percentage'
-                    ? ((parseFloat(selectedFlight.price.total) * applicableDiscount.value) / 100).toString()
-                    : applicableDiscount.value.toString(),
-                  selectedFlight.price.currency
-                )}
-              </div>
-            )}
-            <div className="figma-price-value">
-              {formatPrice(taxes.toString(), selectedFlight.price.currency)}
-            </div>
-            <div className="figma-price-value">
-              {applicableDiscount && discountedPrice > 0
-                ? formatPrice(discountedPrice.toString(), selectedFlight.price.currency)
-                : formatPrice(selectedFlight.price.total, selectedFlight.price.currency)
-              }
-            </div>
-          </div>
+          <PriceBreakdown
+            basePrice={parseFloat(selectedFlight.price?.total || '0')}
+            serviceType="flights"
+            userRole="user"
+            providerCode={selectedFlight.validatingAirlineCodes?.[0] || selectedFlight.itineraries?.[0]?.segments?.[0]?.carrierCode}
+            onPriceCalculated={() => {}}
+            showDetails={true}
+          />
         </div>
       </div>
       
