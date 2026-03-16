@@ -84,7 +84,7 @@ export interface Tax {
   _id: string;
   name: string;
   description?: string;
-  type: string;
+  type: 'VAT' | 'GST' | 'Sales Tax' | 'Service Tax' | 'Other';
   rate: number;
   country: string;
   appliesTo: string[];
