@@ -1,6 +1,8 @@
 'use client'
 
 import { FlightOffer, LocationInfo, AircraftInfo } from '@/types/api'
+import { useState, useEffect } from 'react'
+import { pricingService, ApplicableDiscount } from '@/lib/services/pricing-service'
 
 interface FlightSelectionProps {
   selectedFlight?: FlightOffer;
@@ -20,6 +22,66 @@ export default function FlightSelection({
   onContinue,
   onBack 
 }: FlightSelectionProps) {
+  const [applicableDiscount, setApplicableDiscount] = useState<ApplicableDiscount | null>(null);
+  const [discountedPrice, setDiscountedPrice] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch applicable discounts when flight is selected
+  useEffect(() => {
+    if (selectedFlight) {
+      fetchApplicableDiscount();
+    }
+  }, [selectedFlight]);
+
+  const fetchApplicableDiscount = async () => {
+    if (!selectedFlight) return;
+
+    setLoading(true);
+    try {
+      // Get the airline code from the flight
+      const airlineCode = selectedFlight.validatingAirlineCodes?.[0] || 
+                         selectedFlight.itineraries?.[0]?.segments?.[0]?.carrierCode;
+
+      if (!airlineCode) {
+        setApplicableDiscount(null);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch applicable discounts for this airline
+      const discount = await pricingService.getBestDiscount({
+        serviceType: 'flights',
+        userRole: 'user',
+        providerCode: airlineCode,
+        basePrice: parseFloat(selectedFlight.price.total),
+      });
+
+      setApplicableDiscount(discount);
+
+      // Calculate discounted price if discount exists
+      if (discount) {
+        const basePrice = parseFloat(selectedFlight.price.total);
+        let discountAmount = 0;
+
+        if (discount.type === 'percentage') {
+          discountAmount = (basePrice * discount.value) / 100;
+        } else {
+          discountAmount = discount.value;
+        }
+
+        setDiscountedPrice(basePrice - discountAmount);
+      } else {
+        setDiscountedPrice(0);
+      }
+    } catch (error) {
+      console.error('Error fetching applicable discount:', error);
+      setApplicableDiscount(null);
+      setDiscountedPrice(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!selectedFlight) {
     return (
       <div className="figma-flight-selection">
@@ -178,6 +240,11 @@ export default function FlightSelection({
         <div className="figma-price-summary">
           <div className="figma-price-labels">
             <div className="figma-price-label">Subtotal</div>
+            {applicableDiscount && (
+              <div className="figma-price-label" style={{ color: '#10b981' }}>
+                {applicableDiscount.name}
+              </div>
+            )}
             <div className="figma-price-label">Taxes and Fees</div>
             <div className="figma-price-label">Total</div>
           </div>
@@ -186,11 +253,24 @@ export default function FlightSelection({
             <div className="figma-price-value">
               {formatPrice(selectedFlight.price.base, selectedFlight.price.currency)}
             </div>
+            {applicableDiscount && (
+              <div className="figma-price-value" style={{ color: '#10b981' }}>
+                -{formatPrice(
+                  applicableDiscount.type === 'percentage'
+                    ? ((parseFloat(selectedFlight.price.total) * applicableDiscount.value) / 100).toString()
+                    : applicableDiscount.value.toString(),
+                  selectedFlight.price.currency
+                )}
+              </div>
+            )}
             <div className="figma-price-value">
               {formatPrice(taxes.toString(), selectedFlight.price.currency)}
             </div>
             <div className="figma-price-value">
-              {formatPrice(selectedFlight.price.total, selectedFlight.price.currency)}
+              {applicableDiscount && discountedPrice > 0
+                ? formatPrice(discountedPrice.toString(), selectedFlight.price.currency)
+                : formatPrice(selectedFlight.price.total, selectedFlight.price.currency)
+              }
             </div>
           </div>
         </div>

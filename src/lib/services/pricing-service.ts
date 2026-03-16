@@ -1,182 +1,153 @@
-import { appConfig } from '@/lib/config';
+/**
+ * Pricing Service
+ * Handles pricing calculations, discount retrieval, and price breakdowns
+ */
 
-const API_BASE_URL = appConfig.apiBaseUrl;
+import { apiClient } from "../api-client";
 
-export interface ServiceCharge {
-  _id: string;
+export interface PriceBreakdownItem {
+  id: string;
   name: string;
-  description?: string;
-  type: 'percentage' | 'fixed';
+  type: string;
   value: number;
-  appliesTo: string[];
-  isActive: boolean;
-  priority: number;
-  createdAt: string;
-  updatedAt: string;
+  amount: number;
 }
 
-export interface Tax {
-  _id: string;
-  name: string;
-  description?: string;
-  type: 'VAT' | 'GST' | 'Sales Tax' | 'Service Tax' | 'Other';
-  rate: number;
-  appliesTo: string[];
-  country: string;
-  isActive: boolean;
-  isInclusive: boolean;
-  priority: number;
-  createdAt: string;
-  updatedAt: string;
+export interface PriceBreakdown {
+  basePrice: number;
+  serviceCharges: PriceBreakdownItem[];
+  taxes: PriceBreakdownItem[];
+  discounts: PriceBreakdownItem[];
+  subtotal: number;
+  totalServiceCharges: number;
+  totalTaxes: number;
+  totalDiscounts: number;
+  finalPrice: number;
 }
 
-export interface Discount {
-  _id: string;
+export interface ApplicableDiscount {
+  id: string;
   name: string;
-  description?: string;
   code?: string;
-  type: 'percentage' | 'fixed' | 'role-based' | 'provider-specific';
-  value?: number;
-  roleDiscounts?: {
-    user: number;
-    staff: number;
-    agent: number;
-    business: number;
-  };
-  provider?: {
-    type: string;
-    name: string;
-    code: string;
-  };
-  appliesTo: string[];
-  minPurchaseAmount?: number;
-  maxDiscountAmount?: number;
-  usageLimit?: number;
-  usageCount: number;
-  validFrom?: string;
-  validUntil?: string;
-  isActive: boolean;
+  type: string;
+  value: number;
+  discountAmount?: number;
   isStackable: boolean;
-  priority: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
-class PricingService {
-  private async fetchWithAuth(url: string, options: RequestInit = {}) {
-    const response = await fetch(url, {
-      ...options,
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    });
+export class PricingService {
+  /**
+   * Calculate price with all charges, taxes, and discounts
+   */
+  async calculatePrice(params: {
+    basePrice: number;
+    serviceType: string;
+    userRole?: string;
+    discountCode?: string;
+    providerCode?: string;
+    country?: string;
+  }): Promise<PriceBreakdown> {
+    try {
+      const response = await apiClient.post<{ data: PriceBreakdown }>(
+        "/pricing/calculate",
+        params,
+        { requiresAuth: false }
+      );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'An error occurred');
+      return response.data.data;
+    } catch (error) {
+      console.error("Price calculation error:", error);
+      // Return basic breakdown if calculation fails
+      return {
+        basePrice: params.basePrice,
+        serviceCharges: [],
+        taxes: [],
+        discounts: [],
+        subtotal: params.basePrice,
+        totalServiceCharges: 0,
+        totalTaxes: 0,
+        totalDiscounts: 0,
+        finalPrice: params.basePrice,
+      };
     }
-
-    return data;
   }
 
-  // Service Charges
-  async getAllServiceCharges(filters?: { isActive?: boolean; appliesTo?: string }) {
-    const params = new URLSearchParams();
-    if (filters?.isActive !== undefined) params.append('isActive', String(filters.isActive));
-    if (filters?.appliesTo) params.append('appliesTo', filters.appliesTo);
+  /**
+   * Get applicable discounts for a service type
+   */
+  async getApplicableDiscounts(params: {
+    serviceType: string;
+    userRole?: string;
+    providerCode?: string;
+  }): Promise<ApplicableDiscount[]> {
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.append("serviceType", params.serviceType);
+      if (params.userRole) queryParams.append("userRole", params.userRole);
+      if (params.providerCode) queryParams.append("providerCode", params.providerCode);
 
-    return this.fetchWithAuth(`${API_BASE_URL}/service-charges?${params.toString()}`);
+      const response = await apiClient.get<{ data: { discounts: ApplicableDiscount[] } }>(
+        `/discounts/applicable/${params.serviceType}?${queryParams.toString()}`,
+        { requiresAuth: false }
+      );
+
+      return response.data.data.discounts || [];
+    } catch (error) {
+      console.error("Error fetching applicable discounts:", error);
+      return [];
+    }
   }
 
-  async createServiceCharge(data: Partial<ServiceCharge>) {
-    return this.fetchWithAuth(`${API_BASE_URL}/service-charges`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  /**
+   * Validate a discount code
+   */
+  async validateDiscountCode(params: {
+    code: string;
+    serviceType: string;
+    amount: number;
+    userRole?: string;
+  }): Promise<ApplicableDiscount | null> {
+    try {
+      const response = await apiClient.post<{ data: { discount: ApplicableDiscount } }>(
+        "/discounts/validate",
+        params,
+        { requiresAuth: false }
+      );
+
+      return response.data.data.discount || null;
+    } catch (error) {
+      console.error("Discount validation error:", error);
+      return null;
+    }
   }
 
-  async updateServiceCharge(id: string, data: Partial<ServiceCharge>) {
-    return this.fetchWithAuth(`${API_BASE_URL}/service-charges/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  }
+  /**
+   * Get best applicable discount for a service
+   * Checks for provider-specific, role-based, and general discounts
+   */
+  async getBestDiscount(params: {
+    serviceType: string;
+    userRole?: string;
+    providerCode?: string;
+    basePrice?: number;
+  }): Promise<ApplicableDiscount | null> {
+    try {
+      const discounts = await this.getApplicableDiscounts({
+        serviceType: params.serviceType,
+        userRole: params.userRole,
+        providerCode: params.providerCode,
+      });
 
-  async deleteServiceCharge(id: string) {
-    return this.fetchWithAuth(`${API_BASE_URL}/service-charges/${id}`, {
-      method: 'DELETE',
-    });
-  }
+      if (discounts.length === 0) return null;
 
-  // Taxes
-  async getAllTaxes(filters?: { isActive?: boolean; appliesTo?: string; country?: string }) {
-    const params = new URLSearchParams();
-    if (filters?.isActive !== undefined) params.append('isActive', String(filters.isActive));
-    if (filters?.appliesTo) params.append('appliesTo', filters.appliesTo);
-    if (filters?.country) params.append('country', filters.country);
-
-    return this.fetchWithAuth(`${API_BASE_URL}/taxes?${params.toString()}`);
-  }
-
-  async createTax(data: Partial<Tax>) {
-    return this.fetchWithAuth(`${API_BASE_URL}/taxes`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async updateTax(id: string, data: Partial<Tax>) {
-    return this.fetchWithAuth(`${API_BASE_URL}/taxes/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async deleteTax(id: string) {
-    return this.fetchWithAuth(`${API_BASE_URL}/taxes/${id}`, {
-      method: 'DELETE',
-    });
-  }
-
-  // Discounts
-  async getAllDiscounts(filters?: { isActive?: boolean; type?: string; appliesTo?: string }) {
-    const params = new URLSearchParams();
-    if (filters?.isActive !== undefined) params.append('isActive', String(filters.isActive));
-    if (filters?.type) params.append('type', filters.type);
-    if (filters?.appliesTo) params.append('appliesTo', filters.appliesTo);
-
-    return this.fetchWithAuth(`${API_BASE_URL}/discounts?${params.toString()}`);
-  }
-
-  async createDiscount(data: Partial<Discount>) {
-    return this.fetchWithAuth(`${API_BASE_URL}/discounts`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async updateDiscount(id: string, data: Partial<Discount>) {
-    return this.fetchWithAuth(`${API_BASE_URL}/discounts/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async deleteDiscount(id: string) {
-    return this.fetchWithAuth(`${API_BASE_URL}/discounts/${id}`, {
-      method: 'DELETE',
-    });
-  }
-
-  async validateDiscountCode(code: string, serviceType: string, amount: number, userRole: string) {
-    return this.fetchWithAuth(`${API_BASE_URL}/discounts/validate`, {
-      method: 'POST',
-      body: JSON.stringify({ code, serviceType, amount, userRole }),
-    });
+      // Return the first (highest priority) discount
+      return discounts[0];
+    } catch (error) {
+      console.error("Error getting best discount:", error);
+      return null;
+    }
   }
 }
 
+// Export singleton instance
 export const pricingService = new PricingService();
