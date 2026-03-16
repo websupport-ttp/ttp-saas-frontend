@@ -213,12 +213,18 @@ export class PricingService {
    */
   async getAllDiscounts(): Promise<{ data: { discounts: Discount[] } }> {
     try {
-      const response = await apiClient.get<{ data: { discounts: Discount[] } }>(
+      const response = await apiClient.get<{ data: { count: number; discounts: Discount[] } }>(
         "/discounts",
         { requiresAuth: true }
       );
 
-      return response.data;
+      // Backend returns { status, data: { count, discounts } }
+      // apiClient wraps it, so response.data is the full response
+      return {
+        data: {
+          discounts: response.data.data?.discounts || []
+        }
+      };
     } catch (error) {
       console.error("Error fetching discounts:", error);
       return { data: { discounts: [] } };
@@ -281,12 +287,18 @@ export class PricingService {
    */
   async getAllServiceCharges(): Promise<{ data: { serviceCharges: ServiceCharge[] } }> {
     try {
-      const response = await apiClient.get<{ data: { serviceCharges: ServiceCharge[] } }>(
+      const response = await apiClient.get<{ data: { count: number; serviceCharges: ServiceCharge[] } }>(
         "/service-charges",
         { requiresAuth: true }
       );
 
-      return response.data;
+      // Backend returns { status, data: { count, serviceCharges } }
+      // apiClient wraps it, so response.data is the full response
+      return {
+        data: {
+          serviceCharges: response.data.data?.serviceCharges || []
+        }
+      };
     } catch (error) {
       console.error("Error fetching service charges:", error);
       return { data: { serviceCharges: [] } };
@@ -349,12 +361,18 @@ export class PricingService {
    */
   async getAllTaxes(): Promise<{ data: { taxes: Tax[] } }> {
     try {
-      const response = await apiClient.get<{ data: { taxes: Tax[] } }>(
+      const response = await apiClient.get<{ data: { count: number; taxes: Tax[] } }>(
         "/taxes",
         { requiresAuth: true }
       );
 
-      return response.data;
+      // Backend returns { status, data: { count, taxes } }
+      // apiClient wraps it, so response.data is the full response
+      return {
+        data: {
+          taxes: response.data.data?.taxes || []
+        }
+      };
     } catch (error) {
       console.error("Error fetching taxes:", error);
       return { data: { taxes: [] } };
