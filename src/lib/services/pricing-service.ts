@@ -67,6 +67,34 @@ export interface Discount {
   updatedAt?: string;
 }
 
+export interface ServiceCharge {
+  _id: string;
+  name: string;
+  description?: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  appliesTo: string[];
+  isActive: boolean;
+  priority: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Tax {
+  _id: string;
+  name: string;
+  description?: string;
+  type: string;
+  rate: number;
+  country: string;
+  appliesTo: string[];
+  isInclusive: boolean;
+  isActive: boolean;
+  priority: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export class PricingService {
   /**
    * Calculate price with all charges, taxes, and discounts
@@ -244,6 +272,142 @@ export class PricingService {
       );
     } catch (error) {
       console.error("Error deleting discount:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all service charges (admin)
+   */
+  async getAllServiceCharges(): Promise<{ data: { serviceCharges: ServiceCharge[] } }> {
+    try {
+      const response = await apiClient.get<{ data: { serviceCharges: ServiceCharge[] } }>(
+        "/service-charges",
+        { requiresAuth: true }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching service charges:", error);
+      return { data: { serviceCharges: [] } };
+    }
+  }
+
+  /**
+   * Create a new service charge (admin)
+   */
+  async createServiceCharge(data: Partial<ServiceCharge>): Promise<{ data: { serviceCharge: ServiceCharge } }> {
+    try {
+      const response = await apiClient.post<{ data: { serviceCharge: ServiceCharge } }>(
+        "/service-charges",
+        data,
+        { requiresAuth: true }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error creating service charge:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update a service charge (admin)
+   */
+  async updateServiceCharge(id: string, data: Partial<ServiceCharge>): Promise<{ data: { serviceCharge: ServiceCharge } }> {
+    try {
+      const response = await apiClient.put<{ data: { serviceCharge: ServiceCharge } }>(
+        `/service-charges/${id}`,
+        data,
+        { requiresAuth: true }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error updating service charge:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a service charge (admin)
+   */
+  async deleteServiceCharge(id: string): Promise<void> {
+    try {
+      await apiClient.delete(
+        `/service-charges/${id}`,
+        { requiresAuth: true }
+      );
+    } catch (error) {
+      console.error("Error deleting service charge:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all taxes (admin)
+   */
+  async getAllTaxes(): Promise<{ data: { taxes: Tax[] } }> {
+    try {
+      const response = await apiClient.get<{ data: { taxes: Tax[] } }>(
+        "/taxes",
+        { requiresAuth: true }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching taxes:", error);
+      return { data: { taxes: [] } };
+    }
+  }
+
+  /**
+   * Create a new tax (admin)
+   */
+  async createTax(data: Partial<Tax>): Promise<{ data: { tax: Tax } }> {
+    try {
+      const response = await apiClient.post<{ data: { tax: Tax } }>(
+        "/taxes",
+        data,
+        { requiresAuth: true }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error creating tax:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update a tax (admin)
+   */
+  async updateTax(id: string, data: Partial<Tax>): Promise<{ data: { tax: Tax } }> {
+    try {
+      const response = await apiClient.put<{ data: { tax: Tax } }>(
+        `/taxes/${id}`,
+        data,
+        { requiresAuth: true }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error updating tax:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a tax (admin)
+   */
+  async deleteTax(id: string): Promise<void> {
+    try {
+      await apiClient.delete(
+        `/taxes/${id}`,
+        { requiresAuth: true }
+      );
+    } catch (error) {
+      console.error("Error deleting tax:", error);
       throw error;
     }
   }
