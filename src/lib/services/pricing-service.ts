@@ -221,6 +221,8 @@ export class PricingService {
       // Backend returns { status, data: { count, discounts } }
       // apiClient transforms it to { success, message, data: { count, discounts } }
       // So response.data is the transformed response
+      console.log('getAllDiscounts - Response:', response);
+      
       return {
         data: {
           discounts: response.data?.data?.discounts || []
@@ -228,6 +230,12 @@ export class PricingService {
       };
     } catch (error) {
       console.error("Error fetching discounts:", error);
+      console.error("Error details:", {
+        message: error instanceof Error ? error.message : String(error),
+        status: (error as any)?.response?.status,
+        statusText: (error as any)?.response?.statusText,
+        data: (error as any)?.response?.data
+      });
       return { data: { discounts: [] } };
     }
   }

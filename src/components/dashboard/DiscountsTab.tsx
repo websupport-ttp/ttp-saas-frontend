@@ -47,9 +47,14 @@ export default function DiscountsTab() {
     try {
       setLoading(true)
       const response = await pricingService.getAllDiscounts()
+      console.log('Discounts loaded:', response.data.discounts)
       setDiscounts(response.data.discounts || [])
     } catch (error) {
       console.error('Error loading discounts:', error)
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        error
+      })
     } finally {
       setLoading(false)
     }
