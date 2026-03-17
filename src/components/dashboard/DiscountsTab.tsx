@@ -56,16 +56,17 @@ function valueLabel(t: DiscountType) {
   return 'Value (%)'
 }
 
+function roleBreakdown(d: Discount): string {
+  const rd = d.roleDiscounts
+  if (!rd) return 'Role-based'
+  const parts = ALL_ROLES
+    .filter(r => (rd[r] ?? 0) > 0)
+    .map(r => `${r.charAt(0).toUpperCase() + r.slice(1)} ${rd[r]}%`)
+  return parts.length > 0 ? parts.join(' / ') : 'Role-based (all 0%)'
+}
+
 function discountSummary(d: Discount): string {
-  if (d.type === 'role-based' || d.type === 'provider-role-based') {
-    const rd = d.roleDiscounts
-    if (!rd) return 'Role-based'
-    // Show only roles that have a non-zero value
-    const parts = ALL_ROLES
-      .filter(r => (rd[r] ?? 0) > 0)
-      .map(r => `${r.charAt(0).toUpperCase() + r.slice(1)} ${rd[r]}%`)
-    return parts.length > 0 ? parts.join(' / ') : 'Role-based (all 0%)'
-  }
+  if (d.type === 'role-based' || d.type === 'provider-role-based') return roleBreakdown(d)
   if (d.type === 'fixed') return `₦${d.value}`
   return `${d.value}%`
 }
@@ -448,8 +449,17 @@ export default function DiscountsTab() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900 capitalize">{discount.type.replace(/-/g, ' ')}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">{discountSummary(discount)}</span>
+                    <td className="px-6 py-4 whitespace-nowrap max-w-[160px]">
+                      {(discount.type === 'role-based' || discount.type === 'provider-role-based') ? (
+                        <span
+                          title={roleBreakdown(discount)}
+                          className="block text-sm text-gray-900 truncate cursor-help"
+                        >
+                          Role-based ℹ
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-900">{discountSummary(discount)}</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900">
