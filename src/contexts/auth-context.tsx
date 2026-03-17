@@ -56,26 +56,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initializeAuth();
   }, []);
 
-  // Set up periodic auth check (every 10 minutes)
+  // Set up periodic token refresh (every 14 minutes — before typical 15min expiry)
   useEffect(() => {
     if (!user) return;
 
     const authCheckInterval = setInterval(async () => {
       try {
-        // Try to refresh token proactively before it expires
-        // This ensures the user stays logged in
         await authService.refreshToken();
       } catch (error) {
-        // If refresh fails, user is logged out
-        console.log('Token refresh failed, logging out');
-        setUser(null);
-        authService.clearAuthData();
-        router.push('/');
+        // Only log — do NOT log the user out on a failed refresh.
+        // The next API call will handle re-auth if truly expired.
+        console.warn('Periodic token refresh failed, will retry next interval:', error);
       }
-    }, 10 * 60 * 1000); // 10 minutes
+    }, 14 * 60 * 1000); // 14 minutes
 
     return () => clearInterval(authCheckInterval);
-  }, [user, router]);
+  }, [user]);
 
   /**
    * Initialize authentication state from storage
@@ -84,39 +80,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setIsLoading(true);
       
-      // Get current user from localStorage
       const currentUser = authService.getCurrentUser();
       
       if (currentUser) {
-        // Since we use HTTP-only cookies, verify auth by making an API call
+        // Optimistically set the user immediately so the UI doesn't flash logged-out
+        setUser(currentUser);
+
+        // Verify the session is still valid in the background
         try {
-          // Try to fetch user profile to verify cookie is still valid
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/me`, {
-            credentials: 'include', // Send cookies
-            headers: {
-              'Content-Type': 'application/json'
-            }
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
           });
 
-          if (response.ok) {
-            // Cookie is valid, user is authenticated
-            setUser(currentUser);
-          } else {
-            // Cookie expired or invalid, clear auth
-            await handleLogout(false);
+          if (response.status === 401) {
+            // Explicitly unauthorised — try a token refresh before giving up
+            try {
+              await authService.refreshToken();
+              // Refresh succeeded, keep the user logged in
+            } catch {
+              // Refresh also failed — now we log out
+              setUser(null);
+              authService.clearAuthData();
+            }
           }
-        } catch (error) {
-          // Network error or auth failed, clear auth
-          console.error('Auth verification failed:', error);
-          await handleLogout(false);
+          // Any other status (200, 5xx, network error) — keep the user logged in
+        } catch {
+          // Network error — keep the user logged in, don't clear session
+          console.warn('Auth verification network error — keeping session alive');
         }
       } else {
-        // No user data in localStorage
         setUser(null);
       }
     } catch (error) {
       console.error('Error initializing auth:', error);
-      setUser(null);
+      // Don't clear user on unexpected errors
     } finally {
       setIsLoading(false);
     }
@@ -228,18 +226,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const refreshUser = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      
-      // Get updated user data from auth service
       const currentUser = authService.getCurrentUser();
-      
-      if (currentUser && authService.isAuthenticated()) {
+      if (currentUser) {
         setUser(currentUser);
-      } else {
-        await handleLogout(false);
       }
     } catch (error) {
       console.error('Error refreshing user:', error);
-      await handleLogout(false);
     } finally {
       setIsLoading(false);
     }

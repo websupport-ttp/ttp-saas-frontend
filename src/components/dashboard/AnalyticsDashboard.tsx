@@ -38,14 +38,12 @@ export default function AnalyticsDashboard() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
-      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+      // Use the apiClient base URL but strip any trailing /api/v1 duplication
+      const base = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1')
+        .replace(/\/api\/v1\/?$/, '');
       const response = await fetch(
-        `${API_BASE_URL}/api/v1/analytics/dashboard?period=${dateRange}`,
-        {
-          credentials: 'include',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        `${base}/api/v1/analytics/dashboard?period=${dateRange}`,
+        { credentials: 'include' }
       );
 
       if (response.ok) {
