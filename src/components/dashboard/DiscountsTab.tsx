@@ -5,13 +5,18 @@ import { pricingService, Discount } from '@/lib/services/pricing-service'
 
 type DiscountType = 'percentage' | 'fixed' | 'role-based' | 'provider-specific' | 'provider-role-based'
 
+const EMPTY_ROLE_DISCOUNTS = {
+  customer: 0, business: 0, staff: 0,
+  vendor: 0, agent: 0, manager: 0, executive: 0, admin: 0,
+}
+
 const EMPTY_FORM = {
   name: '',
   description: '',
   code: '',
   type: 'percentage' as DiscountType,
   value: 0,
-  roleDiscounts: { user: 0, staff: 10, agent: 15, business: 20 },
+  roleDiscounts: { ...EMPTY_ROLE_DISCOUNTS },
   provider: { type: '', name: '', code: '' },
   appliesTo: [] as string[],
   minPurchaseAmount: 0,
@@ -23,6 +28,12 @@ const EMPTY_FORM = {
   isStackable: false,
   priority: 0,
 }
+
+const ALL_ROLES = [
+  'customer', 'business', 'staff', 'vendor',
+  'agent', 'manager', 'executive', 'admin',
+] as const
+type RoleKey = typeof ALL_ROLES[number]
 
 const SERVICE_TYPES = ['all', 'flights', 'hotels', 'car-hire', 'visa', 'insurance', 'packages']
 const PROVIDER_TYPES = ['airline', 'hotel', 'car-rental', 'insurance']
@@ -49,7 +60,11 @@ function discountSummary(d: Discount): string {
   if (d.type === 'role-based' || d.type === 'provider-role-based') {
     const rd = d.roleDiscounts
     if (!rd) return 'Role-based'
-    return `User ${rd.user}% / Agent ${rd.agent}% / Business ${rd.business}%`
+    // Show only roles that have a non-zero value
+    const parts = ALL_ROLES
+      .filter(r => (rd[r] ?? 0) > 0)
+      .map(r => `${r.charAt(0).toUpperCase() + r.slice(1)} ${rd[r]}%`)
+    return parts.length > 0 ? parts.join(' / ') : 'Role-based (all 0%)'
   }
   if (d.type === 'fixed') return `₦${d.value}`
   return `${d.value}%`
@@ -123,7 +138,7 @@ export default function DiscountsTab() {
       code: d.code || '',
       type: d.type,
       value: d.value || 0,
-      roleDiscounts: d.roleDiscounts || { user: 0, staff: 10, agent: 15, business: 20 },
+      roleDiscounts: { ...EMPTY_ROLE_DISCOUNTS, ...d.roleDiscounts },
       provider: d.provider || { type: '', name: '', code: '' },
       appliesTo: d.appliesTo,
       minPurchaseAmount: d.minPurchaseAmount || 0,
@@ -151,7 +166,7 @@ export default function DiscountsTab() {
   const resetForm = () => {
     setEditingDiscount(null)
     setShowForm(false)
-    setFormData({ ...EMPTY_FORM, roleDiscounts: { user: 0, staff: 10, agent: 15, business: 20 }, provider: { type: '', name: '', code: '' }, appliesTo: [] })
+    setFormData({ ...EMPTY_FORM, roleDiscounts: { ...EMPTY_ROLE_DISCOUNTS }, provider: { type: '', name: '', code: '' }, appliesTo: [] })
   }
 
   const set = (field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }))
@@ -287,7 +302,7 @@ export default function DiscountsTab() {
                 )}
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {(['user', 'staff', 'agent', 'business'] as const).map(role => (
+                {ALL_ROLES.map(role => (
                   <div key={role}>
                     <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">{role} (%)</label>
                     <input

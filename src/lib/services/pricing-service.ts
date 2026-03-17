@@ -43,10 +43,14 @@ export interface Discount {
   type: 'percentage' | 'fixed' | 'role-based' | 'provider-specific' | 'provider-role-based';
   value?: number;
   roleDiscounts?: {
-    user: number;
-    staff: number;
-    agent: number;
+    customer: number;
     business: number;
+    staff: number;
+    vendor: number;
+    agent: number;
+    manager: number;
+    executive: number;
+    admin: number;
   };
   provider?: {
     type: string;
