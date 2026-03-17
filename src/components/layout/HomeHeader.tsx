@@ -5,17 +5,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { LoginOverlay } from '@/components/auth'
+import { useAuth } from '@/contexts/auth-context'
+import { getDashboardRoute } from '@/lib/auth/permissions'
 
 interface HomeHeaderProps {
   className?: string
-}
-
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
 }
 
 export function HomeHeader({ className = '' }: HomeHeaderProps) {
@@ -25,57 +19,9 @@ export function HomeHeader({ className = '' }: HomeHeaderProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState('EN')
   const [selectedCurrency, setSelectedCurrency] = useState('NGN')
-  const [user, setUser] = useState<User | null>(null)
   const pathname = usePathname()
   const router = useRouter()
-
-  const languages = ['EN', 'FR', 'ES', 'DE']
-  const currencies = ['NGN', 'USD', 'EUR', 'GBP']
-
-  // Check for logged-in user
-  useEffect(() => {
-    const checkUser = () => {
-      const userData = localStorage.getItem('user_data')
-      if (userData) {
-        try {
-          const parsedUser = JSON.parse(userData)
-          setUser(parsedUser)
-        } catch (error) {
-          console.error('Error parsing user data:', error)
-          localStorage.removeItem('user_data')
-        }
-      } else {
-        setUser(null)
-      }
-    }
-
-    // Check immediately
-    checkUser()
-
-    // Listen for custom login and logout events
-    const handleUserLoggedIn = () => {
-      checkUser()
-    }
-
-    const handleUserLoggedOut = () => {
-      checkUser()
-    }
-
-    // Also check when storage changes (for cross-tab updates)
-    window.addEventListener('storage', checkUser)
-    window.addEventListener('userLoggedIn', handleUserLoggedIn)
-    window.addEventListener('userLoggedOut', handleUserLoggedOut)
-    
-    // Check again after a short delay to catch any race conditions
-    const timer = setTimeout(checkUser, 100)
-
-    return () => {
-      window.removeEventListener('storage', checkUser)
-      window.removeEventListener('userLoggedIn', handleUserLoggedIn)
-      window.removeEventListener('userLoggedOut', handleUserLoggedOut)
-      clearTimeout(timer)
-    }
-  }, [])
+  const { user, logout } = useAuth()
 
   // Handle scroll effect
   useEffect(() => {
@@ -96,46 +42,21 @@ export function HomeHeader({ className = '' }: HomeHeaderProps) {
     { label: 'Contact Us', href: '/contact', active: pathname === '/contact' }
   ]
 
-  const getDashboardPath = () => {
-    if (!user) return '/dashboard'
-    
-    switch (user.role) {
-      case 'Admin':
-        return '/dashboard/admin'
-      case 'Staff':
-        return '/dashboard/staff'
-      case 'Manager':
-      case 'Executive':
-        return '/dashboard/manager'
-      default:
-        return '/dashboard'
-    }
-  }
-
   const handleAccountClick = () => {
     if (user) {
-      router.push(getDashboardPath())
+      router.push(getDashboardRoute(user))
     } else {
       setIsLoginOverlayOpen(true)
     }
   }
 
-  const handleLogin = async (email: string, password: string) => {
-    // TODO: Implement actual login logic
-    console.log('Login attempt:', { email, password })
-    // For now, just simulate a successful login
-    await new Promise(resolve => setTimeout(resolve, 1000))
-  }
-
   const handleSignUp = () => {
     setIsLoginOverlayOpen(false)
-    // Navigate to sign up page or open sign up overlay
     window.location.href = '/signup'
   }
 
   const handleForgotPassword = () => {
     setIsLoginOverlayOpen(false)
-    // Navigate to forgot password page
     window.location.href = '/forgot-password'
   }
 
@@ -332,14 +253,16 @@ export function HomeHeader({ className = '' }: HomeHeaderProps) {
           </div>
         )}
 
-        {/* Login Overlay */}
-        <LoginOverlay
-          isOpen={isLoginOverlayOpen}
-          onClose={() => setIsLoginOverlayOpen(false)}
-          onLogin={handleLogin}
-          onSignUp={handleSignUp}
-          onForgotPassword={handleForgotPassword}
-        />
+        {/* Login Overlay — only shown when not logged in */}
+        {!user && (
+          <LoginOverlay
+            isOpen={isLoginOverlayOpen}
+            onClose={() => setIsLoginOverlayOpen(false)}
+            onLogin={async () => {}}
+            onSignUp={handleSignUp}
+            onForgotPassword={handleForgotPassword}
+          />
+        )}
       </div>
     </header>
   )
