@@ -348,9 +348,10 @@ export default function DiscountsTab() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Max Discount</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Max Discount Cap <span className="text-gray-400 font-normal">(leave blank for no cap)</span></label>
               <input type="number" min={0} value={formData.maxDiscountAmount || ''}
                 onChange={e => set('maxDiscountAmount', e.target.value ? parseFloat(e.target.value) : undefined)}
+                placeholder="e.g. 10000"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
               />
             </div>

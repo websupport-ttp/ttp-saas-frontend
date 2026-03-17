@@ -37,7 +37,7 @@ interface PriceBreakdownProps {
 export default function PriceBreakdown({
   basePrice,
   serviceType,
-  userRole = 'user',
+  userRole = 'guest',
   discountCode,
   providerCode,
   country = 'NG',

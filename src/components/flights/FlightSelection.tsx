@@ -55,7 +55,7 @@ export default function FlightSelection({
       // Fetch applicable discounts for this airline
       const discount = await pricingService.getBestDiscount({
         serviceType: 'flights',
-        userRole: 'user',
+        userRole: userRole,
         providerCode: airlineCode,
         basePrice: parseFloat(selectedFlight.price.total),
       });
