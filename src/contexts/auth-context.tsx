@@ -56,11 +56,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initializeAuth();
   }, []);
 
-  // Set up periodic token refresh (every 14 minutes — before typical 15min expiry)
+  // Refresh token on tab becoming visible after being hidden (handles idle/background tabs)
+  useEffect(() => {
+    if (!user) return;
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          await authService.refreshToken();
+        } catch {
+          // Non-fatal — only a 401 from refreshToken() will clear the session
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user]);
+
+  // Periodic token refresh every 14 minutes while tab is active
   useEffect(() => {
     if (!user) return;
 
     const authCheckInterval = setInterval(async () => {
+      // Skip if tab is hidden — the visibilitychange handler will catch it on return
+      if (document.visibilityState !== 'visible') return;
       try {
         await authService.refreshToken();
       } catch (error) {
