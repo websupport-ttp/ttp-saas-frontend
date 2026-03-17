@@ -130,6 +130,10 @@ export default function PriceBreakdown({
     breakdown.discounts.length > 0 ||
     breakdown.taxes.length > 0;
 
+  // Inclusive taxes are shown separately — they don't add to total but should be visible
+  const exclusiveTaxes = breakdown.taxes.filter(t => !t.isInclusive);
+  const inclusiveTaxes = breakdown.taxes.filter(t => t.isInclusive);
+
   // Helper row
   const Row = ({
     label, value, sub, green, indent,
@@ -161,9 +165,12 @@ export default function PriceBreakdown({
           {breakdown.totalDiscounts > 0 && (
             <Row label="Discounts" value={`-${formatAmount(breakdown.totalDiscounts)}`} green />
           )}
-          {breakdown.totalTaxes > 0 && (
+          {exclusiveTaxes.length > 0 && (
             <Row label="Taxes & Fees" value={formatAmount(breakdown.totalTaxes)} />
           )}
+          {inclusiveTaxes.map(t => (
+            <Row key={t.id} label={`${t.name} (${t.rate}%)`} value="included" sub="incl. in price" />
+          ))}
         </>
       )}
 
@@ -221,14 +228,25 @@ export default function PriceBreakdown({
             <div className="space-y-1">
               <div className="flex justify-between text-sm font-medium text-gray-700 border-t border-gray-100 pt-1">
                 <span>Taxes & Fees</span>
-                <span className="tabular-nums">{formatAmount(breakdown.totalTaxes)}</span>
+                <span className="tabular-nums">
+                  {exclusiveTaxes.length > 0 ? formatAmount(breakdown.totalTaxes) : 'see below'}
+                </span>
               </div>
-              {breakdown.taxes.map(t => (
+              {exclusiveTaxes.map(t => (
                 <Row
                   key={t.id}
                   label={t.name}
-                  sub={`(${t.rate}%)${t.isInclusive ? ' incl.' : ''}`}
-                  value={t.isInclusive ? 'included' : formatAmount(t.amount)}
+                  sub={`(${t.rate}%)`}
+                  value={formatAmount(t.amount)}
+                  indent
+                />
+              ))}
+              {inclusiveTaxes.map(t => (
+                <Row
+                  key={t.id}
+                  label={t.name}
+                  sub={`(${t.rate}%) incl. in price`}
+                  value={formatAmount(t.amount)}
                   indent
                 />
               ))}
