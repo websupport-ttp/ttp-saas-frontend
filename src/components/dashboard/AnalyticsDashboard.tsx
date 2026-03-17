@@ -39,19 +39,48 @@ export default function AnalyticsDashboard() {
     try {
       setLoading(true);
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
       const response = await fetch(
-        `${API_BASE_URL}/pricing?range=${dateRange}`,
+        `${API_BASE_URL}/api/v1/analytics/dashboard?period=${dateRange}`,
         {
           credentials: 'include',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         }
       );
 
       if (response.ok) {
-        const data = await response.json();
-        setAnalytics(data.data);
-      } else if (response.status === 404) {
-        // Analytics endpoint not available
-        console.warn('Analytics endpoint not available');
+        const json = await response.json();
+        const d = json.data;
+        // Map analytics service shape to the component's AnalyticsData shape
+        setAnalytics({
+          revenue: {
+            total: d?.overview?.totalRevenue ?? 0,
+            byService: (d?.revenue?.revenueByItemType ?? []).map((item: any) => ({
+              service: item.itemType,
+              amount: item.totalRevenue,
+            })),
+            trend: parseFloat(d?.overview?.profitMarginPercentage ?? 0),
+          },
+          bookings: {
+            total: d?.overview?.totalTransactions ?? 0,
+            byService: (d?.products?.itemPerformance ?? []).map((item: any) => ({
+              service: item.itemType,
+              count: item.transactionCount,
+            })),
+            trend: 0,
+          },
+          discounts: {
+            totalApplied: 0,
+            totalAmount: 0,
+            mostUsed: [],
+          },
+          taxes: {
+            totalCollected: 0,
+            byType: [],
+          },
+        });
+      } else {
+        console.warn('Analytics endpoint returned', response.status);
         setAnalytics(null);
       }
     } catch (error) {

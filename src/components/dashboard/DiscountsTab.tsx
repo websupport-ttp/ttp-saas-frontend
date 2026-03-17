@@ -6,6 +6,7 @@ import { pricingService, Discount } from '@/lib/services/pricing-service'
 export default function DiscountsTab() {
   const [discounts, setDiscounts] = useState<Discount[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null)
   const [formData, setFormData] = useState({
@@ -46,15 +47,16 @@ export default function DiscountsTab() {
   const loadDiscounts = async () => {
     try {
       setLoading(true)
+      setError(null)
       const response = await pricingService.getAllDiscounts()
-      console.log('Discounts loaded:', response.data.discounts)
+      if (response.error) {
+        setError(response.error)
+      }
       setDiscounts(response.data.discounts || [])
     } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
+      setError(msg)
       console.error('Error loading discounts:', error)
-      console.error('Error details:', {
-        message: error instanceof Error ? error.message : String(error),
-        error
-      })
     } finally {
       setLoading(false)
     }
@@ -491,6 +493,12 @@ export default function DiscountsTab() {
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-gray-600">Loading discounts...</div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <p className="text-red-600 font-medium">Failed to load discounts</p>
+            <p className="text-sm text-gray-500 mt-1">{error}</p>
+            <button onClick={loadDiscounts} className="mt-3 text-sm text-brand-blue underline">Retry</button>
+          </div>
         ) : discounts.length === 0 ? (
           <div className="p-8 text-center text-gray-600">No discounts found</div>
         ) : (

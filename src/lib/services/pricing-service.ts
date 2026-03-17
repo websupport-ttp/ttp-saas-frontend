@@ -108,13 +108,13 @@ export class PricingService {
     country?: string;
   }): Promise<PriceBreakdown> {
     try {
-      const response = await apiClient.post<{ data: PriceBreakdown }>(
+      const response = await apiClient.post<PriceBreakdown>(
         "/pricing/calculate",
         params,
         { requiresAuth: false }
       );
 
-      return response.data.data;
+      return response.data;
     } catch (error) {
       console.error("Price calculation error:", error);
       // Return basic breakdown if calculation fails
@@ -146,12 +146,12 @@ export class PricingService {
       if (params.userRole) queryParams.append("userRole", params.userRole);
       if (params.providerCode) queryParams.append("providerCode", params.providerCode);
 
-      const response = await apiClient.get<{ data: { discounts: ApplicableDiscount[] } }>(
+      const response = await apiClient.get<{ count: number; discounts: ApplicableDiscount[] }>(
         `/discounts/applicable/${params.serviceType}?${queryParams.toString()}`,
         { requiresAuth: false }
       );
 
-      return response.data.data.discounts || [];
+      return response.data?.discounts || [];
     } catch (error) {
       console.error("Error fetching applicable discounts:", error);
       return [];
@@ -168,13 +168,13 @@ export class PricingService {
     userRole?: string;
   }): Promise<ApplicableDiscount | null> {
     try {
-      const response = await apiClient.post<{ data: { discount: ApplicableDiscount } }>(
+      const response = await apiClient.post<{ discount: ApplicableDiscount }>(
         "/discounts/validate",
         params,
         { requiresAuth: false }
       );
 
-      return response.data.data.discount || null;
+      return response.data?.discount || null;
     } catch (error) {
       console.error("Discount validation error:", error);
       return null;
@@ -211,32 +211,28 @@ export class PricingService {
   /**
    * Get all discounts (admin)
    */
-  async getAllDiscounts(): Promise<{ data: { discounts: Discount[] } }> {
+  async getAllDiscounts(): Promise<{ data: { discounts: Discount[] }; error?: string }> {
     try {
-      const response = await apiClient.get<{ data: { count: number; discounts: Discount[] } }>(
+      const response = await apiClient.get<{ count: number; discounts: Discount[] }>(
         "/discounts",
         { requiresAuth: true }
       );
 
-      // Backend returns { status, data: { count, discounts } }
-      // apiClient transforms it to { success, message, data: { count, discounts } }
-      // So response.data is the transformed response
-      console.log('getAllDiscounts - Response:', response);
-      
+      // apiClient.get() returns ApiResponse<T> where T = { count, discounts }
+      // After interceptor: { success, message, data: { count, discounts } }
+      // So response.data is { count, discounts }
+      const discounts = response.data?.discounts;
+      console.log('[PricingService] getAllDiscounts raw response:', JSON.stringify(response));
       return {
         data: {
-          discounts: response.data?.data?.discounts || []
+          discounts: Array.isArray(discounts) ? discounts : []
         }
       };
-    } catch (error) {
-      console.error("Error fetching discounts:", error);
-      console.error("Error details:", {
-        message: error instanceof Error ? error.message : String(error),
-        status: (error as any)?.response?.status,
-        statusText: (error as any)?.response?.statusText,
-        data: (error as any)?.response?.data
-      });
-      return { data: { discounts: [] } };
+    } catch (error: any) {
+      const msg = error?.message || String(error);
+      const status = error?.response?.status || error?.status;
+      console.error(`[PricingService] getAllDiscounts failed (${status}):`, msg);
+      return { data: { discounts: [] }, error: `${status ? status + ': ' : ''}${msg}` };
     }
   }
 
@@ -294,24 +290,28 @@ export class PricingService {
   /**
    * Get all service charges (admin)
    */
-  async getAllServiceCharges(): Promise<{ data: { serviceCharges: ServiceCharge[] } }> {
+  async getAllServiceCharges(): Promise<{ data: { serviceCharges: ServiceCharge[] }; error?: string }> {
     try {
-      const response = await apiClient.get<{ data: { count: number; serviceCharges: ServiceCharge[] } }>(
+      const response = await apiClient.get<{ count: number; serviceCharges: ServiceCharge[] }>(
         "/service-charges",
         { requiresAuth: true }
       );
 
-      // Backend returns { status, data: { count, serviceCharges } }
-      // apiClient transforms it to { success, message, data: { count, serviceCharges } }
-      // So response.data is the transformed response
+      // apiClient.get() returns ApiResponse<T> where T = { count, serviceCharges }
+      // After interceptor: { success, message, data: { count, serviceCharges } }
+      // So response.data is { count, serviceCharges }
+      const serviceCharges = response.data?.serviceCharges;
+      console.log('[PricingService] getAllServiceCharges raw response:', JSON.stringify(response));
       return {
         data: {
-          serviceCharges: response.data?.data?.serviceCharges || []
+          serviceCharges: Array.isArray(serviceCharges) ? serviceCharges : []
         }
       };
-    } catch (error) {
-      console.error("Error fetching service charges:", error);
-      return { data: { serviceCharges: [] } };
+    } catch (error: any) {
+      const msg = error?.message || String(error);
+      const status = error?.response?.status || error?.status;
+      console.error(`[PricingService] getAllServiceCharges failed (${status}):`, msg);
+      return { data: { serviceCharges: [] }, error: `${status ? status + ': ' : ''}${msg}` };
     }
   }
 
@@ -371,17 +371,16 @@ export class PricingService {
    */
   async getAllTaxes(): Promise<{ data: { taxes: Tax[] } }> {
     try {
-      const response = await apiClient.get<{ data: { count: number; taxes: Tax[] } }>(
+      const response = await apiClient.get<{ count: number; taxes: Tax[] }>(
         "/taxes",
         { requiresAuth: true }
       );
 
-      // Backend returns { status, data: { count, taxes } }
-      // apiClient transforms it to { success, message, data: { count, taxes } }
-      // So response.data is the transformed response
+      // apiClient.get() returns ApiResponse<T> where T = { count, taxes }
+      // So response.data is { count, taxes }
       return {
         data: {
-          taxes: response.data?.data?.taxes || []
+          taxes: response.data?.taxes || []
         }
       };
     } catch (error) {

@@ -6,6 +6,7 @@ import { pricingService, ServiceCharge } from '@/lib/services/pricing-service'
 export default function ServiceChargesTab() {
   const [charges, setCharges] = useState<ServiceCharge[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingCharge, setEditingCharge] = useState<ServiceCharge | null>(null)
   const [formData, setFormData] = useState({
@@ -27,9 +28,15 @@ export default function ServiceChargesTab() {
   const loadCharges = async () => {
     try {
       setLoading(true)
+      setError(null)
       const response = await pricingService.getAllServiceCharges()
+      if (response.error) {
+        setError(response.error)
+      }
       setCharges(response.data.serviceCharges || [])
     } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
+      setError(msg)
       console.error('Error loading service charges:', error)
     } finally {
       setLoading(false)
@@ -272,9 +279,16 @@ export default function ServiceChargesTab() {
           </div>
         ))}
 
-        {charges.length === 0 && (
+      {charges.length === 0 && !error && (
           <div className="text-center py-8 text-gray-500">
             No service charges configured yet
+          </div>
+        )}
+        {error && (
+          <div className="text-center py-8">
+            <p className="text-red-600 font-medium">Failed to load service charges</p>
+            <p className="text-sm text-gray-500 mt-1">{error}</p>
+            <button onClick={loadCharges} className="mt-3 text-sm text-brand-blue underline">Retry</button>
           </div>
         )}
       </div>
