@@ -40,7 +40,7 @@ export interface Discount {
   name: string;
   description?: string;
   code?: string;
-  type: 'percentage' | 'fixed' | 'role-based' | 'provider-specific';
+  type: 'percentage' | 'fixed' | 'role-based' | 'provider-specific' | 'provider-role-based';
   value?: number;
   roleDiscounts?: {
     user: number;
