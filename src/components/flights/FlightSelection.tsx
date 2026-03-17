@@ -4,6 +4,7 @@ import { FlightOffer, LocationInfo, AircraftInfo } from '@/types/api'
 import { useState, useEffect } from 'react'
 import { pricingService, ApplicableDiscount } from '@/lib/services/pricing-service'
 import PriceBreakdown from '@/components/common/PriceBreakdown'
+import { useAuth } from '@/contexts/auth-context'
 
 interface FlightSelectionProps {
   selectedFlight?: FlightOffer;
@@ -23,6 +24,8 @@ export default function FlightSelection({
   onContinue,
   onBack 
 }: FlightSelectionProps) {
+  const { user } = useAuth()
+  const userRole = user?.role || 'customer'
   const [applicableDiscount, setApplicableDiscount] = useState<ApplicableDiscount | null>(null);
   const [discountedPrice, setDiscountedPrice] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -242,7 +245,7 @@ export default function FlightSelection({
           <PriceBreakdown
             basePrice={parseFloat(selectedFlight.price?.total || '0')}
             serviceType="flights"
-            userRole="user"
+            userRole={userRole}
             providerCode={selectedFlight.validatingAirlineCodes?.[0] || selectedFlight.itineraries?.[0]?.segments?.[0]?.carrierCode}
             onPriceCalculated={() => {}}
             showDetails={true}

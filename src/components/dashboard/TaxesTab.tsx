@@ -114,7 +114,7 @@ export default function TaxesTab() {
             {editingTax ? 'Edit Tax' : 'New Tax'}
           </h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
               <input
@@ -239,7 +239,7 @@ export default function TaxesTab() {
                 {tax.description && (
                   <p className="text-sm text-gray-600 mt-1">{tax.description}</p>
                 )}
-                <div className="flex gap-4 mt-2 text-sm">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm">
                   <span className="text-gray-600">
                     <strong>Rate:</strong> {tax.rate}%
                   </span>

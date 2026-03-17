@@ -67,8 +67,8 @@ function roleBreakdown(d: Discount): string {
 
 function discountSummary(d: Discount): string {
   if (d.type === 'role-based' || d.type === 'provider-role-based') return roleBreakdown(d)
-  if (d.type === 'fixed') return `₦${d.value}`
-  return `${d.value}%`
+  if (d.type === 'fixed') return d.value != null ? `₦${d.value}` : '—'
+  return d.value != null ? `${d.value}%` : '—'
 }
 
 export default function DiscountsTab() {
@@ -174,7 +174,7 @@ export default function DiscountsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-3">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Discounts</h3>
           <p className="text-sm text-gray-600">Manage discount codes and promotions</p>
@@ -339,7 +339,7 @@ export default function DiscountsTab() {
           </div>
 
           {/* Limits + dates */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Min Purchase</label>
               <input type="number" min={0} value={formData.minPurchaseAmount}
@@ -426,69 +426,103 @@ export default function DiscountsTab() {
         ) : discounts.length === 0 ? (
           <div className="p-8 text-center text-gray-500">No discounts found</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {discounts.map(discount => (
-                  <tr key={discount._id}>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{discount.name}</div>
-                      {discount.description && <div className="text-xs text-gray-500">{discount.description}</div>}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 capitalize">{discount.type.replace(/-/g, ' ')}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap max-w-[160px]">
-                      {(discount.type === 'role-based' || discount.type === 'provider-role-based') ? (
-                        <span
-                          title={roleBreakdown(discount)}
-                          className="block text-sm text-gray-900 truncate cursor-help"
-                        >
-                          Role-based ℹ
-                        </span>
-                      ) : (
-                        <span className="text-sm text-gray-900">{discountSummary(discount)}</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">
-                        {discount.provider?.name
-                          ? `${discount.provider.name} (${discount.provider.code})`
-                          : '—'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">{discount.code || '—'}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        discount.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {discount.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button onClick={() => handleEdit(discount)}
-                        className="text-brand-blue hover:text-brand-blue-800 mr-3">Edit</button>
-                      <button onClick={() => handleDelete(discount._id)}
-                        className="text-red-600 hover:text-red-800">Delete</button>
-                    </td>
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {discounts.map(discount => (
+                    <tr key={discount._id}>
+                      <td className="px-4 py-3">
+                        <div className="text-sm font-medium text-gray-900">{discount.name}</div>
+                        {discount.description && <div className="text-xs text-gray-500 truncate max-w-[180px]">{discount.description}</div>}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-900 capitalize">{discount.type.replace(/-/g, ' ')}</span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {(discount.type === 'role-based' || discount.type === 'provider-role-based') ? (
+                          <span title={roleBreakdown(discount)} className="text-sm text-gray-900 cursor-help">
+                            Role-based ℹ
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-900">{discountSummary(discount)}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-900">
+                          {discount.provider?.name ? `${discount.provider.name} (${discount.provider.code})` : '—'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-900">{discount.code || '—'}</span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          discount.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {discount.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                        <button onClick={() => handleEdit(discount)} className="text-brand-blue hover:text-brand-blue-800 mr-3">Edit</button>
+                        <button onClick={() => handleDelete(discount._id)} className="text-red-600 hover:text-red-800">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-gray-200">
+              {discounts.map(discount => (
+                <div key={discount._id} className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{discount.name}</p>
+                      {discount.description && <p className="text-xs text-gray-500 truncate">{discount.description}</p>}
+                    </div>
+                    <span className={`shrink-0 px-2 py-1 text-xs font-medium rounded-full ${
+                      discount.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {discount.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600">
+                    <span><span className="font-medium">Type:</span> <span className="capitalize">{discount.type.replace(/-/g, ' ')}</span></span>
+                    <span>
+                      <span className="font-medium">Value:</span>{' '}
+                      {(discount.type === 'role-based' || discount.type === 'provider-role-based')
+                        ? <span title={roleBreakdown(discount)} className="cursor-help">Role-based ℹ</span>
+                        : discountSummary(discount)}
+                    </span>
+                    {discount.provider?.name && (
+                      <span className="col-span-2"><span className="font-medium">Provider:</span> {discount.provider.name} ({discount.provider.code})</span>
+                    )}
+                    {discount.code && (
+                      <span><span className="font-medium">Code:</span> {discount.code}</span>
+                    )}
+                  </div>
+                  <div className="flex gap-4 pt-1">
+                    <button onClick={() => handleEdit(discount)} className="text-sm text-brand-blue hover:text-brand-blue-800">Edit</button>
+                    <button onClick={() => handleDelete(discount._id)} className="text-sm text-red-600 hover:text-red-800">Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -21,7 +21,7 @@ export default function PricingManagement() {
       {/* Tabs */}
       <div className="bg-white rounded-lg shadow">
         <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8 px-6">
+          <nav className="-mb-px flex space-x-4 sm:space-x-8 px-4 sm:px-6 overflow-x-auto">
             <button
               onClick={() => setActiveTab('discounts')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${

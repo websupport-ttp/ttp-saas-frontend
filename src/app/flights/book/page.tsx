@@ -28,7 +28,8 @@ interface PaymentData {
 export default function FlightBookingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth()
+  const userRole = (user?.role as string) || 'customer'
   const [selectedFlight, setSelectedFlight] = useState<any>(null)
   const [passengerData, setPassengerData] = useState<PassengerData | null>(null)
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null)
@@ -293,7 +294,8 @@ export default function FlightBookingPage() {
                     <PriceBreakdown
                       basePrice={parseFloat(selectedFlight.price?.total || '0')}
                       serviceType="flights"
-                      userRole="user"
+                      userRole={userRole}
+                      providerCode={selectedFlight.validatingAirlineCodes?.[0] || selectedFlight.itineraries?.[0]?.segments?.[0]?.carrierCode}
                       discountCode={discountCode}
                       onPriceCalculated={(breakdown) => setFinalPrice(breakdown.finalPrice)}
                       showDetails={true}
