@@ -204,34 +204,35 @@ class ApiClient {
               }
               
               return this.axiosInstance(originalRequest);
-            } catch (refreshError) {
+            } catch (refreshError: any) {
               this.processQueue(refreshError, null);
-              this.clearTokensFromStorage();
-              
-              // Import auth service to handle logout properly
-              try {
-                const { authService } = await import('./auth-service');
-                await authService.clearAuthData();
-              } catch (importError) {
-                console.error('Error importing auth service:', importError);
+
+              // Only hard-logout if the refresh itself returned 401 (truly expired session)
+              const refreshStatus = (refreshError as any)?.response?.status || (refreshError as any)?.status;
+              if (refreshStatus === 401) {
+                this.clearTokensFromStorage();
+                try {
+                  const { authService } = await import('./auth-service');
+                  await authService.clearAuthData();
+                } catch (importError) {
+                  console.error('Error importing auth service:', importError);
+                }
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/';
+                }
               }
-              
-              // Redirect to login page
-              if (typeof window !== 'undefined') {
-                window.location.href = '/login';
-              }
+              // For network errors or 5xx, just reject — don't log the user out
               
               return Promise.reject(refreshError);
             } finally {
               this.isRefreshing = false;
             }
           } else {
-            // For auth endpoints or when no refresh token, clear auth data and redirect
-            this.clearTokensFromStorage();
-            
+            // For auth endpoints or when no refresh token, clear auth data
             // Only redirect if it's not a guest request and not an auth endpoint
-            if (typeof window !== 'undefined' && !isAuthEndpoint && !isGuestRequest) {
-              window.location.href = '/login';
+            if (!isAuthEndpoint && !isGuestRequest) {
+              this.clearTokensFromStorage();
+              // Don't redirect — let the component handle the 401 gracefully
             }
           }
         }

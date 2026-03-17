@@ -18,7 +18,9 @@ export default function AdminDashboardPage() {
     }
 
     const userData: User = JSON.parse(userStr);
-    if (userData.role !== 'Admin') {
+    
+    // Accept both 'admin' and 'Admin' (backend may return either)
+    if (userData.role?.toLowerCase() !== 'admin') {
       router.push('/dashboard');
       return;
     }

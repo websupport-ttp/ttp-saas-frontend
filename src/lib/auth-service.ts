@@ -345,13 +345,15 @@ class AuthenticationService implements AuthService {
 
       return response.data.token;
     } catch (error: any) {
-      // Clear auth data on refresh failure
-      this.clearAuthData();
-      
-      if (error.type === ErrorType.AUTHENTICATION_ERROR) {
+      // Only clear auth data on explicit 401 (invalid refresh token).
+      // Do NOT clear on network errors or 5xx — the session may still be valid.
+      const status = error?.response?.status || error?.status || error?.statusCode;
+      if (status === 401) {
+        this.clearAuthData();
         throw new Error('Session expired. Please login again.');
       }
 
+      // For any other error (network, 5xx, etc.) just throw without clearing
       throw new Error(error.message || 'Failed to refresh authentication token');
     }
   }

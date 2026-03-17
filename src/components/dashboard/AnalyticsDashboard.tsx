@@ -38,9 +38,9 @@ export default function AnalyticsDashboard() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      // Use the apiClient base URL but strip any trailing /api/v1 duplication
-      const base = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1')
-        .replace(/\/api\/v1\/?$/, '');
+      // Build base URL — strip any trailing /api/v1 to avoid doubling
+      const rawBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
+      const base = rawBase.replace(/\/api\/v1\/?$/, '');
       const response = await fetch(
         `${base}/api/v1/analytics/dashboard?period=${dateRange}`,
         { credentials: 'include' }

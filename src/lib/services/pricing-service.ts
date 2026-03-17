@@ -9,8 +9,11 @@ export interface PriceBreakdownItem {
   id: string;
   name: string;
   type: string;
-  value: number;
+  value?: number;  // used by service charges and discounts
+  rate?: number;   // used by taxes
   amount: number;
+  isInclusive?: boolean;
+  code?: string;
 }
 
 export interface PriceBreakdown {

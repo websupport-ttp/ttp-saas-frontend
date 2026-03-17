@@ -29,7 +29,8 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
   const [loading, setLoading] = useState(true);
   const permissions = getDashboardPermissions(user);
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+  const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1')
+    .replace(/\/api\/v1\/?$/, '');
 
   useEffect(() => {
     if (activeTab === 'overview') {
@@ -40,7 +41,7 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/dashboard/admin/stats`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/dashboard/admin/stats`, {
         credentials: 'include',
       });
 
