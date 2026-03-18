@@ -434,7 +434,8 @@ export default function SearchForm({
 }: SearchFormProps) {
   const [formData, setFormData] = useState<SearchFormData>({
     passengers: '1', // Default to 1 adult
-    dates: '' // Combined dates field
+    dates: '',       // Combined dates field
+    guests: '1 room, 1 guest', // Default hotel guests
   });
   const [passengerData, setPassengerData] = useState({
     adults: 1,
@@ -636,8 +637,8 @@ export default function SearchForm({
     config.fields.forEach(field => {
       const value = formData[field.key as keyof SearchFormData] || '';
 
-      // Skip validation for passenger-selector, traveler-selector, trip-type-selector, time-selector, simple-passenger-selector, visa-type-selector, and processing-speed-selector as they're handled separately
-      if (field.type === 'passenger-selector' || field.type === 'traveler-selector' || field.type === 'trip-type-selector' || field.type === 'time-selector' || field.type === 'simple-passenger-selector' || field.type === 'visa-type-selector' || field.type === 'processing-speed-selector') {
+      // Skip validation for passenger-selector, traveler-selector, trip-type-selector, time-selector, simple-passenger-selector, visa-type-selector, processing-speed-selector, and room-selector as they're handled separately
+      if (field.type === 'passenger-selector' || field.type === 'traveler-selector' || field.type === 'trip-type-selector' || field.type === 'time-selector' || field.type === 'simple-passenger-selector' || field.type === 'visa-type-selector' || field.type === 'processing-speed-selector' || field.type === 'room-selector') {
         return;
       }
 
