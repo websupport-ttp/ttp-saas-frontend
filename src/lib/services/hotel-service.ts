@@ -129,6 +129,7 @@ class HotelService {
     bookHash: string;
     guests: { guests: { first_name: string; last_name: string; age?: number }[] }[];
     userPhone: string;
+    userEmail?: string;
   }): Promise<BookingFormResult> {
     const response = await apiClient.post<BookingFormResult>(
       '/bookings/hotels/booking-form',

@@ -313,18 +313,44 @@ export default function HotelBookingPage() {
     return Object.keys(allErrors).length === 0;
   };
 
+  // ── Price calculation — use ETG prebooked rate when available ──────────────
+  const getRateData = () => {
+    // Prefer the prebooked rate's confirmed rate object
+    const rate = prebookedRate?.rate || hotelPageData?.rates?.[0] || null;
+    return rate;
+  };
+
   const calculateSubtotal = () => {
+    const rate = getRateData();
+    if (rate?.showAmount) return parseFloat(rate.showAmount);
+    if (rate?.dailyPrice && hotel?.bookingInfo?.nights) {
+      return parseFloat(rate.dailyPrice) * (hotel.bookingInfo.nights || 1);
+    }
+    // Fallback to hotel.pricePerNight
     if (!hotel?.pricePerNight || !hotel?.bookingInfo?.nights || !hotel?.bookingInfo?.rooms) return 0;
     return hotel.pricePerNight * hotel.bookingInfo.nights * hotel.bookingInfo.rooms;
   };
 
+  const calculateIncludedTaxes = () => {
+    const rate = getRateData();
+    if (!rate?.includedTaxes?.length) return 0;
+    return rate.includedTaxes.reduce((sum: number, t: any) => sum + parseFloat(t.amount || '0'), 0);
+  };
+
   const calculateTaxes = () => {
-    const subtotal = calculateSubtotal();
-    return Math.round(subtotal * 0.12);
+    const rate = getRateData();
+    // If ETG rate has included taxes, use those; otherwise fall back to 12%
+    if (rate?.includedTaxes?.length) return calculateIncludedTaxes();
+    return Math.round(calculateSubtotal() * 0.12);
   };
 
   const calculateTotal = () => {
     return calculateSubtotal() + calculateTaxes();
+  };
+
+  const getRateCurrency = () => {
+    const rate = getRateData();
+    return rate?.currency || 'USD';
   };
 
   const handleBack = () => {
@@ -360,7 +386,8 @@ export default function HotelBookingPage() {
         const formResult = await hotelService.createBookingForm({
           bookHash: prebookedRate.bookHash,
           guests: [{ guests: etgGuests }],
-          userPhone: `${contactInfo.dialCode}${contactInfo.phoneNumber}`,
+          userPhone: `${contactInfo.dialCode}${contactInfo.phoneNumber}`.replace(/\s+/g, ''),
+          userEmail: contactInfo.email,
         });
 
         if (!formResult.orderId) {
@@ -750,9 +777,16 @@ export default function HotelBookingPage() {
               <div className="mb-6">
                 <div className="flex items-baseline gap-2">
                   <span className="text-lg font-bold text-gray-900">Amount :</span>
-                  <span className="text-2xl font-bold text-green-600">₦{hotel?.pricePerNight?.toLocaleString() || 'Loading...'}</span>
+                  <span className="text-2xl font-bold text-green-600">
+                    {getRateCurrency()} {(parseFloat(getRateData()?.dailyPrice || String(hotel?.pricePerNight || 0))).toLocaleString()}
+                  </span>
                   <span className="text-base text-gray-700">Per Night</span>
                 </div>
+                {prebookedRate?.priceChanged && (
+                  <p className="text-amber-600 text-sm mt-1">
+                    Price updated from {getRateCurrency()} {parseFloat(prebookedRate.oldPrice || '0').toLocaleString()} to {getRateCurrency()} {parseFloat(prebookedRate.newPrice || '0').toLocaleString()}
+                  </p>
+                )}
               </div>
 
               {/* Metapolicy */}
@@ -764,11 +798,13 @@ export default function HotelBookingPage() {
               <div className="mb-8 space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-base text-gray-700">Subtotal</span>
-                  <span className="text-base font-semibold text-gray-900">₦{calculateSubtotal().toLocaleString()}</span>
+                  <span className="text-base font-semibold text-gray-900">{getRateCurrency()} {calculateSubtotal().toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-base text-gray-700">Taxes and Fees</span>
-                  <span className="text-base font-semibold text-gray-900">₦{calculateTaxes().toLocaleString()}</span>
+                  <span className="text-base text-gray-700">
+                    {getRateData()?.includedTaxes?.length ? 'Included Taxes & Fees' : 'Taxes and Fees (est.)'}
+                  </span>
+                  <span className="text-base font-semibold text-gray-900">{getRateCurrency()} {calculateTaxes().toLocaleString()}</span>
                 </div>
                 {excludedTaxes.length > 0 && (
                   <div className="pt-2 border-t border-gray-200">
@@ -783,7 +819,7 @@ export default function HotelBookingPage() {
                 )}
                 <div className="flex justify-between items-center pt-2 border-t border-gray-300">
                   <span className="text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-lg font-bold text-gray-900">₦{calculateTotal().toLocaleString()}</span>
+                  <span className="text-lg font-bold text-gray-900">{getRateCurrency()} {calculateTotal().toLocaleString()}</span>
                 </div>
               </div>
 
