@@ -27,13 +27,15 @@ interface HotelPaymentSidebarProps {
   priceSummary: PriceSummary
   onBack?: () => void
   onConfirmPay?: () => void
+  isSubmitting?: boolean
 }
 
 export default function HotelPaymentSidebar({
   hotel,
   priceSummary,
   onBack,
-  onConfirmPay
+  onConfirmPay,
+  isSubmitting = false,
 }: HotelPaymentSidebarProps) {
   return (
     <div className="flex flex-col items-end gap-10 w-[400px]">
@@ -129,9 +131,13 @@ export default function HotelPaymentSidebar({
 
         <button
           onClick={onConfirmPay}
-          className="flex-1 flex items-center justify-center gap-2 px-5 py-3 h-12 bg-[#E21E24] rounded text-white text-lg font-normal hover:bg-red-700 transition-colors"
+          disabled={isSubmitting}
+          className="flex-1 flex items-center justify-center gap-2 px-5 py-3 h-12 bg-[#E21E24] rounded text-white text-lg font-normal hover:bg-red-700 transition-colors disabled:opacity-70"
         >
-          Confirm and pay
+          {isSubmitting && (
+            <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          )}
+          {isSubmitting ? 'Booking...' : 'Confirm and pay'}
         </button>
       </div>
     </div>
