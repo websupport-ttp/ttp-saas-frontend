@@ -606,10 +606,17 @@ export default function SearchForm({
   const handleInputBlur = useCallback((key: string, value: string) => {
     setTouched(prev => ({ ...prev, [key]: true }));
 
-    // Validate field on blur
     if (config && config.fields) {
       const field = config.fields.find(f => f.key === key);
       if (field) {
+        // Skip validation for all selector types — they always have valid defaults
+        const selectorTypes = ['passenger-selector', 'traveler-selector', 'room-selector',
+          'trip-type-selector', 'time-selector', 'simple-passenger-selector',
+          'visa-type-selector', 'processing-speed-selector'];
+        if (selectorTypes.includes(field.type)) {
+          return;
+        }
+
         let error = '';
 
         if (field.required && !value.trim()) {
@@ -621,7 +628,6 @@ export default function SearchForm({
           }
         }
 
-        // Always update the error state (either set error or clear it)
         setErrors(prev => ({ ...prev, [key]: error }));
       }
     }
