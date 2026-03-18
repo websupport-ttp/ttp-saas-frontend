@@ -8,7 +8,6 @@ import RouteGuard from '@/components/hotels/RouteGuard';
 import CreditCardForm from '@/components/hotels/CreditCardForm';
 import { getHotelById } from '@/lib/hotels';
 import { PaymentMethod, PaymentDetails, HotelDetails, Guest, CardProcessor } from '@/types/hotels';
-import { HotelBookingData } from '@/types/api';
 import { hotelService } from '@/lib/services/hotel-service';
 import { HOTEL_ROUTES } from '@/lib/routing';
 import { useBookingState } from '@/lib/bookingState';
@@ -115,10 +114,10 @@ export default function PaymentPage({ params }: PaymentPageProps) {
         });
       }
 
-      // Prepare hotel booking data
-      const hotelBookingData: HotelBookingData = {
+      // Prepare hotel booking data (kept for reference)
+      const _hotelBookingData = {
         hotelId: params.id,
-        roomId: 'standard-room', // This would come from room selection
+        roomId: 'standard-room',
         checkInDate: bookingData.dates.checkIn.toISOString().split('T')[0],
         checkOutDate: bookingData.dates.checkOut.toISOString().split('T')[0],
         guests: bookingData.guests.map((guest: Guest) => ({
@@ -132,20 +131,50 @@ export default function PaymentPage({ params }: PaymentPageProps) {
 
       // Update payment details in booking state
       updatePaymentDetails(paymentData);
-      
-      // Make hotel booking API call
-      const bookingResponse = await hotelService.bookHotel(hotelBookingData);
-      
-      // Store booking reference for verification
-      sessionStorage.setItem('hotelBookingReference', bookingResponse.bookingReference);
-      sessionStorage.setItem('hotelPaymentReference', bookingResponse.paymentReference);
-      
-      // Redirect to Paystack for payment
-      if (bookingResponse.authorizationUrl) {
-        window.location.href = bookingResponse.authorizationUrl;
-      } else {
-        throw new Error('No payment URL received from server');
+
+      // ETG flow: use prebookedRate from localStorage if available
+      const prebookedRaw = localStorage.getItem('prebookedRate');
+      if (prebookedRaw) {
+        const prebooked = JSON.parse(prebookedRaw);
+        if (prebooked?.bookHash) {
+          const etgGuests = bookingData.guests.map((guest: Guest) => ({
+            first_name: guest.firstName,
+            last_name: guest.lastName,
+          }));
+
+          const formResult = await hotelService.createBookingForm({
+            bookHash: prebooked.bookHash,
+            guests: [{ guests: etgGuests }],
+            userPhone: bookingData.guests[0]?.phoneNumber || '+2348000000000',
+          });
+
+          if (!formResult.orderId) throw new Error('No orderId returned');
+
+          const bookingResult = await hotelService.startBooking({
+            orderId: formResult.orderId,
+            partnerOrderId: formResult.partnerOrderId,
+            userPhone: bookingData.guests[0]?.phoneNumber || '+2348000000000',
+          });
+
+          if (bookingResult.status !== 'ok') {
+            throw new Error(`Booking failed: ${bookingResult.error || bookingResult.status}`);
+          }
+
+          localStorage.setItem('confirmedHotelBooking', JSON.stringify({
+            orderId: bookingResult.orderId,
+            hotel,
+            guests: bookingData.guests,
+            searchData: bookingData.dates,
+            prebookedRate: prebooked,
+          }));
+
+          router.push(`/hotels/success?orderId=${bookingResult.orderId}`);
+          return;
+        }
       }
+
+      // Fallback: redirect to main booking flow
+      router.push(`/hotels/book`);
     } catch (error) {
       console.error('Hotel booking failed:', error);
       addNotification({ 
