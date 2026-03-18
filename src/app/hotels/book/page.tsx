@@ -6,6 +6,8 @@ import { Header } from '@/components/layout/Header';
 import ServiceFooter from '@/components/layout/ServiceFooter';
 import { SimpleDatePicker } from '@/components/ui/SimpleDatePicker';
 import CountryCodeSelector from '@/components/ui/CountryCodeSelector';
+import { hotelService } from '@/lib/services/hotel-service';
+import MetapolicyDisplay from '@/components/hotels/MetapolicyDisplay';
 
 interface Guest {
   type: 'Adult' | 'Minor';
@@ -38,6 +40,11 @@ export default function HotelBookingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchData, setSearchData] = useState<any>(null);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [prebookedRate, setPrebookedRate] = useState<any>(null);
+  const [hotelPageData, setHotelPageData] = useState<any>(null);
+  const [excludedTaxes, setExcludedTaxes] = useState<any[]>([]);
 
   useEffect(() => {
     // Get hotel data from URL params
@@ -197,6 +204,23 @@ export default function HotelBookingPage() {
       router.push('/hotels');
     }
     setIsLoading(false);
+
+    // Load prebooked rate and hotel page data from localStorage
+    try {
+      const stored = localStorage.getItem('prebookedRate');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setPrebookedRate(parsed);
+        // Extract excluded taxes from the prebooked rate
+        if (parsed.rate?.excludedTaxes?.length) {
+          setExcludedTaxes(parsed.rate.excludedTaxes);
+        }
+      }
+      const storedPage = localStorage.getItem('hotelPageData');
+      if (storedPage) setHotelPageData(JSON.parse(storedPage));
+    } catch (e) {
+      console.warn('Could not load prebooked rate from localStorage', e);
+    }
   }, [searchParams, router]);
 
   const updateGuest = (index: number, field: keyof Guest, value: string) => {
@@ -307,10 +331,9 @@ export default function HotelBookingPage() {
     router.back();
   };
 
-  const handleProceedToPayment = () => {
+  const handleProceedToPayment = async () => {
     // Validate form before proceeding
     if (!validateForm()) {
-      // Scroll to first error
       const firstErrorElement = document.querySelector('.border-red-500');
       if (firstErrorElement) {
         firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -318,37 +341,86 @@ export default function HotelBookingPage() {
       return;
     }
 
-    // Prepare booking data for payment
-    const bookingData = {
-      hotel: hotel,
-      guests: guests,
-      contactInfo: contactInfo,
-      searchData: searchData
-    };
-    
-    // Navigate to payment page with booking data and search parameters
-    const hotelData = encodeURIComponent(JSON.stringify(hotel));
-    const guestData = encodeURIComponent(JSON.stringify(guests));
-    const contactData = encodeURIComponent(JSON.stringify(contactInfo));
-    
-    // Include search parameters for complete booking context
-    const urlParams = new URLSearchParams();
-    urlParams.set('hotel', hotelData);
-    urlParams.set('guests', guestData);
-    urlParams.set('contact', contactData);
-    
-    // Add search data if available
-    if (searchData) {
-      urlParams.set('destination', searchData.destination || hotel.location.city);
-      urlParams.set('checkin', searchData.checkin);
-      urlParams.set('checkout', searchData.checkout);
-      urlParams.set('nights', searchData.nights?.toString() || '1');
-      urlParams.set('rooms', searchData.rooms?.toString() || '1');
-      urlParams.set('adults', searchData.adults?.toString() || '1');
-      urlParams.set('children', searchData.children?.toString() || '0');
+    setIsSubmitting(true);
+    setBookingError(null);
+
+    try {
+      // If we have a prebooked rate (ETG flow), run createBookingForm → startBooking
+      if (prebookedRate?.bookHash) {
+        // Build ETG guest rooms array: one room with all guests
+        const etgGuests = guests.map(g => ({
+          first_name: g.firstName,
+          last_name: g.lastName,
+          ...(g.type === 'Minor' && g.dateOfBirth
+            ? { age: Math.floor((Date.now() - new Date(g.dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000)) }
+            : {}),
+        }));
+
+        // Step 3a: create booking form
+        const formResult = await hotelService.createBookingForm({
+          bookHash: prebookedRate.bookHash,
+          guests: [{ guests: etgGuests }],
+          userPhone: `${contactInfo.dialCode}${contactInfo.phoneNumber}`,
+        });
+
+        if (!formResult.orderId) {
+          throw new Error('Failed to create booking form — no orderId returned');
+        }
+
+        // Step 3b: start booking + poll
+        const bookingResult = await hotelService.startBooking({
+          orderId: formResult.orderId,
+          partnerOrderId: formResult.partnerOrderId,
+          userPhone: `${contactInfo.dialCode}${contactInfo.phoneNumber}`,
+        });
+
+        if (bookingResult.status !== 'ok') {
+          throw new Error(`Booking failed: ${bookingResult.error || bookingResult.status}`);
+        }
+
+        // Store confirmed booking data
+        localStorage.setItem('confirmedHotelBooking', JSON.stringify({
+          orderId: bookingResult.orderId,
+          hotel,
+          guests,
+          contactInfo,
+          searchData,
+          prebookedRate,
+          excludedTaxes,
+        }));
+
+        // Navigate to success page
+        router.push(`/hotels/success?orderId=${bookingResult.orderId}`);
+        return;
+      }
+
+      // Fallback: navigate to payment page (non-ETG hotels)
+      const hotelData = encodeURIComponent(JSON.stringify(hotel));
+      const guestData = encodeURIComponent(JSON.stringify(guests));
+      const contactData = encodeURIComponent(JSON.stringify(contactInfo));
+
+      const urlParams = new URLSearchParams();
+      urlParams.set('hotel', hotelData);
+      urlParams.set('guests', guestData);
+      urlParams.set('contact', contactData);
+
+      if (searchData) {
+        urlParams.set('destination', searchData.destination || hotel.location.city);
+        urlParams.set('checkin', searchData.checkin);
+        urlParams.set('checkout', searchData.checkout);
+        urlParams.set('nights', searchData.nights?.toString() || '1');
+        urlParams.set('rooms', searchData.rooms?.toString() || '1');
+        urlParams.set('adults', searchData.adults?.toString() || '1');
+        urlParams.set('children', searchData.children?.toString() || '0');
+      }
+
+      router.push(`/hotels/payment?${urlParams.toString()}`);
+    } catch (err: any) {
+      console.error('Hotel booking error:', err);
+      setBookingError(err.message || 'Booking failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    router.push(`/hotels/payment?${urlParams.toString()}`);
   };
 
   if (isLoading) {
@@ -683,6 +755,11 @@ export default function HotelBookingPage() {
                 </div>
               </div>
 
+              {/* Metapolicy */}
+              {hotelPageData?.metapolicy && (
+                <MetapolicyDisplay metapolicy={hotelPageData.metapolicy} />
+              )}
+
               {/* Price Breakdown */}
               <div className="mb-8 space-y-3">
                 <div className="flex justify-between items-center">
@@ -693,26 +770,48 @@ export default function HotelBookingPage() {
                   <span className="text-base text-gray-700">Taxes and Fees</span>
                   <span className="text-base font-semibold text-gray-900">₦{calculateTaxes().toLocaleString()}</span>
                 </div>
+                {excludedTaxes.length > 0 && (
+                  <div className="pt-2 border-t border-gray-200">
+                    <p className="text-sm text-amber-700 font-medium mb-1">Payable at property:</p>
+                    {excludedTaxes.map((tax, i) => (
+                      <div key={i} className="flex justify-between items-center text-sm text-amber-700">
+                        <span>{tax.name}</span>
+                        <span>{tax.currency} {parseFloat(tax.amount).toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="flex justify-between items-center pt-2 border-t border-gray-300">
                   <span className="text-lg font-bold text-gray-900">Total</span>
                   <span className="text-lg font-bold text-gray-900">₦{calculateTotal().toLocaleString()}</span>
                 </div>
               </div>
 
+              {bookingError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                  {bookingError}
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="flex gap-3">
                 <button
                   onClick={handleBack}
-                  className="flex-1 px-3 py-3 text-red-500 bg-white rounded-lg hover:bg-red-50 transition-colors duration-200 font-medium text-center whitespace-nowrap"
+                  disabled={isSubmitting}
+                  className="flex-1 px-3 py-3 text-red-500 bg-white rounded-lg hover:bg-red-50 transition-colors duration-200 font-medium text-center whitespace-nowrap disabled:opacity-50"
                   style={{ border: '2px solid #ef4444' }}
                 >
                   Back
                 </button>
                 <button
                   onClick={handleProceedToPayment}
-                  className="flex-1 px-3 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium text-center whitespace-nowrap"
+                  disabled={isSubmitting}
+                  className="flex-1 px-3 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium text-center whitespace-nowrap disabled:opacity-70 flex items-center justify-center gap-2"
                 >
-                  Proceed to payment
+                  {isSubmitting && (
+                    <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  )}
+                  {isSubmitting ? 'Booking...' : prebookedRate?.bookHash ? 'Confirm Booking' : 'Proceed to payment'}
                 </button>
               </div>
             </div>

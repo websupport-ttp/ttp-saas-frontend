@@ -90,6 +90,7 @@ export interface SearchCriteria {
   rooms: number;
   adults: number;
   children: number;
+  residency?: string; // passport country code e.g. 'ng', 'us'
 }
 
 // Filter options

@@ -254,59 +254,64 @@ export default function HotelDetailsPage() {
     );
   }
 
-  const handleBookNow = () => {
-    // Ensure pricePerNight is correctly set for dummy hotels
+  const handleBookNow = async () => {
     const hotelDataForBooking = {
       ...hotel,
       pricePerNight: hotel.pricePerNight || hotel.rooms?.[0]?.price?.total || hotel.price || 25000
     };
-    
-    // Get search criteria from URL params or localStorage
-    const checkin = searchParams.get('checkin');
-    const checkout = searchParams.get('checkout');
-    const adults = searchParams.get('adults');
-    const children = searchParams.get('children');
-    const rooms = searchParams.get('rooms');
-    const destination = searchParams.get('location');
-    
-    // Build URL with search criteria
-    const urlParams = new URLSearchParams();
-    urlParams.set('hotel', encodeURIComponent(JSON.stringify(hotelDataForBooking)));
-    
-    // Add search criteria if available from URL
-    if (checkin && checkout && adults && rooms) {
-      urlParams.set('destination', destination || hotel.location?.city || 'Lagos');
-      urlParams.set('checkin', checkin);
-      urlParams.set('checkout', checkout);
-      urlParams.set('adults', adults);
-      urlParams.set('children', children || '0');
-      urlParams.set('rooms', rooms);
-    } else {
-      // Try to get from localStorage if not in URL
+
+    // Get search criteria
+    const checkin = searchParams.get('checkin') || (() => {
+      try { return JSON.parse(localStorage.getItem('hotelSearchCriteria') || '{}').checkIn?.split('T')[0] } catch { return new Date().toISOString().split('T')[0] }
+    })();
+    const checkout = searchParams.get('checkout') || (() => {
+      try { return JSON.parse(localStorage.getItem('hotelSearchCriteria') || '{}').checkOut?.split('T')[0] } catch { return new Date(Date.now() + 86400000).toISOString().split('T')[0] }
+    })();
+    const adults = parseInt(searchParams.get('adults') || '2');
+    const residency = (() => {
+      try { return JSON.parse(localStorage.getItem('hotelSearchCriteria') || '{}').residency || 'ng' } catch { return 'ng' }
+    })();
+
+    // If this is a real ETG hotel (has a numeric-style id / hid), run hotelpage + prebook
+    const isEtgHotel = hotel.hid || (!hotel.id?.startsWith('dummy_hotel_'));
+
+    if (isEtgHotel && checkin && checkout) {
       try {
-        const storedCriteria = localStorage.getItem('hotelSearchCriteria');
-        if (storedCriteria) {
-          const criteria = JSON.parse(storedCriteria);
-          urlParams.set('destination', criteria.location || hotel.location?.city || 'Lagos');
-          urlParams.set('checkin', criteria.checkIn ? new Date(criteria.checkIn).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
-          urlParams.set('checkout', criteria.checkOut ? new Date(criteria.checkOut).toISOString().split('T')[0] : new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0]);
-          urlParams.set('adults', (criteria.adults || 1).toString());
-          urlParams.set('children', (criteria.children || 0).toString());
-          urlParams.set('rooms', (criteria.rooms || 1).toString());
+        // Step 2a: get all rates for this hotel
+        const { hotelService } = await import('@/lib/services/hotel-service');
+        const hotelPage = await hotelService.getHotelPage({
+          hotelId: hotel.id,
+          checkin,
+          checkout,
+          guests: [{ adults, children: [] }],
+          residency,
+        });
+
+        // Pick cheapest rate
+        const cheapestRate = hotelPage.rates?.sort((a: any, b: any) =>
+          parseFloat(a.showAmount || a.dailyPrice || '0') - parseFloat(b.showAmount || b.dailyPrice || '0')
+        )[0];
+
+        if (cheapestRate?.bookHash) {
+          // Step 2b: prebook
+          const prebook = await hotelService.prebookRate(cheapestRate.bookHash, 0);
+          localStorage.setItem('prebookedRate', JSON.stringify(prebook));
+          localStorage.setItem('hotelPageData', JSON.stringify(hotelPage));
         }
-      } catch (error) {
-        console.error('Error parsing stored search criteria:', error);
-        // Use defaults if parsing fails
-        urlParams.set('destination', hotel.location?.city || 'Lagos');
-        urlParams.set('checkin', new Date().toISOString().split('T')[0]);
-        urlParams.set('checkout', new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0]);
-        urlParams.set('adults', '1');
-        urlParams.set('children', '0');
-        urlParams.set('rooms', '1');
+      } catch (e) {
+        console.warn('Hotelpage/prebook failed, proceeding with search data:', e);
       }
     }
-    
-    // Navigate to booking page with all parameters
+
+    const urlParams = new URLSearchParams();
+    urlParams.set('hotel', encodeURIComponent(JSON.stringify(hotelDataForBooking)));
+    if (checkin) urlParams.set('checkin', checkin);
+    if (checkout) urlParams.set('checkout', checkout);
+    urlParams.set('adults', adults.toString());
+    urlParams.set('children', (searchParams.get('children') || '0'));
+    urlParams.set('rooms', (searchParams.get('rooms') || '1'));
+    urlParams.set('residency', residency);
+
     router.push(`/hotels/book?${urlParams.toString()}`);
   };
 

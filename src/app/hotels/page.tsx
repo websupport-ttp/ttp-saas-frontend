@@ -112,12 +112,12 @@ export default function HotelsPage() {
         destination: criteria.location,
         checkInDate: criteria.checkIn.toISOString().split('T')[0],
         checkOutDate: criteria.checkOut.toISOString().split('T')[0],
-        rooms: Array.from({ length: criteria.rooms }, () => ({
-          adults: Math.ceil(criteria.adults / criteria.rooms),
-          children: Math.ceil(criteria.children / criteria.rooms),
-          childrenAges: []
+        guests: Array.from({ length: criteria.rooms }, (_, i) => ({
+          adults: Math.max(1, Math.ceil(criteria.adults / criteria.rooms)),
+          children: [],
         })),
-        currency: 'USD'
+        residency: criteria.residency || 'ng',
+        currency: 'USD',
       };
 
       const response = await hotelService.searchHotels(hotelSearchCriteria);

@@ -215,6 +215,7 @@ export default function HotelSearchForm({ onSearch, initialValues }: HotelSearch
   const [rooms, setRooms] = useState(initialValues?.rooms || 1);
   const [adults, setAdults] = useState(initialValues?.adults || 1);
   const [children, setChildren] = useState(initialValues?.children || 0);
+  const [residency, setResidency] = useState(initialValues?.residency || 'ng');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showGuestSelector, setShowGuestSelector] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
@@ -228,6 +229,7 @@ export default function HotelSearchForm({ onSearch, initialValues }: HotelSearch
       setRooms(initialValues.rooms || 1);
       setAdults(initialValues.adults || 1);
       setChildren(initialValues.children || 0);
+      setResidency(initialValues.residency || 'ng');
     }
   }, [initialValues]);
 
@@ -305,6 +307,7 @@ export default function HotelSearchForm({ onSearch, initialValues }: HotelSearch
         rooms,
         adults,
         children,
+        residency,
       };
       
       onSearch(searchCriteria);
@@ -463,6 +466,27 @@ export default function HotelSearchForm({ onSearch, initialValues }: HotelSearch
             {errors.checkOut && (
               <p className="mt-1 text-sm text-red-600">{errors.checkOut}</p>
             )}
+          </div>
+
+          {/* Residency (passport country) */}
+          <div className="flex-shrink-0">
+            <label className="block text-xs text-gray-500 mb-1">Passport Country</label>
+            <select
+              value={residency}
+              onChange={(e) => setResidency(e.target.value)}
+              className="px-3 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-red"
+            >
+              <option value="ng">Nigeria</option>
+              <option value="us">United States</option>
+              <option value="gb">United Kingdom</option>
+              <option value="gh">Ghana</option>
+              <option value="ke">Kenya</option>
+              <option value="za">South Africa</option>
+              <option value="ae">UAE</option>
+              <option value="de">Germany</option>
+              <option value="fr">France</option>
+              <option value="uz">Uzbekistan</option>
+            </select>
           </div>
 
           {/* Search Button */}
