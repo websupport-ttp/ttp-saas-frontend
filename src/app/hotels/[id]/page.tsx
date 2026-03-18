@@ -14,6 +14,14 @@ export default function HotelDetailsPage() {
   const [hotel, setHotel] = useState<any>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState<boolean>(false);
+  const [prebookedRate, setPrebookedRate] = useState<any>(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('prebookedRate');
+      if (stored) setPrebookedRate(JSON.parse(stored));
+    } catch { /* ignore */ }
+  }, []);
 
   // Reset image index when hotel changes and ensure it's within bounds
   useEffect(() => {
@@ -418,16 +426,17 @@ export default function HotelDetailsPage() {
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-6">Hotel Details</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left: First two paragraphs */}
               <div className="space-y-4 text-gray-600 text-sm leading-relaxed">
-                <p>This Stylish And Roomy Family Home Is Nestled In Stockholm's Kista District, Just 1.4 Km Away From The Royal Swedish Opera. Museum Of Medieval Stockholm, And Skansen, Offering The Convenience Of Free Private Parking, It's Also A Short 9 Km Drive From Friends Arena And 34 Km From Arlanda Airport.</p>
-                <p>Explore Nearby Attractions Like The Army Museum, Just 15 Km Away, And The Royal Palace, Situated 15 Km From This Charming Home. For Convenience, Bromma Stockholm Airport Is The Closest Airport, Located Just 8 Km Away From This Stylish And Spacious Family Retreat.</p>
+                {hotel.fullDescription
+                  ? hotel.fullDescription.split('\n').filter(Boolean).map((p: string, i: number) => <p key={i}>{p}</p>)
+                  : <p>Comfortable accommodations with modern amenities and excellent service.</p>
+                }
               </div>
-              
-              {/* Right: Service description paragraphs */}
               <div className="space-y-4 text-gray-600 text-sm leading-relaxed">
-                <p>Your Stay At Our Hotel Includes A Complimentary Breakfast To Kickstart Your Day, And Our Rooms Offer A Cozy And Comfortable Retreat. Select Rooms Feature A Relaxing Bath Tub For Added Luxury.</p>
-                <p>Our Dedicated Staff Is At Your Service, Ensuring A Seamless And Enjoyable Experience Throughout Your Stay. In Addition To The Inviting Accommodations, Indulge In Extra Leisure Activities Such As Our Fitness Center Or Spa. We've Thoughtfully Curated Every Aspect To Make Your Stay Special, Promising A Combination Of Comfort, Convenience, And Delightful Extras.</p>
+                {hotel.serviceDescription
+                  ? hotel.serviceDescription.split('\n').filter(Boolean).map((p: string, i: number) => <p key={i}>{p}</p>)
+                  : <p>Our dedicated staff ensures a seamless and enjoyable experience throughout your stay.</p>
+                }
               </div>
             </div>
           </div>
@@ -457,8 +466,21 @@ export default function HotelDetailsPage() {
                   {hotel.bookingInfo.adults}&nbsp;Adults,&nbsp;{hotel.bookingInfo.children}&nbsp;Children,&nbsp;{hotel.bookingInfo.nights}&nbsp;Nights&nbsp;|&nbsp;{hotel.bookingInfo.rooms}&nbsp;Room{hotel.bookingInfo.rooms > 1 ? 's' : ''}
                 </div>
                 <div className="flex items-center lg:justify-end space-x-2">
-                  <span className="text-xl font-bold text-green-600">₦{hotel.pricePerNight?.toLocaleString()}</span>
-                  <span className="text-gray-600 text-sm">Per night</span>
+                  {(() => {
+                    const rate = prebookedRate?.rate;
+                    const currency = rate?.currency || null;
+                    const price = rate?.dailyPrice
+                      ? parseFloat(rate.dailyPrice)
+                      : hotel.pricePerNight;
+                    return (
+                      <>
+                        <span className="text-xl font-bold text-green-600">
+                          {currency ? `${currency} ` : '₦'}{price?.toLocaleString()}
+                        </span>
+                        <span className="text-gray-600 text-sm">Per night</span>
+                      </>
+                    );
+                  })()}
                 </div>
                 <div className="flex space-x-3 lg:justify-end">
                   <button

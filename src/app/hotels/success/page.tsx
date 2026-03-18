@@ -197,16 +197,28 @@ export default function HotelSuccessPage() {
           )}
 
           {/* Price */}
-          {hotel?.pricePerNight && (
-            <div className="p-4 border-t border-gray-100 flex justify-between items-center">
-              <span className="text-sm text-gray-600">
-                ₦{hotel.pricePerNight.toLocaleString()} × {searchData?.nights || hotel?.bookingInfo?.nights || 1} night{(searchData?.nights || 1) > 1 ? 's' : ''}
-              </span>
-              <span className="text-base font-semibold text-gray-900">
-                ₦{(hotel.pricePerNight * (searchData?.nights || hotel?.bookingInfo?.nights || 1)).toLocaleString()}
-              </span>
-            </div>
-          )}
+          {(() => {
+            const rate = booking?.prebookedRate?.rate;
+            const currency = rate?.currency || 'USD';
+            const nights = searchData?.nights || hotel?.bookingInfo?.nights || 1;
+            const total = rate?.showAmount
+              ? parseFloat(rate.showAmount)
+              : (hotel?.pricePerNight || 0) * nights;
+            const perNight = rate?.dailyPrice
+              ? parseFloat(rate.dailyPrice)
+              : (hotel?.pricePerNight || 0);
+            if (!total) return null;
+            return (
+              <div className="p-4 border-t border-gray-100 flex justify-between items-center">
+                <span className="text-sm text-gray-600">
+                  {currency} {perNight.toLocaleString()} × {nights} night{nights > 1 ? 's' : ''}
+                </span>
+                <span className="text-base font-semibold text-gray-900">
+                  {currency} {total.toLocaleString()}
+                </span>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Actions */}
