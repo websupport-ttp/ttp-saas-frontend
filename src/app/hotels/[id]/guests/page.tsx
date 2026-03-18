@@ -59,9 +59,9 @@ export default function GuestInformationPage({ params }: GuestInformationPagePro
             icon: '', 
             category: 'comfort' as const 
           })),
-          pricePerNight: hotelDetails.rooms[0]?.price.total || 0,
-          classification: `${hotelDetails.rating}-Star`,
-          bedTypes: hotelDetails.rooms.map((room: any) => room.bedType)
+          pricePerNight: hotelDetails.rates?.[0]?.showAmount ? parseFloat(hotelDetails.rates[0].showAmount) : 0,
+          classification: `${hotelDetails.stars || 0}-Star`,
+          bedTypes: (hotelDetails.roomGroups || []).map((rg: any) => rg.name).filter(Boolean)
         };
         
         setHotel(convertedHotel);
