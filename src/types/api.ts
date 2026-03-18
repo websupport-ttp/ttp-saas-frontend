@@ -420,7 +420,8 @@ export interface HotelSearchCriteria {
   destination: string;
   checkInDate: string;
   checkOutDate: string;
-  rooms: RoomRequirement[];
+  guests?: { adults: number; children: number[] }[];
+  residency?: string;
   currency?: string;
 }
 

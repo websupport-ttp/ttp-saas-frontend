@@ -4,33 +4,33 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { hotelService } from '@/lib/services/hotel-service'
-import { HotelOffer, HotelSearchCriteria } from '@/types/api'
+import { HotelSearchCriteria } from '@/types/api'
+import { HotelResult } from '@/lib/services/hotel-service'
 
 interface HotelSliderProps {
   destination: string
   checkInDate: string
   checkOutDate: string
-  rooms?: { adults: number; children: number }[]
+  guests?: { adults: number; children: number[] }[]
 }
 
 export default function HotelSlider({ 
   destination, 
   checkInDate, 
   checkOutDate, 
-  rooms = [{ adults: 2, children: 0 }] 
+  guests = [{ adults: 2, children: [] }] 
 }: HotelSliderProps) {
-  // Only log in development mode
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🏨 HotelSlider rendered with props:', { 
-      destination, 
-      checkInDate, 
-      checkOutDate, 
-      rooms,
-      timestamp: new Date().toISOString()
-    })
-  }
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🏨 HotelSlider rendered with props:', { 
+          destination, 
+          checkInDate, 
+          checkOutDate, 
+          guests,
+          timestamp: new Date().toISOString()
+        })
+      }
   
-  const [hotels, setHotels] = useState<HotelOffer[]>([])
+  const [hotels, setHotels] = useState<HotelResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
@@ -113,7 +113,7 @@ export default function HotelSlider({
           checkInDate, 
           checkOutDate, 
           hasFetched,
-          rooms 
+          guests 
         })
       }
       
@@ -141,24 +141,22 @@ export default function HotelSlider({
           destination,
           checkInDate,
           checkOutDate,
-          rooms,
+          guests,
           currency: 'NGN'
         }
 
         const response = await hotelService.searchHotels(criteria)
         
-        // Handle different response structures
-        // The response should have hotels directly based on HotelSearchResponse type
         const hotelsList = response.hotels || []
         
-        // Sort by price (lowest first) and take top 6 for original design
+        // Sort by rate price (lowest first) and take top 6
         const sortedHotels = (Array.isArray(hotelsList) ? hotelsList : [])
           .sort((a, b) => {
-            const priceA = a.rooms?.[0]?.price?.total || 0
-            const priceB = b.rooms?.[0]?.price?.total || 0
+            const priceA = parseFloat(a.rates?.[0]?.showAmount || '0')
+            const priceB = parseFloat(b.rates?.[0]?.showAmount || '0')
             return priceA - priceB
           })
-          .slice(0, 6) // Match original design with 6 hotels
+          .slice(0, 6)
 
         if (process.env.NODE_ENV === 'development') {
           console.log('✅ Final sorted hotels:', sortedHotels.length, 'hotels loaded for', destination)
@@ -166,13 +164,6 @@ export default function HotelSlider({
         setHotels(sortedHotels)
       } catch (error: any) {
         console.error('❌ Error fetching hotels:', error)
-        if (process.env.NODE_ENV === 'development') {
-          console.error('❌ Error details:', {
-            message: error?.message,
-            stack: error?.stack,
-            response: error?.response?.data
-          })
-        }
         setHotels([])
       } finally {
         setIsLoading(false)
@@ -180,15 +171,14 @@ export default function HotelSlider({
     }
 
     fetchHotels()
-  }, [destination, checkInDate, checkOutDate, rooms, hasFetched, lastDestination])
+  }, [destination, checkInDate, checkOutDate, guests, hasFetched, lastDestination])
 
-  const handleHotelClick = (hotel: HotelOffer) => {
+  const handleHotelClick = (hotel: HotelResult) => {
     // Navigate to hotel details page with search parameters
     const params = new URLSearchParams({
       destination,
       checkin: checkInDate,
       checkout: checkOutDate,
-      rooms: JSON.stringify(rooms)
     })
     router.push(`/hotels/${hotel.id}?${params.toString()}`)
   }
@@ -202,11 +192,10 @@ export default function HotelSlider({
     }).format(price)
   }
 
-  const getHotelImage = (hotel: HotelOffer) => {
+  const getHotelImage = (hotel: HotelResult) => {
     if (hotel.images && hotel.images.length > 0) {
       return hotel.images[0]
     }
-    // Use original image paths for consistency
     const imageMap = [
       '/images/hotel-1.png',
       '/images/hotel-2.png', 
@@ -321,7 +310,7 @@ export default function HotelSlider({
                         className="w-3 h-3"
                       />
                       <span className="text-gray-500 text-xs font-normal tracking-wide">
-                        {hotel.location?.address || `${destination} Area`}
+                        {hotel.address || `${destination} Area`}
                       </span>
                     </div>
 
@@ -335,7 +324,7 @@ export default function HotelSlider({
                     {/* Description */}
                     <div>
                       <p className="text-gray-600 text-sm leading-relaxed">
-                        {hotel.rooms?.[0]?.description || 'Comfortable accommodation with modern amenities and excellent service.'}
+                        {hotel.rates?.[0]?.roomName || 'Comfortable accommodation with modern amenities and excellent service.'}
                       </p>
                     </div>
                   </div>
@@ -343,8 +332,8 @@ export default function HotelSlider({
                   {/* Price - Original Design */}
                   <div className="mt-4">
                     <p className="text-red-600 text-sm font-medium">
-                      {hotel.rooms && hotel.rooms.length > 0 
-                        ? `${formatPrice(hotel.rooms[0].price.total, hotel.rooms[0].price.currency)} /night`
+                      {hotel.rates && hotel.rates.length > 0 
+                        ? `${formatPrice(parseFloat(hotel.rates[0].showAmount), hotel.rates[0].currency)} /night`
                         : '₦25,000 /night'
                       }
                     </p>

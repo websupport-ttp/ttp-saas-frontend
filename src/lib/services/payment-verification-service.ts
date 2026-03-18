@@ -50,7 +50,8 @@ class PaymentVerificationService {
       case 'flight':
         return await flightService.verifyPayment(reference)
       case 'hotel':
-        return await hotelService.verifyPayment(reference)
+        // Hotels use ETG order status check, not Paystack payment verification
+        return await hotelService.checkBookingStatus(reference)
       case 'visa':
         if (!bookingId) throw new Error('Booking ID required for visa payment verification')
         return await visaService.verifyPayment(bookingId, reference)

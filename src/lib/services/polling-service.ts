@@ -110,7 +110,7 @@ class PollingService {
       case 'flight':
         return await flightService.getBookingStatus(bookingReference)
       case 'hotel':
-        return await hotelService.getBookingStatus(bookingReference)
+        return await hotelService.checkBookingStatus(bookingReference)
       case 'visa':
         return await visaService.getApplicationStatus(bookingReference)
       case 'insurance':

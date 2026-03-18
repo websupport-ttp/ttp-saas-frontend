@@ -85,7 +85,7 @@ export function useBookingStatus({
       let status;
       switch (serviceType) {
         case 'hotel':
-          status = await hotelService.getBookingStatus(bookingReference)
+          status = await hotelService.checkBookingStatus(bookingReference)
           break
         case 'visa':
           status = await visaService.getApplicationStatus(bookingReference)

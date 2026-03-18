@@ -8,9 +8,8 @@ import HotelSearchForm from '@/components/hotels/HotelSearchForm';
 import FilterBar from '@/components/hotels/FilterBar';
 import HotelCard from '@/components/hotels/HotelCard';
 import { SearchCriteria, FilterOptions, Hotel } from '@/types/hotels';
-import { HotelSearchCriteria, HotelOffer } from '@/types/api';
 import { SAMPLE_HOTELS, filterHotels } from '@/lib/hotels';
-import { hotelService } from '@/lib/services/hotel-service';
+import { hotelService, HotelResult, HotelSearchCriteria } from '@/lib/services/hotel-service';
 import { getUIIcon } from '@/lib/constants/icons';
 import { NavigationHelper } from '@/lib/routing';
 import { useNotifications } from '@/contexts/notification-context';
@@ -22,8 +21,8 @@ export default function HotelsPage() {
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria | null>(null);
   const [initialSearchData, setInitialSearchData] = useState<SearchCriteria | null>(null);
   const [filters, setFilters] = useState<FilterOptions>({});
-  const [hotels, setHotels] = useState<HotelOffer[]>([]);
-  const [filteredHotels, setFilteredHotels] = useState<HotelOffer[]>([]);
+  const [hotels, setHotels] = useState<HotelResult[]>([]);
+  const [filteredHotels, setFilteredHotels] = useState<HotelResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,23 +79,20 @@ export default function HotelsPage() {
   // Filter hotels when filters change
   useEffect(() => {
     if (hotels.length > 0) {
-      // Convert HotelOffer to Hotel format for filtering
-      const convertedHotels = hotels.map(hotelOffer => ({
-        id: hotelOffer.id,
-        name: hotelOffer.name,
-        location: hotelOffer.location,
-        images: hotelOffer.images,
-        description: `${hotelOffer.name} - ${hotelOffer.location.city}`,
-        amenities: hotelOffer.amenities.map(amenity => ({ id: amenity, name: amenity, icon: '', category: 'comfort' as const })),
-        pricePerNight: hotelOffer.rooms[0]?.price.total || 0,
-        classification: `${hotelOffer.rating}-Star`,
-        bedTypes: hotelOffer.rooms.map(room => room.bedType)
+      const convertedHotels = hotels.map(h => ({
+        id: h.id,
+        name: h.name,
+        location: { address: h.address, city: h.address, country: '' },
+        images: h.images,
+        description: h.name,
+        amenities: h.amenities.map(a => ({ id: a, name: a, icon: '', category: 'comfort' as const })),
+        pricePerNight: parseFloat(h.rates?.[0]?.showAmount || '0'),
+        classification: `${h.stars || 0}-Star`,
+        bedTypes: []
       }));
       
       const filtered = filterHotels(convertedHotels, filters);
-      setFilteredHotels(hotels.filter(hotel => 
-        filtered.some(f => f.id === hotel.id)
-      ));
+      setFilteredHotels(hotels.filter(h => filtered.some(f => f.id === h.id)));
     }
   }, [hotels, filters]);
 
@@ -136,37 +132,37 @@ export default function HotelsPage() {
       addNotification({ type: 'error', title: 'Search Failed', message: 'Failed to search hotels. Please try again.' });
       
       // Fallback to sample data for development
-      const convertedSampleHotels = SAMPLE_HOTELS.map(hotel => ({
+      const convertedSampleHotels: HotelResult[] = SAMPLE_HOTELS.map(hotel => ({
         id: hotel.id,
+        hid: 0,
         name: hotel.name,
-        rating: 4.5,
-        location: {
-          address: hotel.location.address,
-          city: hotel.location.city,
-          country: hotel.location.country,
-          coordinates: { latitude: 0, longitude: 0 }
-        },
-        amenities: hotel.amenities.map(a => a.name),
+        address: hotel.location.address,
+        stars: 4,
         images: hotel.images,
-        rooms: [{
-          id: '1',
-          name: 'Standard Room',
-          description: 'Comfortable standard room',
-          price: {
-            total: hotel.pricePerNight,
-            currency: 'USD',
-            breakdown: []
-          },
-          bedType: hotel.bedTypes[0] || 'Queen',
-          maxOccupancy: 2,
-          amenities: [],
-          cancellable: true
+        amenities: hotel.amenities?.map(a => a.name) || [],
+        location: { latitude: 0, longitude: 0 },
+        rating: 4.5,
+        reviewCount: 100,
+        rates: [{
+          matchHash: '',
+          bookHash: '',
+          roomName: 'Standard Room',
+          meal: 'nomeal',
+          mealData: { value: 'nomeal', has_breakfast: false, no_child_meal: false },
+          dailyPrice: String(hotel.pricePerNight),
+          showAmount: String(hotel.pricePerNight),
+          amount: String(hotel.pricePerNight),
+          currency: 'USD',
+          paymentType: 'deposit',
+          cancellationPenalties: null,
+          freeCancellationBefore: null,
+          includedTaxes: [],
+          excludedTaxes: [],
+          roomDataTrans: null,
         }],
-        cancellationPolicy: 'Free cancellation up to 24 hours before check-in'
       }));
       setHotels(convertedSampleHotels);
       
-      // Store fallback results and criteria in localStorage as well
       localStorage.setItem('hotelSearchResults', JSON.stringify(convertedSampleHotels));
       localStorage.setItem('hotelSearchCriteria', JSON.stringify(criteria));
     } finally {
@@ -277,24 +273,24 @@ export default function HotelsPage() {
           ) : filteredHotels.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {filteredHotels.map((hotelOffer) => {
-                // Convert HotelOffer to Hotel format for the card
+                // Convert HotelResult to card format
                 const hotel = {
                   id: hotelOffer.id,
                   name: hotelOffer.name,
-                  location: `${hotelOffer.location.city}, ${hotelOffer.location.country}`,
-                  city: hotelOffer.location.city,
-                  country: hotelOffer.location.country,
+                  location: hotelOffer.address || '',
+                  city: hotelOffer.address || '',
+                  country: '',
                   image: hotelOffer.images[0] || '/images/placeholder-hotel.png',
                   gallery: hotelOffer.images,
                   rating: hotelOffer.rating,
-                  reviewCount: Math.floor(Math.random() * 1000) + 100, // Mock review count
-                  price: hotelOffer.rooms[0]?.price.total || 0,
-                  currency: hotelOffer.rooms[0]?.price.currency || 'USD',
+                  reviewCount: hotelOffer.reviewCount,
+                  price: parseFloat(hotelOffer.rates?.[0]?.showAmount || '0'),
+                  currency: hotelOffer.rates?.[0]?.currency || 'USD',
                   amenities: hotelOffer.amenities,
-                  description: `${hotelOffer.name} - ${hotelOffer.location.address}`,
+                  description: hotelOffer.name,
                   coordinates: {
-                    lat: hotelOffer.location.coordinates.latitude,
-                    lng: hotelOffer.location.coordinates.longitude
+                    lat: hotelOffer.location?.latitude || 0,
+                    lng: hotelOffer.location?.longitude || 0,
                   }
                 };
                 

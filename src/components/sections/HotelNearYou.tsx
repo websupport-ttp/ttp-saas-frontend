@@ -4,22 +4,23 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { hotelService } from '@/lib/services/hotel-service'
-import { HotelOffer, HotelSearchCriteria } from '@/types/api'
+import { HotelSearchCriteria } from '@/types/api'
+import { HotelResult } from '@/lib/services/hotel-service'
 
 interface HotelNearYouProps {
   destination?: string
   checkInDate?: string
   checkOutDate?: string
-  rooms?: { adults: number; children: number }[]
+  guests?: { adults: number; children: number[] }[]
 }
 
 export default function HotelNearYou({ 
   destination = 'Lagos', 
   checkInDate, 
   checkOutDate, 
-  rooms = [{ adults: 2, children: 0 }] 
+  guests = [{ adults: 2, children: [] }] 
 }: HotelNearYouProps) {
-  const [hotels, setHotels] = useState<HotelOffer[]>([])
+  const [hotels, setHotels] = useState<HotelResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
@@ -93,23 +94,22 @@ export default function HotelNearYou({
           destination,
           checkInDate: defaultCheckIn,
           checkOutDate: defaultCheckOut,
-          rooms,
+          guests,
           currency: 'NGN'
         }
 
         const response = await hotelService.searchHotels(criteria)
         
-        // Handle different response structures
         const hotelsList = response.hotels || []
         
-        // Sort by price (lowest first) and take top 6 for original design
+        // Sort by rate price (lowest first) and take top 6
         const sortedHotels = (Array.isArray(hotelsList) ? hotelsList : [])
           .sort((a, b) => {
-            const priceA = a.rooms?.[0]?.price?.total || 0
-            const priceB = b.rooms?.[0]?.price?.total || 0
+            const priceA = parseFloat(a.rates?.[0]?.showAmount || '0')
+            const priceB = parseFloat(b.rates?.[0]?.showAmount || '0')
             return priceA - priceB
           })
-          .slice(0, 6) // Match original design with 6 hotels
+          .slice(0, 6)
 
         setHotels(sortedHotels)
       } catch (error: any) {
@@ -121,15 +121,13 @@ export default function HotelNearYou({
     }
 
     fetchHotels()
-  }, [destination, checkInDate, checkOutDate, rooms])
+  }, [destination, checkInDate, checkOutDate, guests])
 
-  const handleHotelClick = (hotel: HotelOffer) => {
-    // Navigate to hotel details page with search parameters
+  const handleHotelClick = (hotel: HotelResult) => {
     const params = new URLSearchParams({
       destination,
       checkin: checkInDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       checkout: checkOutDate || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      rooms: JSON.stringify(rooms)
     })
     router.push(`/hotels/${hotel.id}?${params.toString()}`)
   }
@@ -143,11 +141,10 @@ export default function HotelNearYou({
     }).format(price)
   }
 
-  const getHotelImage = (hotel: HotelOffer) => {
+  const getHotelImage = (hotel: HotelResult) => {
     if (hotel.images && hotel.images.length > 0) {
       return hotel.images[0]
     }
-    // Use original image paths for consistency
     const imageMap = [
       '/images/hotel-1.png',
       '/images/hotel-2.png', 
@@ -241,7 +238,7 @@ export default function HotelNearYou({
                         className="w-3 h-3"
                       />
                       <span className="text-gray-500 text-xs font-normal tracking-wide">
-                        {hotel.location?.address || `${destination} Area`}
+                        {hotel.address || `${destination} Area`}
                       </span>
                     </div>
 
@@ -255,7 +252,7 @@ export default function HotelNearYou({
                     {/* Description */}
                     <div>
                       <p className="text-gray-600 text-sm leading-relaxed">
-                        {hotel.rooms?.[0]?.description || 'Comfortable accommodation with modern amenities and excellent service.'}
+                        {hotel.rates?.[0]?.roomName || 'Comfortable accommodation with modern amenities and excellent service.'}
                       </p>
                     </div>
                   </div>
@@ -263,8 +260,8 @@ export default function HotelNearYou({
                   {/* Price - Original Design */}
                   <div className="mt-4">
                     <p className="text-red-600 text-sm font-medium">
-                      {hotel.rooms && hotel.rooms.length > 0 
-                        ? `${formatPrice(hotel.rooms[0].price.total, hotel.rooms[0].price.currency)} /night`
+                      {hotel.rates && hotel.rates.length > 0 
+                        ? `${formatPrice(parseFloat(hotel.rates[0].showAmount), hotel.rates[0].currency)} /night`
                         : '₦25,000 /night'
                       }
                     </p>

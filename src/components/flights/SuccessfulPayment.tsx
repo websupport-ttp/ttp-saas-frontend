@@ -443,7 +443,7 @@ export default function SuccessfulPayment({
           destination={destination}
           checkInDate={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
           checkOutDate={new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-          rooms={[{ adults: 2, children: 0 }]}
+          guests={[{ adults: 2, children: [] }]}
         />
       </div>
     </div>

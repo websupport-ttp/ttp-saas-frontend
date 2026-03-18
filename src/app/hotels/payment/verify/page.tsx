@@ -30,19 +30,19 @@ export default function HotelPaymentVerifyPage() {
       }
 
       try {
-        const result = await hotelService.verifyPayment(paymentRef);
+        // For ETG hotels, check order status using the orderId (passed as reference)
+        const result = await hotelService.checkBookingStatus(paymentRef);
         
-        if (result.status === 'success') {
-          // Redirect to success page with payment reference
+        if (result.status === 'ok' || result.status === 'confirmed') {
           const successUrl = hotelId 
-            ? `/hotels/${hotelId}/success?reference=${paymentRef}`
-            : `/hotels/success?reference=${paymentRef}`;
+            ? `/hotels/${hotelId}/success?orderId=${paymentRef}`
+            : `/hotels/success?orderId=${paymentRef}`;
           router.push(successUrl);
         } else {
           addNotification({
             type: 'error',
-            title: 'Payment Failed',
-            message: 'Payment verification failed. Please try again.'
+            title: 'Booking Failed',
+            message: 'Booking verification failed. Please contact support.'
           });
           router.push('/hotels');
         }

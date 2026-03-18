@@ -361,7 +361,7 @@ export default function FlightsPage() {
                 destination={extractedDestination}
                 checkInDate={initialSearchData.departure}
                 checkOutDate={getCheckOutDate(initialSearchData.departure, initialSearchData.return)}
-                rooms={[{ adults: Math.max(1, adultsCount), children: 0 }]}
+                guests={[{ adults: Math.max(1, adultsCount), children: [] }]}
               />
             </div>
           ) : null;
