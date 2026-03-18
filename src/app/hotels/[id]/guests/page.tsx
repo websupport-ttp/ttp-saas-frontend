@@ -46,9 +46,13 @@ export default function GuestInformationPage({ params }: GuestInformationPagePro
         const convertedHotel: Hotel = {
           id: hotelDetails.id,
           name: hotelDetails.name,
-          location: hotelDetails.location,
+          location: {
+            address: hotelDetails.address || '',
+            city: hotelDetails.address || hotelDetails.name,
+            country: '',
+          },
           images: hotelDetails.images,
-          description: `${hotelDetails.name} - ${hotelDetails.location.city}`,
+          description: `${hotelDetails.name} - ${hotelDetails.address || ''}`,
           amenities: hotelDetails.amenities.map((amenity: string) => ({ 
             id: amenity, 
             name: amenity, 
