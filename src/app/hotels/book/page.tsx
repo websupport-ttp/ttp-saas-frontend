@@ -395,10 +395,16 @@ export default function HotelBookingPage() {
         }
 
         // Step 3b: start booking + poll
+        const primaryGuest = guests[0];
         const bookingResult = await hotelService.startBooking({
           orderId: formResult.orderId,
           partnerOrderId: formResult.partnerOrderId,
-          userPhone: `${contactInfo.dialCode}${contactInfo.phoneNumber}`,
+          userPhone: `${contactInfo.dialCode}${contactInfo.phoneNumber}`.replace(/\s+/g, ''),
+          userEmail: contactInfo.email,
+          guestName: primaryGuest ? `${primaryGuest.firstName} ${primaryGuest.lastName}` : undefined,
+          hotelName: hotel?.name,
+          checkin: searchData?.checkin,
+          checkout: searchData?.checkout,
         });
 
         if (bookingResult.status !== 'ok') {

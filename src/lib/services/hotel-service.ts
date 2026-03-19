@@ -145,6 +145,11 @@ class HotelService {
     orderId: string;
     partnerOrderId: string;
     userPhone: string;
+    userEmail?: string;
+    guestName?: string;
+    hotelName?: string;
+    checkin?: string;
+    checkout?: string;
   }): Promise<BookingStatusResult> {
     const response = await apiClient.post<BookingStatusResult>(
       '/bookings/hotels/start-booking',
