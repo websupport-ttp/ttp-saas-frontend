@@ -174,16 +174,25 @@ export default function HotelSuccessPage() {
             </div>
           )}
 
-          {/* Room / rate info from ETG order */}
-          {orderInfo?.room_name && (
-            <div className="p-4 border-t border-gray-100">
-              <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Room</p>
-              <p className="text-sm font-medium text-gray-900">{orderInfo.room_name}</p>
-              {orderInfo.meal && (
-                <p className="text-xs text-gray-500 mt-0.5">{orderInfo.meal}</p>
-              )}
-            </div>
-          )}
+          {/* Room / rate info */}
+          {(() => {
+            const roomName = orderInfo?.room_name || booking?.prebookedRate?.rate?.roomName;
+            const meal = orderInfo?.meal || (booking?.prebookedRate?.rate?.mealData?.has_breakfast ? 'Breakfast included' : null);
+            const freeCancellation = booking?.prebookedRate?.rate?.freeCancellationBefore;
+            if (!roomName) return null;
+            return (
+              <div className="p-4 border-t border-gray-100">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Room</p>
+                <p className="text-sm font-medium text-gray-900">{roomName}</p>
+                {meal && <p className="text-xs text-gray-500 mt-0.5">{meal}</p>}
+                {freeCancellation && (
+                  <p className="text-xs text-blue-600 mt-0.5">
+                    Free cancellation before {new Date(freeCancellation).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Excluded taxes (payable at property) */}
           {excludedTaxes.length > 0 && (

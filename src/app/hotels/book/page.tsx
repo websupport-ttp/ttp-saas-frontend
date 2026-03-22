@@ -941,6 +941,22 @@ export default function HotelBookingPage() {
                 </ul>
               </div>
 
+              {/* Selected room */}
+              {getRateData()?.roomName && (
+                <div className="mb-4 p-3 bg-gray-100 rounded-lg">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Selected Room</p>
+                  <p className="text-sm font-semibold text-gray-900">{getRateData().roomName}</p>
+                  {getRateData()?.mealData?.has_breakfast && (
+                    <p className="text-xs text-green-600 mt-0.5">Breakfast included</p>
+                  )}
+                  {getRateData()?.freeCancellationBefore && (
+                    <p className="text-xs text-blue-600 mt-0.5">
+                      Free cancellation before {new Date(getRateData().freeCancellationBefore).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Amount */}
               <div className="mb-6">
                 <div className="flex items-baseline gap-2">
