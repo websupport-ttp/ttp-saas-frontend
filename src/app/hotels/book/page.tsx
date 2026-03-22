@@ -51,7 +51,6 @@ export default function HotelBookingPage() {
   const [hotelPageData, setHotelPageData] = useState<any>(null);
   const [excludedTaxes, setExcludedTaxes] = useState<any[]>([]);
   const [discounts, setDiscounts] = useState<any[]>([]);
-  const [totalDiscount, setTotalDiscount] = useState(0);
 
   useEffect(() => {
     // Get hotel data from URL params
@@ -366,20 +365,16 @@ export default function HotelBookingPage() {
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
     const taxes = calculateTaxes();
-    // Compute discount amount from applicable discounts
     let discountAmt = 0;
     for (const d of discounts) {
       if (d.type === 'fixed') {
         discountAmt += d.discountAmount ?? d.value ?? 0;
       } else {
-        // percentage-based
         const pct = d.discountAmount ?? d.value ?? 0;
         discountAmt += (subtotal * pct) / 100;
       }
     }
-    // Cap discount to subtotal
     discountAmt = Math.min(discountAmt, subtotal);
-    setTotalDiscount(discountAmt);
     return subtotal + taxes - discountAmt;
   };
 
@@ -524,7 +519,9 @@ export default function HotelBookingPage() {
             <svg className="h-4 w-4 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
             </svg>
-            {hotel.location.address}, {hotel.location.city}, {hotel.location.country}
+            {typeof hotel.location === 'string'
+              ? hotel.location
+              : [hotel.location?.address, hotel.location?.city, hotel.location?.country].filter(Boolean).join(', ')}
           </p>
         </div>
 
