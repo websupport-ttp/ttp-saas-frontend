@@ -28,6 +28,7 @@ export default function HotelDetailsPage() {
   const [ratesError, setRatesError] = useState<string | null>(null);
   const [selectingRateHash, setSelectingRateHash] = useState<string | null>(null);
   const [hotelPageData, setHotelPageData] = useState<any>(null);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   const safeImageIndex = hotel?.images?.length
     ? Math.min(currentImageIndex, hotel.images.length - 1)
@@ -130,7 +131,7 @@ export default function HotelDetailsPage() {
     const ctx = getBookingContext();
     if (!ctx.checkin || !ctx.checkout) return;
 
-    const isEtg = hotel.hid || !hotel.id?.startsWith('dummy_hotel_');
+    const isEtg = hotel.hid || hotel.id?.startsWith('dummy_hotel_') === false;
     if (!isEtg) return;
 
     const residency = (() => {
@@ -189,6 +190,48 @@ export default function HotelDetailsPage() {
     }
   };
 
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: hotel?.name || 'Hotel',
+        text: `Check out ${hotel?.name}`,
+        url: window.location.href,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied to clipboard!'));
+    }
+  };
+
+  const handleFavorite = () => {
+    setIsFavorited(prev => {
+      const next = !prev;
+      try {
+        const saved: string[] = JSON.parse(localStorage.getItem('favoriteHotels') || '[]');
+        if (next) {
+          if (!saved.includes(hotel.id)) saved.push(hotel.id);
+        } else {
+          const idx = saved.indexOf(hotel.id);
+          if (idx > -1) saved.splice(idx, 1);
+        }
+        localStorage.setItem('favoriteHotels', JSON.stringify(saved));
+      } catch { /* ignore */ }
+      return next;
+    });
+  };
+
+  const handleProceedDefault = () => {
+    const ctx = getBookingContext();
+    const hotelForBooking = { ...hotel };
+    const urlParams = new URLSearchParams();
+    urlParams.set('hotel', encodeURIComponent(JSON.stringify(hotelForBooking)));
+    if (ctx.checkin) urlParams.set('checkin', ctx.checkin);
+    if (ctx.checkout) urlParams.set('checkout', ctx.checkout);
+    urlParams.set('adults', ctx.adults.toString());
+    urlParams.set('children', ctx.children.toString());
+    urlParams.set('rooms', ctx.rooms.toString());
+    router.push(`/hotels/book?${urlParams.toString()}`);
+  };
+
   const handleBack = () => router.back();
 
   if (!hotel) {
@@ -223,12 +266,12 @@ export default function HotelDetailsPage() {
             </p>
           </div>
           <div className="flex items-center space-x-3">
-            <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-50" aria-label="Save">
-              <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-50" aria-label="Save" onClick={handleFavorite}>
+              <svg className="h-5 w-5 text-gray-600" fill={isFavorited ? '#E21E24' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </button>
-            <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-50" aria-label="Share">
+            <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-50" aria-label="Share" onClick={handleShare}>
               <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
               </svg>
@@ -339,8 +382,14 @@ export default function HotelDetailsPage() {
             )}
 
             {!ratesLoading && ratesError && (
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm mb-4">
-                {ratesError}
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm mb-4 flex items-center justify-between gap-4">
+                <span>{ratesError}</span>
+                <button
+                  onClick={handleProceedDefault}
+                  className="flex-shrink-0 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium text-sm"
+                >
+                  Proceed anyway
+                </button>
               </div>
             )}
 

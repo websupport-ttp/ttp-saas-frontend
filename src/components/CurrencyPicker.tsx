@@ -101,15 +101,7 @@ const CurrencyPicker: React.FC = () => {
             )}
           </div>
 
-          {currencies.length > 0 && (
-            <div className="px-3 py-2 bg-gray-50 border-t border-gray-200">
-              <p className="text-xs text-gray-500 text-center">
-                Rates updated: {selectedCurrencyData?.lastUpdated 
-                  ? new Date(selectedCurrencyData.lastUpdated).toLocaleDateString()
-                  : 'N/A'}
-              </p>
-            </div>
-          )}
+
         </div>
       )}
     </div>
