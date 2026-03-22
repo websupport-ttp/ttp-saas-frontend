@@ -362,17 +362,19 @@ export default function HotelBookingPage() {
     return Math.round(calculateSubtotal() * 0.12);
   };
 
+  const getDiscountAmount = (d: any, subtotal: number): number => {
+    // Backend sets applicableValue for role-based, value for percentage/fixed
+    const pct = d.applicableValue ?? d.discountAmount ?? d.value ?? 0;
+    if (d.type === 'fixed') return pct;
+    return (subtotal * pct) / 100;
+  };
+
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
     const taxes = calculateTaxes();
     let discountAmt = 0;
     for (const d of discounts) {
-      if (d.type === 'fixed') {
-        discountAmt += d.discountAmount ?? d.value ?? 0;
-      } else {
-        const pct = d.discountAmount ?? d.value ?? 0;
-        discountAmt += (subtotal * pct) / 100;
-      }
+      discountAmt += getDiscountAmount(d, subtotal);
     }
     discountAmt = Math.min(discountAmt, subtotal);
     return subtotal + taxes - discountAmt;
@@ -1023,9 +1025,7 @@ export default function HotelBookingPage() {
                 {/* Discounts from admin panel */}
                 {discounts.map((d, i) => {
                   const subtotal = calculateSubtotal();
-                  const amt = d.type === 'fixed'
-                    ? (d.discountAmount ?? d.value ?? 0)
-                    : (subtotal * (d.discountAmount ?? d.value ?? 0)) / 100;
+                  const amt = getDiscountAmount(d, subtotal);
                   if (!amt) return null;
                   return (
                     <div key={i} className="flex justify-between items-center text-green-700">
