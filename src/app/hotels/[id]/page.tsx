@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/Header';
 import ServiceFooter from '@/components/layout/ServiceFooter';
 import { SAMPLE_HOTELS } from '@/lib/hotels';
 import AmenityIcon from '@/components/ui/AmenityIcon';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function HotelDetailsPage() {
   const params = useParams();
@@ -15,6 +16,7 @@ export default function HotelDetailsPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState<boolean>(false);
   const [prebookedRate, setPrebookedRate] = useState<any>(null);
+  const { formatAmount } = useCurrency();
 
   useEffect(() => {
     try {
@@ -468,14 +470,14 @@ export default function HotelDetailsPage() {
                 <div className="flex items-center lg:justify-end space-x-2">
                   {(() => {
                     const rate = prebookedRate?.rate;
-                    const currency = rate?.currency || null;
+                    const sourceCurrency = rate?.currency || 'USD';
                     const price = rate?.dailyPrice
                       ? parseFloat(rate.dailyPrice)
                       : hotel.pricePerNight;
                     return (
                       <>
                         <span className="text-xl font-bold text-green-600">
-                          {currency ? `${currency} ` : '₦'}{price?.toLocaleString()}
+                          {formatAmount(price, sourceCurrency)}
                         </span>
                         <span className="text-gray-600 text-sm">Per night</span>
                       </>

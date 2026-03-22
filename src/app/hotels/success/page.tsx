@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Header } from '@/components/layout/Header'
 import ServiceFooter from '@/components/layout/ServiceFooter'
 import { hotelService } from '@/lib/services/hotel-service'
+import { useCurrency } from '@/contexts/CurrencyContext'
 
 interface ConfirmedBooking {
   orderId?: string
@@ -23,6 +24,7 @@ export default function HotelSuccessPage() {
   const [orderInfo, setOrderInfo] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { formatAmount } = useCurrency()
 
   useEffect(() => {
     const orderId = searchParams.get('orderId')
@@ -190,7 +192,7 @@ export default function HotelSuccessPage() {
               {excludedTaxes.map((tax, i) => (
                 <div key={i} className="flex justify-between text-sm text-amber-700">
                   <span>{tax.name}</span>
-                  <span>{tax.currency} {parseFloat(tax.amount).toLocaleString()}</span>
+                  <span>{formatAmount(parseFloat(tax.amount), tax.currency)}</span>
                 </div>
               ))}
             </div>
@@ -199,7 +201,7 @@ export default function HotelSuccessPage() {
           {/* Price */}
           {(() => {
             const rate = booking?.prebookedRate?.rate;
-            const currency = rate?.currency || 'USD';
+            const sourceCurrency = rate?.currency || 'USD';
             const nights = searchData?.nights || hotel?.bookingInfo?.nights || 1;
             const total = rate?.showAmount
               ? parseFloat(rate.showAmount)
@@ -211,10 +213,10 @@ export default function HotelSuccessPage() {
             return (
               <div className="p-4 border-t border-gray-100 flex justify-between items-center">
                 <span className="text-sm text-gray-600">
-                  {currency} {perNight.toLocaleString()} × {nights} night{nights > 1 ? 's' : ''}
+                  {formatAmount(perNight, sourceCurrency)} × {nights} night{nights > 1 ? 's' : ''}
                 </span>
                 <span className="text-base font-semibold text-gray-900">
-                  {currency} {total.toLocaleString()}
+                  {formatAmount(total, sourceCurrency)}
                 </span>
               </div>
             );

@@ -8,6 +8,7 @@ import { SimpleDatePicker } from '@/components/ui/SimpleDatePicker';
 import CountryCodeSelector from '@/components/ui/CountryCodeSelector';
 import { hotelService } from '@/lib/services/hotel-service';
 import MetapolicyDisplay from '@/components/hotels/MetapolicyDisplay';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface Guest {
   type: 'Adult' | 'Minor';
@@ -29,6 +30,7 @@ interface ContactInfo {
 export default function HotelBookingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { formatAmount } = useCurrency();
   const [hotel, setHotel] = useState<any>(null);
   const [guests, setGuests] = useState<Guest[]>([]);
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
@@ -944,13 +946,13 @@ export default function HotelBookingPage() {
                 <div className="flex items-baseline gap-2">
                   <span className="text-lg font-bold text-gray-900">Amount :</span>
                   <span className="text-2xl font-bold text-green-600">
-                    {getRateCurrency()} {(parseFloat(getRateData()?.dailyPrice || String(hotel?.pricePerNight || 0))).toLocaleString()}
+                    {formatAmount(parseFloat(getRateData()?.dailyPrice || String(hotel?.pricePerNight || 0)), getRateCurrency())}
                   </span>
                   <span className="text-base text-gray-700">Per Night</span>
                 </div>
                 {prebookedRate?.priceChanged && (
                   <p className="text-amber-600 text-sm mt-1">
-                    Price updated from {getRateCurrency()} {parseFloat(prebookedRate.oldPrice || '0').toLocaleString()} to {getRateCurrency()} {parseFloat(prebookedRate.newPrice || '0').toLocaleString()}
+                    Price updated from {formatAmount(parseFloat(prebookedRate.oldPrice || '0'), getRateCurrency())} to {formatAmount(parseFloat(prebookedRate.newPrice || '0'), getRateCurrency())}
                   </p>
                 )}
               </div>
@@ -964,13 +966,13 @@ export default function HotelBookingPage() {
               <div className="mb-8 space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-base text-gray-700">Subtotal</span>
-                  <span className="text-base font-semibold text-gray-900">{getRateCurrency()} {calculateSubtotal().toLocaleString()}</span>
+                  <span className="text-base font-semibold text-gray-900">{formatAmount(calculateSubtotal(), getRateCurrency())}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-base text-gray-700">
                     {getRateData()?.includedTaxes?.length ? 'Included Taxes & Fees' : 'Taxes and Fees (est.)'}
                   </span>
-                  <span className="text-base font-semibold text-gray-900">{getRateCurrency()} {calculateTaxes().toLocaleString()}</span>
+                  <span className="text-base font-semibold text-gray-900">{formatAmount(calculateTaxes(), getRateCurrency())}</span>
                 </div>
                 {excludedTaxes.length > 0 && (
                   <div className="pt-2 border-t border-gray-200">
@@ -978,14 +980,14 @@ export default function HotelBookingPage() {
                     {excludedTaxes.map((tax, i) => (
                       <div key={i} className="flex justify-between items-center text-sm text-amber-700">
                         <span>{tax.name}</span>
-                        <span>{tax.currency} {parseFloat(tax.amount).toLocaleString()}</span>
+                        <span>{formatAmount(parseFloat(tax.amount), tax.currency)}</span>
                       </div>
                     ))}
                   </div>
                 )}
                 <div className="flex justify-between items-center pt-2 border-t border-gray-300">
                   <span className="text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-lg font-bold text-gray-900">{getRateCurrency()} {calculateTotal().toLocaleString()}</span>
+                  <span className="text-lg font-bold text-gray-900">{formatAmount(calculateTotal(), getRateCurrency())}</span>
                 </div>
               </div>
 

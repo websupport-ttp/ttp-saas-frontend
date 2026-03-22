@@ -1,8 +1,8 @@
 'use client';
 
 import { HotelCardProps } from '@/types';
-import { formatPrice } from '@/lib/hotels';
 import { getUIIcon } from '@/lib/constants/icons';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function HotelCard({ 
   hotel,
@@ -11,11 +11,17 @@ export default function HotelCard({
   showAmenities = true,
   onClick
 }: HotelCardProps) {
+  const { formatAmount, selectedCurrency } = useCurrency();
+
   const handleClick = () => {
     if (onClick) {
       onClick(hotel);
     }
   };
+
+  // hotel.price comes from ETG in USD; hotel.currency tells us the source currency
+  const sourceCurrency = hotel.currency || 'USD';
+  const displayPrice = formatAmount(hotel.price, sourceCurrency);
 
   return (
     <div 
@@ -65,7 +71,7 @@ export default function HotelCard({
           {/* Price */}
           <div className="mb-2 text-left">
             <div className="text-base sm:text-lg font-bold text-red-500">
-              {formatPrice(hotel.price, 'NGN')} <span className="text-xs font-normal text-gray-500">/Night</span>
+              {displayPrice} <span className="text-xs font-normal text-gray-500">/Night</span>
             </div>
           </div>
         </div>
