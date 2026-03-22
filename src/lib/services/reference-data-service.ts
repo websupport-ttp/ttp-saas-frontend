@@ -248,6 +248,11 @@ class ReferenceDataService {
 
 export const referenceDataService = new ReferenceDataService();
 
+// Pre-warm popular airports cache in the background on service load
+if (typeof window !== 'undefined') {
+  referenceDataService.getCachedAirports().catch(() => {/* silent */});
+}
+
 /**
  * Normalize an AirportDB response item to the Airport interface shape
  */
