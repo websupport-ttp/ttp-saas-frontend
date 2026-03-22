@@ -9,6 +9,8 @@ import CountryCodeSelector from '@/components/ui/CountryCodeSelector';
 import { hotelService } from '@/lib/services/hotel-service';
 import MetapolicyDisplay from '@/components/hotels/MetapolicyDisplay';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { pricingService } from '@/lib/services/pricing-service';
+import { useAuth } from '@/contexts/auth-context';
 
 interface Guest {
   type: 'Adult' | 'Minor';
@@ -31,6 +33,7 @@ export default function HotelBookingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { formatAmount } = useCurrency();
+  const { user } = useAuth();
   const [hotel, setHotel] = useState<any>(null);
   const [guests, setGuests] = useState<Guest[]>([]);
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
@@ -47,6 +50,8 @@ export default function HotelBookingPage() {
   const [prebookedRate, setPrebookedRate] = useState<any>(null);
   const [hotelPageData, setHotelPageData] = useState<any>(null);
   const [excludedTaxes, setExcludedTaxes] = useState<any[]>([]);
+  const [discounts, setDiscounts] = useState<any[]>([]);
+  const [totalDiscount, setTotalDiscount] = useState(0);
 
   useEffect(() => {
     // Get hotel data from URL params
@@ -225,6 +230,18 @@ export default function HotelBookingPage() {
     }
   }, [searchParams, router]);
 
+  // Fetch applicable discounts from backend
+  useEffect(() => {
+    pricingService.getApplicableDiscounts({
+      serviceType: 'hotels',
+      userRole: user?.role || 'customer',
+    }).then(applicable => {
+      if (!applicable.length) return;
+      // Calculate total discount against the subtotal once we have it
+      setDiscounts(applicable);
+    }).catch(() => { /* non-fatal */ });
+  }, [user?.role]);
+
   const updateGuest = (index: number, field: keyof Guest, value: string) => {
     setGuests(prev => prev.map((guest, i) => 
       i === index ? { ...guest, [field]: value } : guest
@@ -347,7 +364,23 @@ export default function HotelBookingPage() {
   };
 
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateTaxes();
+    const subtotal = calculateSubtotal();
+    const taxes = calculateTaxes();
+    // Compute discount amount from applicable discounts
+    let discountAmt = 0;
+    for (const d of discounts) {
+      if (d.type === 'fixed') {
+        discountAmt += d.discountAmount ?? d.value ?? 0;
+      } else {
+        // percentage-based
+        const pct = d.discountAmount ?? d.value ?? 0;
+        discountAmt += (subtotal * pct) / 100;
+      }
+    }
+    // Cap discount to subtotal
+    discountAmt = Math.min(discountAmt, subtotal);
+    setTotalDiscount(discountAmt);
+    return subtotal + taxes - discountAmt;
   };
 
   const getRateCurrency = () => {
@@ -990,6 +1023,20 @@ export default function HotelBookingPage() {
                   </span>
                   <span className="text-base font-semibold text-gray-900">{formatAmount(calculateTaxes(), getRateCurrency())}</span>
                 </div>
+                {/* Discounts from admin panel */}
+                {discounts.map((d, i) => {
+                  const subtotal = calculateSubtotal();
+                  const amt = d.type === 'fixed'
+                    ? (d.discountAmount ?? d.value ?? 0)
+                    : (subtotal * (d.discountAmount ?? d.value ?? 0)) / 100;
+                  if (!amt) return null;
+                  return (
+                    <div key={i} className="flex justify-between items-center text-green-700">
+                      <span className="text-base">{d.name}{d.code ? ` (${d.code})` : ''}</span>
+                      <span className="text-base font-semibold">-{formatAmount(amt, getRateCurrency())}</span>
+                    </div>
+                  );
+                })}
                 {excludedTaxes.length > 0 && (
                   <div className="pt-2 border-t border-gray-200">
                     <p className="text-sm text-amber-700 font-medium mb-1">Payable at property:</p>

@@ -469,97 +469,33 @@ export default function SearchForm({
     );
   }
 
-  // Autocomplete fetch functions
+  // Autocomplete fetch functions — all backed by real APIs via referenceDataService
   const fetchAirportSuggestions = useCallback(async (query: string) => {
-    // Use mock data directly for immediate response during development
-    const mockAirports = [
-      { id: 'LHR', type: 'location', subType: 'AIRPORT', name: 'London Heathrow Airport', iataCode: 'LHR', address: { cityName: 'London', countryName: 'United Kingdom' } },
-      { id: 'JFK', type: 'location', subType: 'AIRPORT', name: 'John F. Kennedy International Airport', iataCode: 'JFK', address: { cityName: 'New York', countryName: 'United States' } },
-      { id: 'CDG', type: 'location', subType: 'AIRPORT', name: 'Charles de Gaulle Airport', iataCode: 'CDG', address: { cityName: 'Paris', countryName: 'France' } },
-      { id: 'DXB', type: 'location', subType: 'AIRPORT', name: 'Dubai International Airport', iataCode: 'DXB', address: { cityName: 'Dubai', countryName: 'United Arab Emirates' } },
-      { id: 'LAX', type: 'location', subType: 'AIRPORT', name: 'Los Angeles International Airport', iataCode: 'LAX', address: { cityName: 'Los Angeles', countryName: 'United States' } },
-      { id: 'LOS', type: 'location', subType: 'AIRPORT', name: 'Murtala Muhammed International Airport', iataCode: 'LOS', address: { cityName: 'Lagos', countryName: 'Nigeria' } },
-      { id: 'ABV', type: 'location', subType: 'AIRPORT', name: 'Nnamdi Azikiwe International Airport', iataCode: 'ABV', address: { cityName: 'Abuja', countryName: 'Nigeria' } },
-      { id: 'SIN', type: 'location', subType: 'AIRPORT', name: 'Singapore Changi Airport', iataCode: 'SIN', address: { cityName: 'Singapore', countryName: 'Singapore' } },
-      { id: 'NRT', type: 'location', subType: 'AIRPORT', name: 'Narita International Airport', iataCode: 'NRT', address: { cityName: 'Tokyo', countryName: 'Japan' } },
-      { id: 'SYD', type: 'location', subType: 'AIRPORT', name: 'Sydney Kingsford Smith Airport', iataCode: 'SYD', address: { cityName: 'Sydney', countryName: 'Australia' } }
-    ];
-
-    const filtered = query.length === 0
-      ? mockAirports.slice(0, 5) // Show top 5 popular airports when no query
-      : mockAirports.filter(airport =>
-        airport.name.toLowerCase().includes(query.toLowerCase()) ||
-        airport.iataCode.toLowerCase().includes(query.toLowerCase()) ||
-        airport.address.cityName.toLowerCase().includes(query.toLowerCase()) ||
-        airport.address.countryName.toLowerCase().includes(query.toLowerCase())
-      );
-
-    const formattedOptions = filtered.map(airport => {
-      try {
-        return referenceDataService.formatAirportOption(airport);
-      } catch (error) {
-        console.error('Error formatting airport option:', error);
-        // Fallback format
-        return {
-          value: airport.iataCode,
-          label: `${airport.name} (${airport.iataCode})`,
-          subtitle: `${airport.address.cityName}, ${airport.address.countryName}`,
-          data: airport
-        };
-      }
-    });
-    return formattedOptions;
+    if (query.length < 1) {
+      // Show popular airports when no query
+      const airports = await referenceDataService.getCachedAirports();
+      return airports.slice(0, 6).map(a => referenceDataService.formatAirportOption(a));
+    }
+    const airports = await referenceDataService.searchAirports(query, 10);
+    return airports.map(a => referenceDataService.formatAirportOption(a));
   }, []);
 
   const fetchLocationSuggestions = useCallback(async (query: string) => {
-    // Use mock data directly for immediate response during development
-    const mockLocations = [
-      { id: 'london', type: 'location', subType: 'CITY', name: 'London', iataCode: 'LON', address: { cityName: 'London', countryName: 'United Kingdom' } },
-      { id: 'paris', type: 'location', subType: 'CITY', name: 'Paris', iataCode: 'PAR', address: { cityName: 'Paris', countryName: 'France' } },
-      { id: 'dubai', type: 'location', subType: 'CITY', name: 'Dubai', iataCode: 'DXB', address: { cityName: 'Dubai', countryName: 'United Arab Emirates' } },
-      { id: 'newyork', type: 'location', subType: 'CITY', name: 'New York', iataCode: 'NYC', address: { cityName: 'New York', countryName: 'United States' } },
-      { id: 'lagos', type: 'location', subType: 'CITY', name: 'Lagos', iataCode: 'LOS', address: { cityName: 'Lagos', countryName: 'Nigeria' } },
-      { id: 'abuja', type: 'location', subType: 'CITY', name: 'Abuja', iataCode: 'ABV', address: { cityName: 'Abuja', countryName: 'Nigeria' } },
-      { id: 'singapore', type: 'location', subType: 'CITY', name: 'Singapore', iataCode: 'SIN', address: { cityName: 'Singapore', countryName: 'Singapore' } },
-      { id: 'tokyo', type: 'location', subType: 'CITY', name: 'Tokyo', iataCode: 'NRT', address: { cityName: 'Tokyo', countryName: 'Japan' } }
-    ];
-
-    const filtered = query.length === 0
-      ? mockLocations.slice(0, 5) // Show top 5 popular locations when no query
-      : mockLocations.filter(location =>
-        location.name.toLowerCase().includes(query.toLowerCase()) ||
-        location.address.cityName.toLowerCase().includes(query.toLowerCase()) ||
-        location.address.countryName.toLowerCase().includes(query.toLowerCase())
-      );
-
-    return filtered.map(location => referenceDataService.formatAirportOption(location));
+    // Cities/locations — reuse airport search (airports have city data)
+    if (query.length < 1) {
+      const airports = await referenceDataService.getCachedAirports();
+      return airports.slice(0, 6).map(a => referenceDataService.formatAirportOption(a));
+    }
+    const airports = await referenceDataService.searchAirports(query, 10);
+    return airports.map(a => referenceDataService.formatAirportOption(a));
   }, []);
 
   const fetchCountrySuggestions = useCallback(async (query: string) => {
-    // Use mock data directly for immediate response during development
-    const mockCountries = [
-      { code: 'US', name: 'United States', continent: 'North America' },
-      { code: 'GB', name: 'United Kingdom', continent: 'Europe' },
-      { code: 'FR', name: 'France', continent: 'Europe' },
-      { code: 'DE', name: 'Germany', continent: 'Europe' },
-      { code: 'AE', name: 'United Arab Emirates', continent: 'Asia' },
-      { code: 'NG', name: 'Nigeria', continent: 'Africa' },
-      { code: 'SG', name: 'Singapore', continent: 'Asia' },
-      { code: 'JP', name: 'Japan', continent: 'Asia' },
-      { code: 'AU', name: 'Australia', continent: 'Oceania' },
-      { code: 'CA', name: 'Canada', continent: 'North America' },
-      { code: 'IN', name: 'India', continent: 'Asia' },
-      { code: 'CN', name: 'China', continent: 'Asia' }
-    ];
-
-    const filtered = query.length === 0
-      ? mockCountries.slice(0, 5) // Show top 5 popular countries when no query
-      : mockCountries.filter(country =>
-        country.name.toLowerCase().includes(query.toLowerCase()) ||
-        country.code.toLowerCase().includes(query.toLowerCase())
-      );
-
-    return filtered.map(country => referenceDataService.formatCountryOption(country));
+    const countries = await referenceDataService.getCachedCountries();
+    const filtered = query.length < 1
+      ? countries.slice(0, 8)
+      : referenceDataService.searchCountries(query, countries);
+    return filtered.map(c => referenceDataService.formatCountryOption(c));
   }, []);
 
   // Get autocomplete function based on type

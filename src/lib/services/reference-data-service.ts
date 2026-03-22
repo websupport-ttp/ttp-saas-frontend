@@ -51,34 +51,31 @@ export interface ApiResponse<T> {
 
 class ReferenceDataService {
   private baseUrl = '/reference';
+  private airportDbUrl = '/airportdb';
 
   /**
-   * Search airports by query
+   * Search airports/cities via AirportDB (primary) with fallback to Amadeus
    */
   async searchAirports(query: string, limit = 10): Promise<Airport[]> {
+    // Try AirportDB first (free, no credentials needed)
+    try {
+      const url = `${this.airportDbUrl}/search?q=${encodeURIComponent(query)}&limit=${limit}`;
+      const response = await apiClient.get<any>(url, { requiresAuth: false });
+      const raw = response.data;
+      const list: any[] = Array.isArray(raw) ? raw : (raw?.data ?? raw?.results ?? []);
+      if (list.length > 0) return list.map(normalizeAirportDbItem);
+    } catch { /* fall through */ }
+
+    // Fallback: Amadeus reference endpoint
     try {
       const url = `${this.baseUrl}/airports/search?q=${encodeURIComponent(query)}&limit=${limit}`;
-      const response = await apiClient.get<ApiResponse<Airport>>(url);
-      
-      // Check if response.data is the full API response or just the data array
-      let airports: Airport[] = [];
-      
-      if (Array.isArray(response.data)) {
-        // Axios already unwrapped to just the data array
-        airports = response.data;
-      } else if (response.data?.data && Array.isArray(response.data.data)) {
-        // Full API response structure
-        airports = response.data.data;
-      } else {
-        console.warn('Unexpected API response structure:', response.data);
-        airports = [];
-      }
-      
-      return airports;
-    } catch (error) {
-      console.error('Failed to search airports:', error);
-      return [];
-    }
+      const response = await apiClient.get<ApiResponse<Airport>>(url, { requiresAuth: false });
+      const raw = response.data;
+      if (Array.isArray(raw)) return raw;
+      if (raw?.data && Array.isArray(raw.data)) return raw.data;
+    } catch { /* ignore */ }
+
+    return [];
   }
 
   /**
@@ -86,12 +83,19 @@ class ReferenceDataService {
    */
   async getAirports(limit = 50): Promise<Airport[]> {
     try {
-      const url = `${this.baseUrl}/airports?limit=${limit}`;
-      const response = await apiClient.get<ApiResponse<Airport>>(url);
-      return response.data.data || [];
-    } catch (error) {
-      console.error('Failed to get airports:', error);
-      return [];
+      const url = `${this.airportDbUrl}/popular?limit=${limit}`;
+      const response = await apiClient.get<any>(url, { requiresAuth: false });
+      const raw = response.data;
+      const list: any[] = Array.isArray(raw) ? raw : (raw?.data ?? raw?.airports ?? []);
+      return list.map(normalizeAirportDbItem);
+    } catch {
+      try {
+        const url = `${this.baseUrl}/airports?limit=${limit}`;
+        const response = await apiClient.get<ApiResponse<Airport>>(url, { requiresAuth: false });
+        return response.data.data || [];
+      } catch {
+        return [];
+      }
     }
   }
 
@@ -111,17 +115,25 @@ class ReferenceDataService {
   }
 
   /**
-   * Get countries list
+   * Get countries list — uses AirportDB countries endpoint
    */
   async getCountries(): Promise<Country[]> {
     try {
-      const response = await apiClient.get<ApiResponse<Country>>(
-        `${this.baseUrl}/countries`
-      );
-      return response.data.data || [];
-    } catch (error) {
-      console.error('Failed to get countries:', error);
-      return [];
+      const response = await apiClient.get<any>(`${this.airportDbUrl}/countries`, { requiresAuth: false });
+      const raw = response.data;
+      const list: any[] = Array.isArray(raw) ? raw : (raw?.data ?? raw?.countries ?? []);
+      return list.map((c: any) => ({
+        code: c.code || c.iso_code || c.isoCode || '',
+        name: c.name || c.country_name || '',
+        continent: c.continent || c.region || '',
+      })).filter(c => c.code && c.name);
+    } catch {
+      try {
+        const response = await apiClient.get<ApiResponse<Country>>(`${this.baseUrl}/countries`, { requiresAuth: false });
+        return response.data.data || [];
+      } catch {
+        return [];
+      }
     }
   }
 
@@ -235,3 +247,27 @@ class ReferenceDataService {
 }
 
 export const referenceDataService = new ReferenceDataService();
+
+/**
+ * Normalize an AirportDB response item to the Airport interface shape
+ */
+function normalizeAirportDbItem(item: any): Airport {
+  return {
+    id: item.icao_code || item.iata_code || item.id || '',
+    type: 'location',
+    subType: item.type === 'large_airport' || item.type === 'medium_airport' || item.type === 'small_airport'
+      ? 'AIRPORT' : (item.type === 'city' ? 'CITY' : 'AIRPORT'),
+    name: item.name || item.airport_name || '',
+    iataCode: item.iata_code || item.iataCode || item.code || '',
+    address: {
+      cityName: item.municipality || item.city || item.cityName || '',
+      cityCode: item.iata_code || '',
+      countryName: item.country?.name || item.country_name || item.countryName || '',
+      countryCode: item.iso_country || item.country?.code || item.countryCode || '',
+    },
+    geoCode: item.latitude_deg != null ? {
+      latitude: parseFloat(item.latitude_deg),
+      longitude: parseFloat(item.longitude_deg),
+    } : undefined,
+  };
+}
