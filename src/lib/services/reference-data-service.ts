@@ -249,8 +249,11 @@ class ReferenceDataService {
 export const referenceDataService = new ReferenceDataService();
 
 // Pre-warm popular airports cache in the background on service load
+// Only runs in browser and only after a short delay to ensure API client is configured
 if (typeof window !== 'undefined') {
-  referenceDataService.getCachedAirports().catch(() => {/* silent */});
+  setTimeout(() => {
+    referenceDataService.getCachedAirports().catch(() => {/* silent */});
+  }, 3000);
 }
 
 /**
