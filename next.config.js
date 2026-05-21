@@ -146,8 +146,9 @@ const nextConfig = {
     // Remove React dev tools in production
     reactRemoveProperties: process.env.NODE_ENV === 'production',
   },
-  // Output configuration
-  output: 'standalone',
+  // Output configuration - remove 'standalone' for Vercel deployments
+  // standalone is only needed for self-hosted Node.js (Docker/Railway)
+  // output: 'standalone',
   // URL configuration
   trailingSlash: false,
   // Environment-specific optimizations
