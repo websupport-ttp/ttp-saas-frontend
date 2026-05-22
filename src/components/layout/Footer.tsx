@@ -351,7 +351,7 @@ export default function Footer({ className = '' }: FooterProps) {
                       className="group inline-flex items-center gap-1 text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium"
                     >
                       <span
-                        className="material-icons text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+                        className="material-icons text-sm -translate-x-1 group-hover:translate-x-1 transition-all duration-200"
                         style={{ color: '#e21e24' }}
                       >
                         chevron_right
