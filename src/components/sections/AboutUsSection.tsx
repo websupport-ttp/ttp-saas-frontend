@@ -119,7 +119,7 @@ export default function AboutUsSection() {
                 width: '36%',
                 height: '34%'
               }}>
-                <div className="border border-solid border-white border-[5px] bg-white rounded-2xl shadow-lg h-full overflow-hidden">
+                <div className="border-[5px] border-white bg-white rounded-2xl shadow-lg h-full overflow-hidden">
                   <div className="relative w-full h-[59.1%]">
                     <Image
                       src="/images/labuan-bajo.png"
@@ -149,7 +149,7 @@ export default function AboutUsSection() {
                 width: '19.6%',
                 height: '19.8%'
               }}>
-                <div className="border border-solid border-white border-2 bg-white rounded-lg shadow-lg h-full overflow-hidden">
+                <div className="border-2 border-white bg-white rounded-lg shadow-lg h-full overflow-hidden">
                   <div className="relative w-full h-[59.1%]">
                     <Image
                       src="/images/le-pirate-hotel.png"
