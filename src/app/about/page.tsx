@@ -21,6 +21,16 @@ function useInView(threshold = 0.15) {
   return { ref, inView }
 }
 
+// Hero stats animate on mount since they're above the fold
+function useOnMount(delay = 300) {
+  const [triggered, setTriggered] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setTriggered(true), delay)
+    return () => clearTimeout(t)
+  }, [delay])
+  return triggered
+}
+
 export default function AboutPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [settings, setSettings] = useState<SiteSettings | null>(null)
@@ -54,6 +64,7 @@ export default function AboutPage() {
   const foundedYear = settings?.foundedYear || 2016
 
   const { ref: heroRef, inView: heroInView } = useInView(0.1)
+  const heroMounted = useOnMount(200) // above-fold trigger
   const { ref: storyRef, inView: storyInView } = useInView(0.1)
   const { ref: missionRef, inView: missionInView } = useInView(0.1)
   const { ref: teamRef, inView: teamInView } = useInView(0.1)
@@ -123,8 +134,8 @@ export default function AboutPage() {
                 ref={heroRef}
                 className="lg:w-1/2"
                 style={{
-                  opacity: heroInView ? 1 : 0,
-                  transform: heroInView ? 'translateY(0)' : 'translateY(30px)',
+                  opacity: heroMounted ? 1 : 0,
+                  transform: heroMounted ? 'translateY(0)' : 'translateY(30px)',
                   transition: 'opacity 0.7s ease, transform 0.7s ease',
                 }}
               >
@@ -151,9 +162,9 @@ export default function AboutPage() {
                     key={stat.label}
                     className="bg-white rounded-2xl p-6 text-center shadow-lg"
                     style={{
-                      opacity: heroInView ? 1 : 0,
-                      transform: heroInView ? 'translateY(0)' : 'translateY(30px)',
-                      transition: `opacity 0.6s ease ${0.1 + i * 0.1}s, transform 0.6s ease ${0.1 + i * 0.1}s`,
+                      opacity: heroMounted ? 1 : 0,
+                      transform: heroMounted ? 'translateY(0)' : 'translateY(30px)',
+                      transition: `opacity 0.6s ease ${0.2 + i * 0.12}s, transform 0.6s ease ${0.2 + i * 0.12}s`,
                     }}
                   >
                     <div className="text-3xl lg:text-4xl font-extrabold mb-1" style={{ color: '#e21e24' }}>
