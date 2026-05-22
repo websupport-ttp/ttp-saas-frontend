@@ -48,10 +48,10 @@ export default function AboutPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                About The Travel Place
+                We exist to get you there
               </h1>
               <p className="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
-                Your trusted partner in creating unforgettable travel experiences since {foundedYear}
+                Since {foundedYear}, we've been turning travel dreams into real trips — one booking at a time.
               </p>
             </div>
           </div>
@@ -62,24 +62,22 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Our Story
+                How it all started
               </h2>
               <div className="space-y-4 text-gray-600">
                 <p>
-                  Founded in {foundedYear}, The Travel Place began as a small travel agency with a big dream: 
-                  to make world-class travel experiences accessible to everyone. What started as a 
-                  passion project has grown into one of Nigeria's most trusted travel companies.
+                  Back in {foundedYear}, we started with a simple frustration: booking travel was harder than it needed to be. 
+                  Too many tabs, too many fees, too little clarity. So we built something better.
                 </p>
                 <p>
-                  We believe that travel has the power to transform lives, broaden perspectives, 
-                  and create lasting memories. Our mission is to remove the barriers that prevent 
-                  people from exploring the world, whether it's complex booking processes, 
-                  language barriers, or simply not knowing where to start.
+                  We believe a great trip starts long before you board the plane. It starts the moment 
+                  you decide to go — and that moment should feel exciting, not stressful. Our job is 
+                  to handle the logistics so you can focus on the adventure.
                 </p>
                 <p>
-                  Today, we serve thousands of customers annually, helping them discover new 
-                  destinations, reconnect with family abroad, and pursue their business goals 
-                  around the globe.
+                  Today, tens of thousands of travellers trust us to get them where they're going — 
+                  whether that's a quick business trip, a family holiday, or the solo adventure 
+                  they've been putting off for years.
                 </p>
               </div>
             </div>
@@ -112,11 +110,11 @@ export default function AboutPage() {
           <div className="bg-white rounded-lg p-8 md:p-12 shadow-sm mb-20">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Our Mission
+                What drives us
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                To democratize travel by providing seamless, affordable, and personalized 
-                travel solutions that connect people to the world's most amazing destinations.
+                Travel should be for everyone — not just those who can navigate a maze of booking sites. 
+                We're here to make the whole experience feel effortless, from first search to safe return.
               </p>
             </div>
             
@@ -128,10 +126,10 @@ export default function AboutPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Speed & Efficiency
+                  Fast & frictionless
                 </h3>
                 <p className="text-gray-600">
-                  Quick bookings and instant confirmations to get you traveling faster
+                  Book in minutes, get confirmed instantly. No waiting, no back-and-forth.
                 </p>
               </div>
               
@@ -142,10 +140,10 @@ export default function AboutPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Customer First
+                  People over process
                 </h3>
                 <p className="text-gray-600">
-                  24/7 support and personalized service for every traveler
+                  Real humans on standby 24/7 — because sometimes you just need to talk to someone.
                 </p>
               </div>
               
@@ -156,10 +154,10 @@ export default function AboutPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Trust & Reliability
+                  No surprises
                 </h3>
                 <p className="text-gray-600">
-                  Secure bookings and guaranteed service you can depend on
+                  What you see is what you pay. Transparent pricing, secure bookings, zero hidden fees.
                 </p>
               </div>
             </div>
@@ -169,10 +167,10 @@ export default function AboutPage() {
           <div className="mb-20">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Meet Our Team
+                The people behind your trips
               </h2>
               <p className="text-xl text-gray-600">
-                The passionate people behind your travel experiences
+                A small, passionate team obsessed with making travel easier for everyone.
               </p>
             </div>
             
