@@ -348,8 +348,14 @@ export default function Footer({ className = '' }: FooterProps) {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium"
+                      className="group inline-flex items-center gap-1 text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium"
                     >
+                      <span
+                        className="material-icons text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+                        style={{ color: '#e21e24' }}
+                      >
+                        chevron_right
+                      </span>
                       {link.label}
                     </Link>
                   </li>
@@ -365,17 +371,22 @@ export default function Footer({ className = '' }: FooterProps) {
             {/* Social Links */}
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
               <span className="text-gray-400 text-sm font-medium">Follow us:</span>
-              <div className="flex space-x-4">
-                {socialLinks.map(({ icon: Icon, href, label, color }) => (
+              <div className="flex space-x-3">
+                {[
+                  { icon: 'facebook', label: 'Facebook', href: settings?.socialLinks?.facebook || 'https://facebook.com/thetravelplace' },
+                  { icon: 'instagram', label: 'Instagram', href: settings?.socialLinks?.instagram || 'https://instagram.com/thetravelplace' },
+                  { icon: 'twitter', label: 'Twitter', href: settings?.socialLinks?.twitter || 'https://twitter.com/thetravelplace' },
+                  { icon: 'linkedin', label: 'LinkedIn', href: settings?.socialLinks?.linkedin || 'https://linkedin.com/company/thetravelplace' },
+                ].map(({ icon, href, label }) => (
                   <Link
                     key={label}
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`p-3 rounded-full bg-gray-800 text-gray-400 transition-all duration-200 hover:bg-gray-700 hover:scale-110 ${color}`}
+                    className="w-10 h-10 rounded-full bg-gray-800 text-gray-400 hover:text-white hover:bg-brand-red flex items-center justify-center transition-all duration-200 hover:scale-110"
                     aria-label={`Follow us on ${label}`}
                   >
-                    <Icon className="w-5 h-5" />
+                    <span className="material-icons text-xl">{icon}</span>
                   </Link>
                 ))}
               </div>
