@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { Header } from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import Link from 'next/link'
@@ -17,6 +17,38 @@ function useInView(threshold = 0.15) {
     return () => obs.disconnect()
   }, [threshold])
   return { ref, inView }
+}
+
+// ── CountUp component ─────────────────────────────────────────────────────────
+// Parses "50K+", "4.9★", "150+" etc. and counts up the numeric part
+function CountUp({ value, trigger }: { value: string; trigger: boolean }) {
+  const [display, setDisplay] = useState('0')
+
+  useEffect(() => {
+    if (!trigger) return
+    // Extract numeric part and suffix
+    const match = value.match(/^([\d.]+)(.*)$/)
+    if (!match) { setDisplay(value); return }
+    const target = parseFloat(match[1])
+    const suffix = match[2]
+    const isDecimal = match[1].includes('.')
+    const duration = 1200
+    const steps = 40
+    const interval = duration / steps
+    let step = 0
+    const timer = setInterval(() => {
+      step++
+      const progress = step / steps
+      // Ease out
+      const eased = 1 - Math.pow(1 - progress, 3)
+      const current = target * eased
+      setDisplay((isDecimal ? current.toFixed(1) : Math.floor(current).toString()) + suffix)
+      if (step >= steps) { setDisplay(value); clearInterval(timer) }
+    }, interval)
+    return () => clearInterval(timer)
+  }, [trigger, value])
+
+  return <>{display}</>
 }
 
 // ── Parallax hook ─────────────────────────────────────────────────────────────
@@ -282,7 +314,9 @@ export default function ServicesPage() {
                   { value: '4.9★', label: 'Average rating' },
                 ].map((s) => (
                   <div key={s.label}>
-                    <div className="text-3xl font-extrabold text-white">{s.value}</div>
+                    <div className="text-3xl font-extrabold text-white">
+                      <CountUp value={s.value} trigger={heroInView} />
+                    </div>
                     <div className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.label}</div>
                   </div>
                 ))}
