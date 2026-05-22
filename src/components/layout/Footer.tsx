@@ -384,7 +384,7 @@ export default function Footer({ className = '' }: FooterProps) {
             {/* Copyright and Legal */}
             <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-8 text-gray-400 text-sm text-center lg:text-left">
               <div>
-                © {new Date().getFullYear()} {settings?.companyName || 'The Travel Place'} Limited. All rights reserved.
+                Made with <span className="text-brand-red">♥</span> for travellers everywhere &nbsp;·&nbsp; © {new Date().getFullYear()} {settings?.companyName || 'The Travel Place'}. Happy travels!
               </div>
               <div className="flex items-center space-x-4">
                 <Link href="/privacy" className="hover:text-white transition-colors duration-200">
