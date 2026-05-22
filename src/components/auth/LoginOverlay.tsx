@@ -43,6 +43,8 @@ export default function LoginOverlay({
   
   // Login state
   const [emailOrPhone, setEmailOrPhone] = useState('')
+  const [loginDialCode, setLoginDialCode] = useState('+234')
+  const [loginCountryCode, setLoginCountryCode] = useState('NG')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
@@ -119,15 +121,16 @@ export default function LoginOverlay({
     setShowVerificationPrompt(false)
     setIsLoading(true)
 
+    const formattedIdentifier = formatLoginIdentifier(emailOrPhone, loginDialCode)
+
     try {
       await authService.login({
-        emailOrPhone,
+        emailOrPhone: formattedIdentifier,
         password,
       })
 
-      // Call the onLogin callback if provided
       if (onLogin) {
-        await onLogin(emailOrPhone, password)
+        await onLogin(formattedIdentifier, password)
       }
       
       // Show success message
@@ -205,6 +208,18 @@ export default function LoginOverlay({
   const buildFullPhone = (dialCode: string, phoneNumber: string) => {
     const stripped = phoneNumber.replace(/^\+/, '').replace(/^0+/, '')
     return `${dialCode}${stripped}`
+  }
+
+  // Detect if input looks like a phone number (digits only, or starts with +)
+  // and format it with the dial code if needed
+  const formatLoginIdentifier = (value: string, dialCode: string): string => {
+    const trimmed = value.trim()
+    // If it contains @ it's an email — send as-is
+    if (trimmed.includes('@')) return trimmed
+    // If it already starts with + it's a full international number — send as-is
+    if (trimmed.startsWith('+')) return trimmed
+    // Otherwise treat as local phone number — prepend dial code, strip leading zero
+    return buildFullPhone(dialCode, trimmed)
   }
 
   const handleSignupNext = async (e: React.FormEvent) => {
@@ -631,15 +646,34 @@ export default function LoginOverlay({
                       <label htmlFor="emailOrPhone" className="block text-sm font-medium text-gray-700 mb-2">
                         Email or Phone Number
                       </label>
-                      <input
-                        id="emailOrPhone"
-                        type="text"
-                        value={emailOrPhone}
-                        onChange={(e) => setEmailOrPhone(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                        placeholder="email@example.com or +234..."
-                        required
-                      />
+                      <div className="flex gap-2">
+                        {/* Show dial code selector only when input looks like a phone number */}
+                        {!emailOrPhone.includes('@') && (
+                          <div className="flex-shrink-0">
+                            <CountryCodeSelector
+                              selectedCountry={loginCountryCode}
+                              onCountryChange={(countryCode, dialCode) => {
+                                setLoginCountryCode(countryCode)
+                                setLoginDialCode(dialCode)
+                              }}
+                            />
+                          </div>
+                        )}
+                        <input
+                          id="emailOrPhone"
+                          type="text"
+                          value={emailOrPhone}
+                          onChange={(e) => setEmailOrPhone(e.target.value)}
+                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                          placeholder={emailOrPhone.includes('@') ? 'email@example.com' : '803 000 0000'}
+                          required
+                        />
+                      </div>
+                      {!emailOrPhone.includes('@') && emailOrPhone.length > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Will be sent as {formatLoginIdentifier(emailOrPhone, loginDialCode)}
+                        </p>
+                      )}
                     </div>
 
                     <button
