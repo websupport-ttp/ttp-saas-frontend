@@ -201,6 +201,12 @@ export default function LoginOverlay({
     setSignupData(prev => ({ ...prev, countryCode, dialCode }))
   }
 
+  // Combine dial code + phone number, stripping leading zero to avoid e.g. +23408...
+  const buildFullPhone = (dialCode: string, phoneNumber: string) => {
+    const stripped = phoneNumber.replace(/^\+/, '').replace(/^0+/, '')
+    return `${dialCode}${stripped}`
+  }
+
   const handleSignupNext = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -226,7 +232,7 @@ export default function LoginOverlay({
       // Send verification codes
       setIsLoading(true)
       try {
-        const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+        const fullPhoneNumber = buildFullPhone(signupData.dialCode, signupData.phoneNumber)
         await authService.sendVerificationCodes(signupData.email, fullPhoneNumber)
         setSuccess('Verification code sent to your email!')
         setSignupStep(3)
@@ -251,7 +257,7 @@ export default function LoginOverlay({
       
       setIsLoading(true)
       try {
-        const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+        const fullPhoneNumber = buildFullPhone(signupData.dialCode, signupData.phoneNumber)
         const result = await authService.verifyRegistrationCodes(
           signupData.email,
           fullPhoneNumber,
@@ -293,7 +299,7 @@ export default function LoginOverlay({
       
       setIsLoading(true)
       try {
-        const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+        const fullPhoneNumber = buildFullPhone(signupData.dialCode, signupData.phoneNumber)
         const result = await authService.verifyRegistrationCodes(
           signupData.email,
           fullPhoneNumber,
@@ -335,7 +341,7 @@ export default function LoginOverlay({
     setIsLoading(true)
     try {
       // Format phone number with dial code
-      const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+      const fullPhoneNumber = buildFullPhone(signupData.dialCode, signupData.phoneNumber)
       
       await authService.register({
         firstName: signupData.firstName,
@@ -371,7 +377,7 @@ export default function LoginOverlay({
     setError('')
     setIsLoading(true)
     try {
-      const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+      const fullPhoneNumber = buildFullPhone(signupData.dialCode, signupData.phoneNumber)
       await authService.resendEmailOtp(signupData.email, fullPhoneNumber)
       setSuccess('Email code resent successfully!')
       setResendEmailTimer(60)
@@ -389,7 +395,7 @@ export default function LoginOverlay({
     setError('')
     setIsLoading(true)
     try {
-      const fullPhoneNumber = `${signupData.dialCode}${signupData.phoneNumber}`
+      const fullPhoneNumber = buildFullPhone(signupData.dialCode, signupData.phoneNumber)
       await authService.resendPhoneOtp(signupData.email, fullPhoneNumber, phoneVerificationMethod)
       setSuccess(`Phone code resent via ${phoneVerificationMethod}!`)
       setResendPhoneTimer(60)
