@@ -101,8 +101,8 @@ const reasons = [
   { icon: 'bolt', title: 'Instant Confirmation', text: 'Book in minutes and get your confirmation straight to your inbox.' },
 ]
 
-// ── Service Card ──────────────────────────────────────────────────────────────
-function ServiceCard({ service, index }: { service: typeof services[0]; index: number }) {
+// ── Service Row (horizontal feature list item) ────────────────────────────────
+function ServiceRow({ service, index }: { service: typeof services[0]; index: number }) {
   const { ref, inView } = useInView()
   const [hovered, setHovered] = useState(false)
 
@@ -111,78 +111,94 @@ function ServiceCard({ service, index }: { service: typeof services[0]; index: n
       ref={ref}
       style={{
         opacity: inView ? 1 : 0,
-        transform: inView ? 'translateY(0)' : 'translateY(40px)',
-        transition: `opacity 0.6s ease ${index * 0.08}s, transform 0.6s ease ${index * 0.08}s`,
+        transform: inView ? 'translateX(0)' : 'translateX(-30px)',
+        transition: `opacity 0.55s ease ${index * 0.07}s, transform 0.55s ease ${index * 0.07}s`,
       }}
     >
       <Link
         href={service.href}
-        className="group block h-full"
+        className="group block"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         <div
-          className="relative h-full bg-white rounded-2xl border border-gray-100 overflow-hidden"
+          className="relative flex items-start gap-5 bg-white rounded-2xl p-5 border border-gray-100 overflow-hidden"
           style={{
-            boxShadow: hovered ? '0 20px 50px -10px rgba(0,0,0,0.12)' : '0 2px 16px -4px rgba(0,0,0,0.06)',
-            transform: hovered ? 'translateY(-5px)' : 'translateY(0)',
-            transition: 'box-shadow 0.3s ease, transform 0.3s ease',
+            boxShadow: hovered ? '0 8px 30px -6px rgba(0,0,0,0.10)' : '0 2px 10px -4px rgba(0,0,0,0.05)',
+            transition: 'box-shadow 0.3s ease',
           }}
         >
-          {/* Top accent bar */}
-          <div className="h-1 w-full" style={{ backgroundColor: service.accent }} />
+          {/* Sliding left border */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
+            style={{
+              backgroundColor: service.accent,
+              transform: hovered ? 'scaleY(1)' : 'scaleY(0)',
+              transformOrigin: 'top',
+              transition: 'transform 0.3s ease',
+            }}
+          />
 
-          <div className="p-7">
-            {/* Icon */}
-            <div
-              className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
-              style={{
-                backgroundColor: service.lightBg,
-                transform: hovered ? 'scale(1.08) rotate(-4deg)' : 'scale(1) rotate(0deg)',
-                transition: 'transform 0.3s ease',
-              }}
-            >
-              <span className="material-icons text-3xl" style={{ color: service.accent }}>
-                {service.icon}
+          {/* Icon */}
+          <div
+            className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center"
+            style={{
+              backgroundColor: service.lightBg,
+              transform: hovered ? 'scale(1.06)' : 'scale(1)',
+              transition: 'transform 0.3s ease',
+            }}
+          >
+            <span className="material-icons text-3xl" style={{ color: service.accent }}>
+              {service.icon}
+            </span>
+          </div>
+
+          {/* Text */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-1">
+              <h3
+                className="text-base font-bold"
+                style={{ color: hovered ? service.accent : '#111827', transition: 'color 0.2s ease' }}
+              >
+                {service.title}
+              </h3>
+              <span
+                className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: service.lightBg, color: service.accent }}
+              >
+                {service.stat}
               </span>
             </div>
-
-            {/* Stat pill */}
-            <div
-              className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-4"
-              style={{ backgroundColor: service.lightBg, color: service.accent }}
-            >
-              {service.stat}
-            </div>
-
-            <h3
-              className="text-xl font-bold text-gray-900 mb-3 transition-colors duration-200"
-              style={{ color: hovered ? service.accent : undefined }}
-            >
-              {service.title}
-            </h3>
-            <p className="text-gray-500 text-sm leading-relaxed mb-5">
+            <p className="text-gray-500 text-sm leading-relaxed">
               {service.description}
             </p>
+          </div>
 
-            <div className="flex items-center font-semibold text-sm" style={{ color: service.accent }}>
-              <span>Explore</span>
-              <span
-                className="material-icons text-base ml-1"
-                style={{
-                  transform: hovered ? 'translateX(5px)' : 'translateX(0)',
-                  transition: 'transform 0.25s ease',
-                }}
-              >
-                arrow_forward
-              </span>
-            </div>
+          {/* Arrow */}
+          <div
+            className="flex-shrink-0 self-center"
+            style={{
+              transform: hovered ? 'translateX(4px)' : 'translateX(0)',
+              transition: 'transform 0.25s ease',
+            }}
+          >
+            <span className="material-icons text-xl" style={{ color: service.accent }}>arrow_forward</span>
           </div>
         </div>
       </Link>
     </div>
   )
 }
+
+// ── Hero icon grid (right side) ───────────────────────────────────────────────
+const heroGridIcons = [
+  { icon: 'flight', accent: '#e21e24', lightBg: 'rgba(226,30,36,0.15)' },
+  { icon: 'hotel', accent: '#0ea5e9', lightBg: 'rgba(14,165,233,0.15)' },
+  { icon: 'directions_car', accent: '#f59e0b', lightBg: 'rgba(245,158,11,0.15)' },
+  { icon: 'health_and_safety', accent: '#10b981', lightBg: 'rgba(16,185,129,0.15)' },
+  { icon: 'badge', accent: '#8b5cf6', lightBg: 'rgba(139,92,246,0.15)' },
+  { icon: 'card_travel', accent: '#e21e24', lightBg: 'rgba(226,30,36,0.15)' },
+]
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function ServicesPage() {
@@ -208,66 +224,90 @@ export default function ServicesPage() {
         }} />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-          <div ref={heroRef} className="max-w-3xl">
-            {/* Eyebrow */}
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 mb-6 border"
-              style={{
-                backgroundColor: 'rgba(226,30,36,0.1)',
-                borderColor: 'rgba(226,30,36,0.3)',
-                opacity: heroInView ? 1 : 0,
-                transform: heroInView ? 'translateY(0)' : 'translateY(20px)',
-                transition: 'opacity 0.6s ease, transform 0.6s ease',
-              }}
-            >
-              <span className="material-icons text-sm" style={{ color: '#e21e24' }}>explore</span>
-              <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>Everything you need to travel well</span>
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+
+            {/* Left: text content */}
+            <div ref={heroRef} className="lg:w-1/2">
+              {/* Eyebrow */}
+              <div
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 mb-6 border"
+                style={{
+                  backgroundColor: 'rgba(226,30,36,0.1)',
+                  borderColor: 'rgba(226,30,36,0.3)',
+                  opacity: heroInView ? 1 : 0,
+                  transform: heroInView ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'opacity 0.6s ease, transform 0.6s ease',
+                }}
+              >
+                <span className="material-icons text-sm" style={{ color: '#e21e24' }}>explore</span>
+                <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>Everything you need to travel well</span>
+              </div>
+
+              <h1
+                className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight"
+                style={{
+                  opacity: heroInView ? 1 : 0,
+                  transform: heroInView ? 'translateY(0)' : 'translateY(30px)',
+                  transition: 'opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s',
+                }}
+              >
+                Travel smarter,<br />
+                <span style={{ color: '#e21e24' }}>not harder</span>
+              </h1>
+
+              <p
+                className="text-lg lg:text-xl mb-10 leading-relaxed"
+                style={{
+                  color: 'rgba(255,255,255,0.7)',
+                  opacity: heroInView ? 1 : 0,
+                  transform: heroInView ? 'translateY(0)' : 'translateY(30px)',
+                  transition: 'opacity 0.7s ease 0.2s, transform 0.7s ease 0.2s',
+                }}
+              >
+                From your first search to your safe return home — we handle every detail so you can focus on the adventure.
+              </p>
+
+              {/* Stats */}
+              <div
+                className="flex flex-wrap gap-8"
+                style={{
+                  opacity: heroInView ? 1 : 0,
+                  transform: heroInView ? 'translateY(0)' : 'translateY(30px)',
+                  transition: 'opacity 0.7s ease 0.35s, transform 0.7s ease 0.35s',
+                }}
+              >
+                {[
+                  { value: '50K+', label: 'Happy travellers' },
+                  { value: '150+', label: 'Destinations' },
+                  { value: '4.9★', label: 'Average rating' },
+                ].map((s) => (
+                  <div key={s.label}>
+                    <div className="text-3xl font-extrabold text-white">{s.value}</div>
+                    <div className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight"
-              style={{
-                opacity: heroInView ? 1 : 0,
-                transform: heroInView ? 'translateY(0)' : 'translateY(30px)',
-                transition: 'opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s',
-              }}
-            >
-              Travel smarter,<br />
-              <span style={{ color: '#e21e24' }}>not harder</span>
-            </h1>
-
-            <p
-              className="text-lg lg:text-xl mb-10 leading-relaxed"
-              style={{
-                color: 'rgba(255,255,255,0.7)',
-                opacity: heroInView ? 1 : 0,
-                transform: heroInView ? 'translateY(0)' : 'translateY(30px)',
-                transition: 'opacity 0.7s ease 0.2s, transform 0.7s ease 0.2s',
-              }}
-            >
-              From your first search to your safe return home — we handle every detail so you can focus on the adventure.
-            </p>
-
-            {/* Stats */}
-            <div
-              className="flex flex-wrap gap-8"
-              style={{
-                opacity: heroInView ? 1 : 0,
-                transform: heroInView ? 'translateY(0)' : 'translateY(30px)',
-                transition: 'opacity 0.7s ease 0.35s, transform 0.7s ease 0.35s',
-              }}
-            >
-              {[
-                { value: '50K+', label: 'Happy travellers' },
-                { value: '150+', label: 'Destinations' },
-                { value: '4.9★', label: 'Average rating' },
-              ].map((s) => (
-                <div key={s.label}>
-                  <div className="text-3xl font-extrabold text-white">{s.value}</div>
-                  <div className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.label}</div>
-                </div>
-              ))}
+            {/* Right: decorative 2×3 icon grid — lg+ only */}
+            <div className="lg:w-1/2 hidden lg:flex items-center justify-center">
+              <div className="grid grid-cols-3 gap-5">
+                {heroGridIcons.map((item, i) => (
+                  <div
+                    key={item.icon + i}
+                    className="w-24 h-24 rounded-3xl flex items-center justify-center"
+                    style={{
+                      backgroundColor: item.lightBg,
+                      animation: `float ${2.4 + i * 0.4}s ease-in-out infinite alternate`,
+                      animationDelay: `${i * 0.18}s`,
+                    }}
+                  >
+                    <span className="material-icons text-4xl" style={{ color: item.accent }}>{item.icon}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+
           </div>
         </div>
 
@@ -281,16 +321,16 @@ export default function ServicesPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* ── Services Grid ── */}
+        {/* ── Services horizontal list ── */}
         <section className="py-20">
           <SectionHeader
             eyebrow="What we offer"
             title="Six ways we make travel easy"
             subtitle="Pick what you need — or let us bundle it all together."
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12">
             {services.map((service, i) => (
-              <ServiceCard key={service.href} service={service} index={i} />
+              <ServiceRow key={service.href} service={service} index={i} />
             ))}
           </div>
         </section>
