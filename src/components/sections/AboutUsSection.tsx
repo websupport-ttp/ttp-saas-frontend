@@ -5,32 +5,32 @@ import Image from 'next/image'
 const services = [
   {
     id: 1,
-    title: 'Flight Ticket',
-    description: 'Enjoy Competitive Prices, Flexible Options, and Hassle-Free Booking Tailored to Your Travel Needs',
+    title: 'Flights at the best price',
+    description: 'Search hundreds of airlines in seconds. Flexible dates, multiple cabins, and no hidden fees — just the fare you see.',
     icon: '/images/service-flight-icon.svg'
   },
   {
     id: 2,
-    title: 'Exceptional Hotel Services',
-    description: 'From Luxurious Rooms and Fine Dining to 24/7 Concierge, and Thoughtful Amenities Designed for Your Comfort.',
+    title: 'Hotels you\'ll actually love',
+    description: 'From budget-friendly stays to luxury escapes — real photos, honest reviews, and instant confirmation.',
     icon: '/images/service-hotel-icon.svg'
   },
   {
     id: 3,
-    title: 'Packaged Tour',
-    description: 'Carefully Curated Itineraries, Comfortable Accommodations, and Unforgettable Experiences All in One Convenient Bundle',
+    title: 'Packages that do the thinking',
+    description: 'Curated bundles that combine flights, hotels, and experiences. One price, zero planning headaches.',
     icon: '/images/service-tour-icon.svg'
   },
   {
     id: 4,
-    title: 'Car Hire Services',
-    description: 'Affordable Rates, Flexible Options, and a Wide Range of Vehicles to Suit Every Journey.',
+    title: 'Cars ready when you land',
+    description: 'Pick up at the airport or in town. Wide range of vehicles, transparent pricing, flexible drop-off.',
     icon: '/images/service-car-icon.svg'
   },
   {
     id: 5,
-    title: 'Visa Application',
-    description: 'Reliable Visa Application Assistance Ensuring You Meet Every Requirement for a Successful and Stress-Free Journey.',
+    title: 'Visa help, simplified',
+    description: 'We walk you through every requirement, document, and deadline — so your application goes in right the first time.',
     icon: '/images/service-visa-icon.svg'
   }
 ]
@@ -178,12 +178,12 @@ export default function AboutUsSection() {
           <div className="w-full lg:w-1/2 max-w-full lg:max-w-2xl">
             {/* Header */}
             <div className="mb-6">
-              <p className="text-yellow-600 text-xl font-normal mb-2">Services</p>
+              <p className="text-yellow-600 text-xl font-normal mb-2">Why us</p>
               <h2 className="text-gray-900 text-3xl lg:text-4xl font-bold mb-4 leading-tight">
-                Why Choose Us
+                Everything you need,<br />nothing you don't
               </h2>
               <p className="text-gray-600 text-base leading-relaxed">
-                Enjoy different experiences in every place you visit and discover new and affordable adventures of course.
+                We built The Travel Place because booking travel should feel exciting — not like a second job. Here's what sets us apart.
               </p>
             </div>
 

@@ -1,18 +1,18 @@
 const processSteps = [
   {
     number: '01',
-    title: 'Travel requirement for your trips',
-    description: 'Ensure a hassle-free journey by staying informed on all essential travel requirements from visa applications and health certifications to local regulations and travel insurance ,everything you need to make your trip smooth, safe, and fully prepared',
+    title: 'Know before you go',
+    description: 'We surface everything you need upfront — visa rules, health requirements, entry restrictions, and travel advisories — so there are no nasty surprises at the airport.',
   },
   {
     number: '02',
-    title: 'Multi-risk travel insurance',
-    description: 'Comprehensive Protection for Every Journey — Safeguard Yourself Against Unexpected Events Like Trip Cancellations, Medical Emergencies, Lost Luggage, and More',
+    title: 'Travel covered, not just booked',
+    description: 'Our insurance plans protect you against trip cancellations, medical emergencies, lost luggage, and delays. One click and you\'re covered — no fine print maze.',
   },
   {
     number: '03',
-    title: 'Travel requirements by desinations',
-    description: 'Find Destination-Specific Travel Requirements — From Visa and Entry Rules to Health Guidelines and Local Regulations, Tailored for Every Country You Plan to Visit',
+    title: 'Requirements by destination',
+    description: 'Every country is different. We give you a clear, up-to-date checklist for wherever you\'re headed — so you arrive prepared, not panicked.',
   },
 ]
 
@@ -23,10 +23,10 @@ export default function ProcessSection() {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="font-poppins font-bold text-4xl lg:text-5xl text-white mb-4">
-            Plan your travel with confidence
+            Plan your trip with confidence
           </h2>
           <p className="text-base text-white max-w-3xl mx-auto">
-            Get assistance with your bookings and travel plans, and explore what to expect every step of your journey.
+            We give you the information and tools to travel prepared — not just booked.
           </p>
         </div>
 

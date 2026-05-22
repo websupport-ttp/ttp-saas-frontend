@@ -28,24 +28,24 @@ const ArrowRight = ({ className }: { className?: string }) => (
 const defaultSlides = [
   {
     _id: '1',
-    title: "Discover Amazing Destinations",
-    subtitle: "Explore the world's most beautiful places",
+    title: "Your next trip starts right here",
+    subtitle: "Flights, hotels, insurance, visas — all in one place, all at the best price",
     image: { url: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" },
     order: 0,
     isActive: true,
   },
   {
     _id: '2',
-    title: "Adventure Awaits You",
-    subtitle: "Create memories that last a lifetime",
+    title: "The world is closer than you think",
+    subtitle: "Let us handle the details while you focus on the adventure",
     image: { url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" },
     order: 1,
     isActive: true,
   },
   {
     _id: '3',
-    title: "Your Journey Starts Here",
-    subtitle: "Plan your perfect getaway with us",
+    title: "Travel made effortless",
+    subtitle: "From first search to safe return — we've got every step covered",
     image: { url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" },
     order: 2,
     isActive: true,
@@ -158,7 +158,7 @@ export default function HeroSection() {
                 Travel Made Effortless, From Start to Finish
               </h1>
               <p className="text-sm sm:text-base md:text-lg text-white/90 leading-relaxed mb-4 sm:mb-6 max-w-2xl">
-                From International and local flight booking to visa applications, hotel bookings, travel insurance, and local car rentals — The Travel Place brings everything you need to plan your trip together in one seamless, easy-to-use platform
+                Flights, hotels, car rentals, visa help, and travel insurance — everything you need to plan a great trip, all in one place. No stress, no surprises.
               </p>
             </div>
 
