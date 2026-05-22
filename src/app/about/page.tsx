@@ -37,6 +37,32 @@ function useOnMount(delay = 200) {
   return triggered
 }
 
+// ── CountUp component ─────────────────────────────────────────────────────────
+function CountUp({ value, trigger }: { value: string; trigger: boolean }) {
+  const [display, setDisplay] = useState('0')
+  useEffect(() => {
+    if (!trigger) return
+    const match = value.match(/^([\d.]+)(.*)$/)
+    if (!match) { setDisplay(value); return }
+    const target = parseFloat(match[1])
+    const suffix = match[2]
+    const isDecimal = match[1].includes('.')
+    const duration = 1200
+    const steps = 40
+    const interval = duration / steps
+    let step = 0
+    const timer = setInterval(() => {
+      step++
+      const eased = 1 - Math.pow(1 - step / steps, 3)
+      const current = target * eased
+      setDisplay((isDecimal ? current.toFixed(1) : Math.floor(current).toString()) + suffix)
+      if (step >= steps) { setDisplay(value); clearInterval(timer) }
+    }, interval)
+    return () => clearInterval(timer)
+  }, [trigger, value])
+  return <>{display}</>
+}
+
 export default function AboutPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [settings, setSettings] = useState<SiteSettings | null>(null)
@@ -174,7 +200,7 @@ export default function AboutPage() {
                     }}
                   >
                     <div className="text-3xl lg:text-4xl font-extrabold mb-1" style={{ color: '#e21e24' }}>
-                      {stat.value}
+                      <CountUp value={stat.value} trigger={heroMounted} />
                     </div>
                     <div className="text-sm font-medium text-gray-600">{stat.label}</div>
                   </div>
