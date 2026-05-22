@@ -21,12 +21,18 @@ function useInView(threshold = 0.15) {
   return { ref, inView }
 }
 
-// Hero stats animate on mount since they're above the fold
-function useOnMount(delay = 300) {
+// Hero stats animate on mount since they're above the fold.
+// We use a two-step approach: start invisible, then add a class after mount.
+function useOnMount(delay = 200) {
   const [triggered, setTriggered] = useState(false)
   useEffect(() => {
-    const t = setTimeout(() => setTriggered(true), delay)
-    return () => clearTimeout(t)
+    // requestAnimationFrame ensures the browser has painted the initial state
+    // before we trigger the transition, so the animation is always visible.
+    const raf = requestAnimationFrame(() => {
+      const t = setTimeout(() => setTriggered(true), delay)
+      return () => clearTimeout(t)
+    })
+    return () => cancelAnimationFrame(raf)
   }, [delay])
   return triggered
 }
