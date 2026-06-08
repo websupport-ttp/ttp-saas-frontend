@@ -11,6 +11,7 @@ import CurrencyManagement from './CurrencyManagement';
 import TransactionDashboard from './TransactionDashboard';
 import PricingManagement from './PricingManagement';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import VisaManagement from './VisaManagement';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface AdminDashboardProps {
@@ -19,7 +20,7 @@ interface AdminDashboardProps {
 
 export default function AdminDashboard({ user }: AdminDashboardProps) {
   const { formatAmount } = useCurrency();
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'inventory' | 'bookings' | 'transactions' | 'currencies' | 'pricing' | 'analytics' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'inventory' | 'bookings' | 'transactions' | 'currencies' | 'pricing' | 'analytics' | 'visa' | 'settings'>('overview');
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalBookings: 0,
@@ -74,6 +75,8 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
         return <PricingManagement />;
       case 'analytics':
         return <AnalyticsDashboard />;
+      case 'visa':
+        return <VisaManagement />;
       case 'settings':
         return <SystemSettings />;
       default:
@@ -312,6 +315,17 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
             }`}
           >
             Analytics
+          </button>
+
+          <button
+            onClick={() => setActiveTab('visa')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'visa'
+                ? 'border-brand-red text-brand-red'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Visa Assistance
           </button>
 
           <button

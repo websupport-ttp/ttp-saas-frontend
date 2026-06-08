@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ServiceLayout } from '@/components/layout'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import ErrorMessage from '@/components/ui/ErrorMessage'
+import { StyledDatePicker } from '@/components/ui/StyledDatePicker'
 import { appConfig } from '@/lib/config'
 
 interface VisaPrice {
@@ -26,6 +27,8 @@ interface VisaPriceEntry {
 }
 
 interface FormState {
+  destinationCountry: string
+  visaType: string
   fullName: string
   email: string
   phone: string
@@ -36,25 +39,24 @@ interface FormState {
   travelPurpose: string
   travelDateFrom: string
   travelDateTo: string
+  urgency: string
 }
 
-const INITIAL_FORM: FormState = {
-  fullName: '',
-  email: '',
-  phone: '',
-  nationality: '',
-  dateOfBirth: '',
-  passportNumber: '',
-  passportExpiry: '',
-  travelPurpose: 'Tourism',
-  travelDateFrom: '',
-  travelDateTo: '',
-}
+const VISA_TYPES = ['Tourist', 'Business', 'Student', 'Transit', 'Work']
+const TRAVEL_PURPOSES = ['Tourism', 'Business', 'Education', 'Medical', 'Family Visit', 'Transit', 'Other']
+const URGENCY_OPTIONS = ['Standard', 'Express', 'Super Express']
 
 const inputClass =
-  'w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none bg-white text-sm transition-colors duration-200'
+  'w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none bg-white text-sm transition-colors duration-200 focus:border-red-500'
 
 const labelClass = 'block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2'
+
+const breadcrumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Services', href: '/services' },
+  { name: 'Visa Assistance', href: '/visa-assistance' },
+  { name: 'Apply', href: '/visa-assistance/apply' },
+]
 
 export default function VisaAssistanceApplyPage() {
   const router = useRouter()
@@ -62,76 +64,94 @@ export default function VisaAssistanceApplyPage() {
   const [isHydrated, setIsHydrated] = useState(false)
 
   // From URL params (set by ServiceTabs search form)
-  const countryParam = searchParams.get('country') || ''
-  const visaTypeParam = searchParams.get('visaType') || ''
+  const countryParam    = searchParams.get('country')     || ''
+  const visaTypeParam   = searchParams.get('visaType')    || ''
   const nationalityParam = searchParams.get('nationality') || ''
+  const urgencyParam    = searchParams.get('urgency')     || 'Standard'
 
-  const [pricing, setPricing] = useState<VisaPrice | null>(null)
-  const [priceEntry, setPriceEntry] = useState<VisaPriceEntry | null>(null)
-  const [isOthers, setIsOthers] = useState(false)
+  const [pricing, setPricing]         = useState<VisaPrice | null>(null)
+  const [isOthers, setIsOthers]       = useState(false)
   const [pricingLoading, setPricingLoading] = useState(false)
 
   const [form, setForm] = useState<FormState>({
-    ...INITIAL_FORM,
+    destinationCountry: countryParam,
+    visaType: visaTypeParam || 'Tourist',
+    fullName: '',
+    email: '',
+    phone: '',
     nationality: nationalityParam,
+    dateOfBirth: '',
+    passportNumber: '',
+    passportExpiry: '',
+    travelPurpose: 'Tourism',
+    travelDateFrom: '',
+    travelDateTo: '',
+    urgency: urgencyParam,
   })
-  const [errors, setErrors] = useState<Partial<FormState>>({})
+
+  const [errors, setErrors]         = useState<Partial<Record<keyof FormState, string>>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
-  const [submitted, setSubmitted] = useState(false)
+  const [submitError, setSubmitError]   = useState<string | null>(null)
+  const [submitted, setSubmitted]       = useState(false)
   const [applicationRef, setApplicationRef] = useState<string | null>(null)
+  const [submittedFee, setSubmittedFee]     = useState<number>(0)
+  const [submittedManual, setSubmittedManual] = useState(false)
 
-  const breadcrumbs = [
-    { name: 'Home', href: '/' },
-    { name: 'Services', href: '/services' },
-    { name: 'Visa Assistance', href: '/visa-applications' },
-    { name: 'Apply', href: '/visa-assistance/apply' },
-  ]
+  useEffect(() => { setIsHydrated(true) }, [])
 
+  // Keep form in sync if URL params arrive after hydration
   useEffect(() => {
-    setIsHydrated(true)
-  }, [])
+    setForm(prev => ({
+      ...prev,
+      destinationCountry: countryParam  || prev.destinationCountry,
+      visaType:           visaTypeParam  || prev.visaType,
+      nationality:        nationalityParam || prev.nationality,
+      urgency:            urgencyParam    || prev.urgency,
+    }))
+  }, [countryParam, visaTypeParam, nationalityParam, urgencyParam])
 
-  // Fetch pricing when country + visa type are available
+  // Fetch pricing whenever destination + type change
   useEffect(() => {
-    if (!countryParam || !visaTypeParam) return
-    fetchPricing()
-  }, [countryParam, visaTypeParam])
+    if (!form.destinationCountry || !form.visaType) return
+    fetchPricing(form.destinationCountry, form.visaType)
+  }, [form.destinationCountry, form.visaType])
 
-  const fetchPricing = async () => {
+  const fetchPricing = async (country: string, visaType: string) => {
     setPricingLoading(true)
     try {
-      const res = await fetch(
-        `${appConfig.apiBaseUrl}/visa-assistance/prices/${encodeURIComponent(countryParam)}/${encodeURIComponent(visaTypeParam)}`
+      const res  = await fetch(
+        `${appConfig.apiBaseUrl}/visa-assistance/prices/${encodeURIComponent(country)}/${encodeURIComponent(visaType)}`
       )
       const data = await res.json()
-      if (data.success) {
+      if (data.status === 'success') {
         if (data.data.isOthers) {
           setIsOthers(true)
-          setPriceEntry(data.data.entry)
+          setPricing(null)
         } else {
           setIsOthers(false)
           setPricing(data.data)
-          setPriceEntry(null)
         }
       }
     } catch {
-      // non-fatal — pricing just won't show
+      // non-fatal
     } finally {
       setPricingLoading(false)
     }
   }
 
   const validate = (): boolean => {
-    const e: Partial<FormState> = {}
-    if (!form.fullName.trim()) e.fullName = 'Full name is required'
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Valid email is required'
-    if (!form.phone.trim()) e.phone = 'Phone number is required'
-    if (!form.nationality.trim()) e.nationality = 'Nationality is required'
-    if (!form.dateOfBirth) e.dateOfBirth = 'Date of birth is required'
-    if (!form.passportNumber.trim()) e.passportNumber = 'Passport number is required'
-    if (!form.passportExpiry) e.passportExpiry = 'Passport expiry is required'
-    if (!form.travelDateFrom) e.travelDateFrom = 'Travel date is required'
+    const e: Partial<Record<keyof FormState, string>> = {}
+    if (!form.destinationCountry.trim())  e.destinationCountry = 'Destination country is required'
+    if (!form.visaType)                   e.visaType = 'Visa type is required'
+    if (!form.fullName.trim())            e.fullName = 'Full name is required'
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+                                          e.email = 'Valid email is required'
+    if (!form.phone.trim())               e.phone = 'Phone number is required'
+    if (!form.nationality.trim())         e.nationality = 'Nationality is required'
+    if (!form.dateOfBirth)                e.dateOfBirth = 'Date of birth is required'
+    if (!form.passportNumber.trim())      e.passportNumber = 'Passport number is required'
+    if (!form.passportExpiry)             e.passportExpiry = 'Passport expiry is required'
+    if (!form.travelDateFrom)             e.travelDateFrom = 'Intended travel date is required'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -154,27 +174,35 @@ export default function VisaAssistanceApplyPage() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          destinationCountry: countryParam || 'Others',
-          visaType: visaTypeParam || 'Tourist',
-          fullName: form.fullName,
-          email: form.email,
-          phone: form.phone,
-          nationality: form.nationality,
-          dateOfBirth: form.dateOfBirth,
-          passportNumber: form.passportNumber,
-          passportExpiry: form.passportExpiry,
-          travelPurpose: form.travelPurpose,
+          destinationCountry: form.destinationCountry || 'Others',
+          visaType:           form.visaType           || 'Tourist',
+          fullName:           form.fullName,
+          email:              form.email,
+          phone:              form.phone,
+          nationality:        form.nationality,
+          dateOfBirth:        form.dateOfBirth,
+          passportNumber:     form.passportNumber,
+          passportExpiry:     form.passportExpiry,
+          travelPurpose:      form.travelPurpose,
+          urgency:            form.urgency,
           travelDates: {
             startDate: form.travelDateFrom,
-            endDate: form.travelDateTo,
+            endDate:   form.travelDateTo,
           },
           isOthersRequest: isOthers,
         }),
       })
+
       const data = await res.json()
-      if (!res.ok || !data.success) throw new Error(data.message || 'Submission failed')
+
+      // ApiResponse always returns { status: 'success' | 'fail' | 'error', message, data }
+      if (!res.ok || data.status !== 'success') {
+        throw new Error(data.message || 'Submission failed')
+      }
 
       setApplicationRef(data.data.applicationReference)
+      setSubmittedFee(data.data.fee || 0)
+      setSubmittedManual(data.data.requiresManualPricing || false)
       setSubmitted(true)
     } catch (err: any) {
       setSubmitError(err.message || 'Something went wrong. Please try again.')
@@ -215,10 +243,13 @@ export default function VisaAssistanceApplyPage() {
             >
               {applicationRef}
             </div>
-            <p className="text-gray-600 leading-relaxed mb-8">
-              {isOthers
+            <p className="text-gray-600 leading-relaxed mb-4">
+              {submittedManual
                 ? "We've received your request. Since the destination you selected isn't on our standard list, one of our visa officers will reach out to you shortly with pricing and next steps."
-                : "A payment link will be sent to your email shortly. Once you pay, our visa team will begin processing your application."}
+                : submittedFee > 0
+                  ? `Our service fee is ₦${submittedFee.toLocaleString()}. A payment link has been sent to your email — once payment is complete, our visa team will begin processing your application.`
+                  : "A confirmation email has been sent to you. Our visa team will review your application and be in touch shortly."
+              }
             </p>
             <p className="text-sm text-gray-400 mb-8">Keep this reference number — you'll need it to track your application.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -257,11 +288,7 @@ export default function VisaAssistanceApplyPage() {
         <div className="max-w-6xl mx-auto py-8 px-4">
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Visa Assistance Application</h1>
-            <p className="text-gray-500">
-              {countryParam
-                ? `${countryParam} · ${visaTypeParam} Visa`
-                : 'Complete the form below and our team will take it from here'}
-            </p>
+            <p className="text-gray-500">Complete the form below and our team will take it from here</p>
           </div>
 
           {submitError && (
@@ -270,11 +297,67 @@ export default function VisaAssistanceApplyPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
               {/* ── Left: form fields ── */}
               <div className="lg:col-span-2 space-y-6">
+
+                {/* Destination — pre-filled from URL but editable */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                  <h2 className="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+                    <span className="material-icons text-xl" style={{ color: '#e21e24' }}>public</span>
+                    Visa Details
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className={labelClass}>Destination Country <span style={{ color: '#e21e24' }}>*</span></label>
+                      <input
+                        type="text"
+                        className={inputClass}
+                        placeholder="e.g. United Kingdom"
+                        value={form.destinationCountry}
+                        onChange={e => handleChange('destinationCountry', e.target.value)}
+                      />
+                      {errors.destinationCountry && (
+                        <p className="text-red-500 text-xs mt-1">{errors.destinationCountry}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className={labelClass}>Visa Type <span style={{ color: '#e21e24' }}>*</span></label>
+                      <select
+                        className={inputClass}
+                        value={form.visaType}
+                        onChange={e => handleChange('visaType', e.target.value)}
+                      >
+                        {VISA_TYPES.map(t => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                      {errors.visaType && <p className="text-red-500 text-xs mt-1">{errors.visaType}</p>}
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className={labelClass}>Processing Speed</label>
+                      <div className="flex gap-3 flex-wrap">
+                        {URGENCY_OPTIONS.map(opt => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => handleChange('urgency', opt)}
+                            className="px-4 py-2 rounded-xl text-sm font-semibold border transition-all duration-150"
+                            style={{
+                              backgroundColor: form.urgency === opt ? '#e21e24' : 'transparent',
+                              color:           form.urgency === opt ? '#ffffff' : '#374151',
+                              borderColor:     form.urgency === opt ? '#e21e24' : '#e5e7eb',
+                            }}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Personal info */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
@@ -286,51 +369,60 @@ export default function VisaAssistanceApplyPage() {
                     <div className="sm:col-span-2">
                       <label className={labelClass}>Full Name <span style={{ color: '#e21e24' }}>*</span></label>
                       <input
-                        type="text" className={inputClass} placeholder="As it appears on your passport"
-                        value={form.fullName} onChange={e => handleChange('fullName', e.target.value)}
-                        onFocus={e => (e.currentTarget.style.borderColor = '#e21e24')}
-                        onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
+                        type="text"
+                        className={inputClass}
+                        placeholder="As it appears on your passport"
+                        value={form.fullName}
+                        onChange={e => handleChange('fullName', e.target.value)}
                       />
                       {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
                     </div>
                     <div>
                       <label className={labelClass}>Email Address <span style={{ color: '#e21e24' }}>*</span></label>
                       <input
-                        type="email" className={inputClass} placeholder="your@email.com"
-                        value={form.email} onChange={e => handleChange('email', e.target.value)}
-                        onFocus={e => (e.currentTarget.style.borderColor = '#e21e24')}
-                        onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
+                        type="email"
+                        className={inputClass}
+                        placeholder="your@email.com"
+                        value={form.email}
+                        onChange={e => handleChange('email', e.target.value)}
                       />
                       {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                     </div>
                     <div>
                       <label className={labelClass}>Phone Number <span style={{ color: '#e21e24' }}>*</span></label>
                       <input
-                        type="tel" className={inputClass} placeholder="+234 800 000 0000"
-                        value={form.phone} onChange={e => handleChange('phone', e.target.value)}
-                        onFocus={e => (e.currentTarget.style.borderColor = '#e21e24')}
-                        onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
+                        type="tel"
+                        className={inputClass}
+                        placeholder="+234 800 000 0000"
+                        value={form.phone}
+                        onChange={e => handleChange('phone', e.target.value)}
                       />
                       {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                     </div>
                     <div>
                       <label className={labelClass}>Nationality <span style={{ color: '#e21e24' }}>*</span></label>
                       <input
-                        type="text" className={inputClass} placeholder="e.g. Nigerian"
-                        value={form.nationality} onChange={e => handleChange('nationality', e.target.value)}
-                        onFocus={e => (e.currentTarget.style.borderColor = '#e21e24')}
-                        onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
+                        type="text"
+                        className={inputClass}
+                        placeholder="e.g. Nigerian"
+                        value={form.nationality}
+                        onChange={e => handleChange('nationality', e.target.value)}
                       />
                       {errors.nationality && <p className="text-red-500 text-xs mt-1">{errors.nationality}</p>}
                     </div>
                     <div>
                       <label className={labelClass}>Date of Birth <span style={{ color: '#e21e24' }}>*</span></label>
-                      <input
-                        type="date" className={inputClass}
-                        value={form.dateOfBirth} onChange={e => handleChange('dateOfBirth', e.target.value)}
-                        onFocus={e => (e.currentTarget.style.borderColor = '#e21e24')}
-                        onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
-                      />
+                      {/* StyledDatePicker in single-date mode — any placeholder that isn't "Select dates" triggers non-flight mode */}
+                      <div className="border border-gray-200 rounded-xl bg-white overflow-visible"
+                           style={{ borderColor: errors.dateOfBirth ? '#ef4444' : undefined }}>
+                        <StyledDatePicker
+                          value={form.dateOfBirth}
+                          onChange={v => handleChange('dateOfBirth', v)}
+                          placeholder="Date of Birth"
+                          maxDate={new Date().toISOString().split('T')[0]}
+                          className="w-full"
+                        />
+                      </div>
                       {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>}
                     </div>
                   </div>
@@ -346,21 +438,26 @@ export default function VisaAssistanceApplyPage() {
                     <div>
                       <label className={labelClass}>Passport Number <span style={{ color: '#e21e24' }}>*</span></label>
                       <input
-                        type="text" className={inputClass} placeholder="A12345678"
-                        value={form.passportNumber} onChange={e => handleChange('passportNumber', e.target.value.toUpperCase())}
-                        onFocus={e => (e.currentTarget.style.borderColor = '#e21e24')}
-                        onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
+                        type="text"
+                        className={inputClass}
+                        placeholder="A12345678"
+                        value={form.passportNumber}
+                        onChange={e => handleChange('passportNumber', e.target.value.toUpperCase())}
                       />
                       {errors.passportNumber && <p className="text-red-500 text-xs mt-1">{errors.passportNumber}</p>}
                     </div>
                     <div>
                       <label className={labelClass}>Passport Expiry Date <span style={{ color: '#e21e24' }}>*</span></label>
-                      <input
-                        type="date" className={inputClass}
-                        value={form.passportExpiry} onChange={e => handleChange('passportExpiry', e.target.value)}
-                        onFocus={e => (e.currentTarget.style.borderColor = '#e21e24')}
-                        onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
-                      />
+                      <div className="border border-gray-200 rounded-xl bg-white overflow-visible"
+                           style={{ borderColor: errors.passportExpiry ? '#ef4444' : undefined }}>
+                        <StyledDatePicker
+                          value={form.passportExpiry}
+                          onChange={v => handleChange('passportExpiry', v)}
+                          placeholder="Passport Expiry"
+                          minDate={new Date().toISOString().split('T')[0]}
+                          className="w-full"
+                        />
+                      </div>
                       {errors.passportExpiry && <p className="text-red-500 text-xs mt-1">{errors.passportExpiry}</p>}
                     </div>
                   </div>
@@ -375,22 +472,29 @@ export default function VisaAssistanceApplyPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label className={labelClass}>Intended Travel Date <span style={{ color: '#e21e24' }}>*</span></label>
-                      <input
-                        type="date" className={inputClass}
-                        value={form.travelDateFrom} onChange={e => handleChange('travelDateFrom', e.target.value)}
-                        onFocus={e => (e.currentTarget.style.borderColor = '#e21e24')}
-                        onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
-                      />
+                      <div className="border border-gray-200 rounded-xl bg-white overflow-visible"
+                           style={{ borderColor: errors.travelDateFrom ? '#ef4444' : undefined }}>
+                        <StyledDatePicker
+                          value={form.travelDateFrom}
+                          onChange={v => handleChange('travelDateFrom', v)}
+                          placeholder="Travel Date"
+                          minDate={new Date().toISOString().split('T')[0]}
+                          className="w-full"
+                        />
+                      </div>
                       {errors.travelDateFrom && <p className="text-red-500 text-xs mt-1">{errors.travelDateFrom}</p>}
                     </div>
                     <div>
-                      <label className={labelClass}>Return Date (optional)</label>
-                      <input
-                        type="date" className={inputClass}
-                        value={form.travelDateTo} onChange={e => handleChange('travelDateTo', e.target.value)}
-                        onFocus={e => (e.currentTarget.style.borderColor = '#e21e24')}
-                        onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
-                      />
+                      <label className={labelClass}>Return Date <span className="text-gray-400 font-normal normal-case tracking-normal">(optional)</span></label>
+                      <div className="border border-gray-200 rounded-xl bg-white overflow-visible">
+                        <StyledDatePicker
+                          value={form.travelDateTo}
+                          onChange={v => handleChange('travelDateTo', v)}
+                          placeholder="Return Date"
+                          minDate={form.travelDateFrom || new Date().toISOString().split('T')[0]}
+                          className="w-full"
+                        />
+                      </div>
                     </div>
                     <div className="sm:col-span-2">
                       <label className={labelClass}>Purpose of Travel</label>
@@ -398,16 +502,10 @@ export default function VisaAssistanceApplyPage() {
                         className={inputClass}
                         value={form.travelPurpose}
                         onChange={e => handleChange('travelPurpose', e.target.value)}
-                        onFocus={e => (e.currentTarget.style.borderColor = '#e21e24')}
-                        onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
                       >
-                        <option value="Tourism">Tourism / Holiday</option>
-                        <option value="Business">Business</option>
-                        <option value="Education">Education / Study</option>
-                        <option value="Medical">Medical</option>
-                        <option value="Family Visit">Family Visit</option>
-                        <option value="Transit">Transit</option>
-                        <option value="Other">Other</option>
+                        {TRAVEL_PURPOSES.map(p => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -436,21 +534,25 @@ export default function VisaAssistanceApplyPage() {
               <div className="lg:col-span-1">
                 <div className="sticky top-4 space-y-4">
 
-                  {/* Visa details card */}
+                  {/* Application summary card */}
                   <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
                     <h3 className="text-base font-bold text-gray-900 mb-4">Application Summary</h3>
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Destination</span>
-                        <span className="font-semibold text-gray-900">{countryParam || '—'}</span>
+                        <span className="font-semibold text-gray-900">{form.destinationCountry || '—'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Visa Type</span>
-                        <span className="font-semibold text-gray-900">{visaTypeParam || '—'}</span>
+                        <span className="font-semibold text-gray-900">{form.visaType || '—'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Nationality</span>
-                        <span className="font-semibold text-gray-900">{form.nationality || nationalityParam || '—'}</span>
+                        <span className="font-semibold text-gray-900">{form.nationality || '—'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Processing</span>
+                        <span className="font-semibold text-gray-900">{form.urgency}</span>
                       </div>
                     </div>
                   </div>
@@ -463,6 +565,8 @@ export default function VisaAssistanceApplyPage() {
                         <LoadingSpinner size="sm" color="white" />
                         <span>Loading pricing...</span>
                       </div>
+                    ) : !form.destinationCountry ? (
+                      <p className="text-white/50 text-sm">Enter a destination to see pricing.</p>
                     ) : isOthers ? (
                       <div>
                         <p className="text-white/60 text-sm leading-relaxed mb-3">
@@ -495,11 +599,11 @@ export default function VisaAssistanceApplyPage() {
                           )}
                         </div>
                         <div className="mt-4 pt-4 border-t border-white/10 text-xs text-white/40 leading-relaxed">
-                          Payment link will be sent to your email after submission. You only pay after our officer reviews your application.
+                          A payment link will be sent to your email after our officer reviews your application.
                         </div>
                       </div>
                     ) : (
-                      <p className="text-white/50 text-sm">Select a destination to see pricing.</p>
+                      <p className="text-white/50 text-sm">Pricing not available for this selection.</p>
                     )}
                   </div>
 
