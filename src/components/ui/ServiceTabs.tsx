@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import SearchForm from './SearchForm'
@@ -47,7 +47,22 @@ const services = [
 export default function ServiceTabs() {
   const [activeService, setActiveService] = useState<ServiceType>('flights')
   const [isSearching, setIsSearching] = useState(false)
+  const [formMinHeight, setFormMinHeight] = useState(0)
+  const formRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+
+  // Track the tallest form height seen so far — prevents shrinking when switching tabs
+  const measureFormHeight = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return
+    ;(formRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+
+    const observer = new ResizeObserver(([entry]) => {
+      const h = entry.contentRect.height
+      setFormMinHeight(prev => (h > prev ? h : prev))
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
 
   const handleTabClick = (serviceId: ServiceType, href: string, event: React.MouseEvent) => {
     // Check for modifier keys for navigation
@@ -179,7 +194,7 @@ export default function ServiceTabs() {
         </div>
       </div>
 
-      {/* Search Form - Responsive with wrapping fields */}
+      {/* Search Form - fixed min-height prevents layout shift when switching tabs */}
       <div 
         className="w-full rounded-tr-none md:rounded-tr-lg rounded-b-lg shadow-xl"
         style={{
@@ -190,15 +205,20 @@ export default function ServiceTabs() {
           overflow: 'visible'
         }}
       >
-        <SearchForm 
-          serviceType={activeService} 
-          onSearch={handleSearch}
-          loading={isSearching}
-          className="border-0 shadow-none w-full"
-          style={{
-            backgroundColor: 'transparent'
-          }}
-        />
+        {/* The inner div is observed — minHeight is pinned to the tallest tab seen so far
+            so switching to a shorter tab never shifts content below the form. */}
+        <div ref={measureFormHeight} style={{ minHeight: formMinHeight > 0 ? formMinHeight : undefined }}>
+          <SearchForm 
+            serviceType={activeService} 
+            onSearch={handleSearch}
+            loading={isSearching}
+            className="border-0 shadow-none w-full"
+            style={{
+              backgroundColor: 'transparent'
+            }}
+          />
+        </div>
       </div>
+    </div>
   )
 }

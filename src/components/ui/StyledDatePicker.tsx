@@ -296,14 +296,8 @@ export function StyledDatePicker({
                     border: 'none',
                     outline: 'none'
                   }}
-                  onMouseDown={(e) => {
-                    console.log('Round trip button mousedown')
-                    setTripType('round-trip')
-                  }}
-                  onClick={(e) => {
-                    console.log('Round trip button clicked')
-                    setTripType('round-trip')
-                  }}
+                  onMouseDown={() => setTripType('round-trip')}
+                  onClick={() => setTripType('round-trip')}
                 >
                   <div style={{ 
                     width: '16px', 
@@ -313,20 +307,23 @@ export function StyledDatePicker({
                     backgroundColor: tripType === 'round-trip' ? '#2563eb' : 'white',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    pointerEvents: 'none'
                   }}>
                     {tripType === 'round-trip' && (
                       <div style={{
                         width: '8px',
                         height: '8px',
                         borderRadius: '50%',
-                        backgroundColor: 'white'
+                        backgroundColor: 'white',
+                        pointerEvents: 'none'
                       }} />
                     )}
                   </div>
                   <span style={{ 
                     color: '#6b7280', 
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    pointerEvents: 'none'
                   }}>
                     Round trip
                   </span>
@@ -344,14 +341,8 @@ export function StyledDatePicker({
                     border: 'none',
                     outline: 'none'
                   }}
-                  onMouseDown={(e) => {
-                    console.log('One way button mousedown')
-                    setTripType('one-way')
-                  }}
-                  onClick={(e) => {
-                    console.log('One way button clicked')
-                    setTripType('one-way')
-                  }}
+                  onMouseDown={() => setTripType('one-way')}
+                  onClick={() => setTripType('one-way')}
                 >
                   <div style={{ 
                     width: '16px', 
@@ -361,20 +352,23 @@ export function StyledDatePicker({
                     backgroundColor: tripType === 'one-way' ? '#2563eb' : 'white',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    pointerEvents: 'none'
                   }}>
                     {tripType === 'one-way' && (
                       <div style={{
                         width: '8px',
                         height: '8px',
                         borderRadius: '50%',
-                        backgroundColor: 'white'
+                        backgroundColor: 'white',
+                        pointerEvents: 'none'
                       }} />
                     )}
                   </div>
                   <span style={{ 
                     color: '#6b7280', 
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    pointerEvents: 'none'
                   }}>
                     One way
                   </span>
