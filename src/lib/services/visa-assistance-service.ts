@@ -1,153 +1,136 @@
-// Visa Assistance API Service
-import { appConfig } from '@/lib/config';
+// Visa Assistance API Service — aligned with new backend endpoints
+import { appConfig } from '@/lib/config'
 
-const API_BASE_URL = appConfig.apiBaseUrl;
+const API = appConfig.apiBaseUrl
 
-export interface VisaRequestData {
-  destinationCountry: string;
-  visaType: string;
-  travelDates?: {
-    departure?: string;
-    return?: string;
-  };
-  email: string;
-  phone: string;
-  fullName: string;
-  nationality: string;
-  travelPurpose?: string;
-  urgency?: 'Standard' | 'Express' | 'Super Express';
-}
-
-export interface VisaApplicationData {
-  applicationReference: string;
-  personalInformation: {
-    firstName: string;
-    lastName: string;
-    dateOfBirth: string;
-    placeOfBirth: string;
-    gender: string;
-    maritalStatus: string;
-    occupation: string;
-  };
-  passportDetails: {
-    passportNumber: string;
-    issueDate: string;
-    expiryDate: string;
-    issuingCountry: string;
-  };
-  travelDates: {
-    intendedDeparture: string;
-    intendedReturn?: string;
-  };
-  documents?: Array<{
-    type: string;
-    url: string;
-    uploadedAt: Date;
-  }>;
-}
-
-export interface FollowUpNote {
-  note: string;
-  contactMethod: 'Email' | 'Phone' | 'WhatsApp';
-  nextAction?: string;
-  nextActionDate?: string;
-}
-
-export interface PaymentLinkRequest {
-  amount: number;
-  description?: string;
-  dueDate?: string;
+export interface VisaApplyPayload {
+  destinationCountry: string
+  visaType: string
+  fullName: string
+  email: string
+  phone: string
+  nationality: string
+  dateOfBirth?: string
+  passportNumber?: string
+  passportExpiry?: string
+  travelPurpose?: string
+  travelDates?: { startDate?: string; endDate?: string }
+  isOthersRequest?: boolean
+  otherCountryNote?: string
 }
 
 class VisaAssistanceService {
-  private async fetchWithAuth(url: string, options: RequestInit = {}) {
-    const response = await fetch(url, {
+  private async req<T>(url: string, options: RequestInit = {}): Promise<{ success: boolean; data: T; message?: string }> {
+    const res = await fetch(url, {
       ...options,
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'An error occurred');
-    }
-
-    return data;
+      headers: { 'Content-Type': 'application/json', ...options.headers },
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || 'Request failed')
+    return data
   }
 
-  async createVisaRequest(requestData: VisaRequestData) {
-    return this.fetchWithAuth(`${API_BASE_URL}/visa-assistance/request`, {
+  // ── Price inventory ──────────────────────────────────────────────────────
+
+  /** Get all active visa destination prices */
+  async getPrices() {
+    return this.req<any>(`${API}/visa-assistance/prices`)
+  }
+
+  /** Get price for a specific country + visa type */
+  async getPrice(country: string, visaType: string) {
+    return this.req<any>(`${API}/visa-assistance/prices/${encodeURIComponent(country)}/${encodeURIComponent(visaType)}`)
+  }
+
+  // ── Client flow ──────────────────────────────────────────────────────────
+
+  /** Submit a visa assistance application */
+  async apply(payload: VisaApplyPayload) {
+    return this.req<{
+      applicationReference: string
+      fee: number
+      currency: string
+      processingTime: string
+      requiresManualPricing: boolean
+      message: string
+    }>(`${API}/visa-assistance/apply`, {
       method: 'POST',
-      body: JSON.stringify(requestData),
-    });
+      body: JSON.stringify(payload),
+    })
   }
 
-  async submitApplication(applicationData: VisaApplicationData) {
-    return this.fetchWithAuth(`${API_BASE_URL}/visa-assistance/applications`, {
+  /** Track application by reference number */
+  async track(reference: string) {
+    return this.req<any>(`${API}/visa-assistance/track/${encodeURIComponent(reference)}`)
+  }
+
+  // ── Officer/Admin ────────────────────────────────────────────────────────
+
+  async getOfficerApplications(filters?: { status?: string; paymentStatus?: string; assignedToMe?: boolean; page?: number }) {
+    const params = new URLSearchParams()
+    if (filters?.status) params.set('status', filters.status)
+    if (filters?.paymentStatus) params.set('paymentStatus', filters.paymentStatus)
+    if (filters?.assignedToMe) params.set('assignedToMe', 'true')
+    if (filters?.page) params.set('page', String(filters.page))
+    return this.req<any>(`${API}/visa-assistance/officer/applications?${params}`)
+  }
+
+  async getApplicationDetails(id: string) {
+    return this.req<any>(`${API}/visa-assistance/officer/applications/${id}`)
+  }
+
+  async assignApplication(id: string, officerId: string) {
+    return this.req<any>(`${API}/visa-assistance/officer/applications/${id}/assign`, {
+      method: 'PUT',
+      body: JSON.stringify({ officerId }),
+    })
+  }
+
+  async updateStatus(id: string, status: string, notes?: string) {
+    return this.req<any>(`${API}/visa-assistance/officer/applications/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status, notes }),
+    })
+  }
+
+  async addFollowUpNote(id: string, note: string, contactMethod?: string, nextAction?: string, nextActionDate?: string) {
+    return this.req<any>(`${API}/visa-assistance/officer/applications/${id}/follow-up`, {
       method: 'POST',
-      body: JSON.stringify(applicationData),
-    });
+      body: JSON.stringify({ note, contactMethod, nextAction, nextActionDate }),
+    })
   }
 
-  async getApplicationByReference(reference: string) {
-    return this.fetchWithAuth(`${API_BASE_URL}/visa-assistance/applications/${reference}`);
+  async generatePaymentLink(id: string, amount: number, description?: string, dueDate?: string) {
+    return this.req<any>(`${API}/visa-assistance/officer/applications/${id}/payment-link`, {
+      method: 'POST',
+      body: JSON.stringify({ amount, description, dueDate }),
+    })
   }
 
-  async getOfficerApplications(filters?: { status?: string; urgency?: string }) {
-    const params = new URLSearchParams();
-    if (filters?.status) params.append('status', filters.status);
-    if (filters?.urgency) params.append('urgency', filters.urgency);
+  // ── Admin price management ───────────────────────────────────────────────
 
-    const queryString = params.toString();
-    const url = `${API_BASE_URL}/visa-assistance/officer/applications${queryString ? `?${queryString}` : ''}`;
-
-    return this.fetchWithAuth(url);
+  async getAllPricesAdmin() {
+    return this.req<any>(`${API}/visa-assistance/admin/prices`)
   }
 
-  async addFollowUpNote(applicationId: string, followUp: FollowUpNote) {
-    return this.fetchWithAuth(
-      `${API_BASE_URL}/visa-assistance/applications/${applicationId}/follow-up`,
-      {
-        method: 'POST',
-        body: JSON.stringify(followUp),
-      }
-    );
+  async createPriceEntry(entry: any) {
+    return this.req<any>(`${API}/visa-assistance/admin/prices`, {
+      method: 'POST',
+      body: JSON.stringify(entry),
+    })
   }
 
-  async generatePaymentLink(applicationId: string, paymentData: PaymentLinkRequest) {
-    return this.fetchWithAuth(
-      `${API_BASE_URL}/visa-assistance/applications/${applicationId}/generate-payment-link`,
-      {
-        method: 'POST',
-        body: JSON.stringify(paymentData),
-      }
-    );
+  async updatePriceEntry(id: string, updates: any) {
+    return this.req<any>(`${API}/visa-assistance/admin/prices/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    })
   }
 
-  async updateApplicationStatus(applicationId: string, status: string, notes?: string) {
-    return this.fetchWithAuth(
-      `${API_BASE_URL}/visa-assistance/applications/${applicationId}/status`,
-      {
-        method: 'PUT',
-        body: JSON.stringify({ status, notes }),
-      }
-    );
-  }
-
-  async assignApplication(applicationId: string, officerId: string) {
-    return this.fetchWithAuth(
-      `${API_BASE_URL}/visa-assistance/applications/${applicationId}/assign`,
-      {
-        method: 'PUT',
-        body: JSON.stringify({ officerId }),
-      }
-    );
+  async deletePriceEntry(id: string) {
+    return this.req<any>(`${API}/visa-assistance/admin/prices/${id}`, { method: 'DELETE' })
   }
 }
 
-export const visaAssistanceService = new VisaAssistanceService();
-
+export const visaAssistanceService = new VisaAssistanceService()
